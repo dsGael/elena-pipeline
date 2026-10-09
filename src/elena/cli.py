@@ -1,8 +1,9 @@
 import typer
 
 from .db import get_connection
-
+from .cli_fuel import app as fuel_app
 app = typer.Typer()
+app.add_typer(fuel_app)
 
 
 @app.command()
@@ -12,10 +13,9 @@ def hello() -> None:
 
 @app.command()
 def db_test() -> None:
-    with get_connection() as conn:
-        with conn.cursor() as cur:
-            cur.execute("SELECT version();")
-            version = cur.fetchone()[0]
+    with get_connection() as conn, conn.cursor() as cur:
+        cur.execute("SELECT version();")
+        version = cur.fetchone()[0]
 
     print("Conexión PostgreSQL OK")
     print(version)
