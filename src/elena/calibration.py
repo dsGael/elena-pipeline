@@ -11,7 +11,7 @@ Reglas (documento ELENA, sección 8):
 
 Casos de borde, sin extrapolar:
   * sensor >= primer punto  -> ZONA_BAJA: el nivel es "<= litros del primer punto".
-  * sensor <  último punto  -> FUERA_DE_CALIBRACION: no hay datos para estimar.
+  * sensor <  último punto  -> ARRIBA_DE_CALIBRACION: el nivel es ">= litros del último punto".
 
 Este módulo es puro: no toca base de datos ni configuración.
 """
@@ -35,7 +35,7 @@ class CalibrationError(ValueError):
 class CalibStatus(StrEnum):
     OK = "ok"
     ZONA_BAJA = "zona_baja"
-    FUERA_DE_CALIBRACION = "fuera_de_calibracion"
+    ARRIBA_DE_CALIBRACION = "arriba_de_calibracion"
     SIN_LECTURA = "sin_lectura"
 
 
@@ -49,8 +49,9 @@ class CalibrationPoint:
 class LitersResult:
     """Resultado de convertir una lectura de sensor.
 
-    ``litros`` es None cuando no se puede estimar (fuera de calibración o sin lectura).
-    En ZONA_BAJA ``litros`` vale el primer punto de la tabla y significa "<= ese valor".
+    ``litros`` es None solo sin lectura. En ZONA_BAJA vale el primer punto de la tabla
+    ("<= ese valor") y en ARRIBA_DE_CALIBRACION el último (">= ese valor"): son COTAS, no
+    mediciones, por eso ``utilizable`` es False y la regresión de rendimiento las ignora.
     """
 
     litros: float | None
@@ -142,7 +143,7 @@ class CalibrationTable:
         if x >= pts[0].sensor:
             return LitersResult(pts[0].litros, CalibStatus.ZONA_BAJA)
         if x < pts[-1].sensor:
-            return LitersResult(None, CalibStatus.FUERA_DE_CALIBRACION)
+            return LitersResult(pts[-1].litros, CalibStatus.ARRIBA_DE_CALIBRACION)
 
         for a, b in pairwise(pts):
             if a.sensor >= x >= b.sensor:

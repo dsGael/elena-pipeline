@@ -57,6 +57,10 @@ src AS (
            g.imei,
            g.recorded_at,
            g.s_analogo,
+           -- Con el motor apagado el sensor no es confiable: si se pide, esa lectura se
+           -- descarta. ignicion NULL = desconocida: la lectura se conserva.
+           CASE WHEN %(descartar_sin_ignicion)s::boolean AND g.ignicion IS FALSE
+                THEN NULL ELSE g.s_analogo END                      AS s_analogo_uso,
            g.inclinacion_vertical,
            g.speed,
            g.ignicion,
@@ -75,11 +79,11 @@ SELECT s.imei,
        cfg.angulo_max,
        cfg.min_muestras_ventana,
        count(*)                                                            AS muestras_totales,
-       count(s.s_analogo)                                                  AS muestras_validas,
-       percentile_cont(0.5) WITHIN GROUP (ORDER BY s.s_analogo)            AS sensor_mediana,
-       avg(s.s_analogo)                                                    AS sensor_promedio,
-       min(s.s_analogo)                                                    AS sensor_min,
-       max(s.s_analogo)                                                    AS sensor_max,
+       count(s.s_analogo_uso)                                              AS muestras_validas,
+       percentile_cont(0.5) WITHIN GROUP (ORDER BY s.s_analogo_uso)        AS sensor_mediana,
+       avg(s.s_analogo_uso)                                                AS sensor_promedio,
+       min(s.s_analogo_uso)                                                AS sensor_min,
+       max(s.s_analogo_uso)                                                AS sensor_max,
        percentile_cont(0.5) WITHIN GROUP (ORDER BY s.inclinacion_vertical) AS inclinacion_mediana,
        count(s.inclinacion_vertical)                                       AS muestras_con_angulo,
        count(*) FILTER (
@@ -384,6 +388,7 @@ def fetch_aggregates(
     *,
     imei: str | None = None,
     minutes: int = WINDOW_MINUTES,
+    descartar_sin_ignicion: bool = False,
 ) -> list[WindowAggregate]:
     """Lee gps_records en [desde, hasta) y agrega por (imei, ventana)."""
     params = {
@@ -392,6 +397,7 @@ def fetch_aggregates(
         "imei": imei,
         "minutos": minutes,
         "origen": GRID_ORIGIN,
+        "descartar_sin_ignicion": descartar_sin_ignicion,
     }
     with conn.cursor() as cur:
         cur.execute(AGGREGATE_SQL, params)
@@ -434,10 +440,13 @@ def consolidate(
     dry_run: bool = False,
     chunk_hours: int = 24,
     keep_sample: int = 0,
+    descartar_sin_ignicion: bool = False,
 ) -> ConsolidationSummary:
     """Consolida [desde, hasta) en fuel_windows. No hace commit: lo decide quien llama.
 
-    Con ``dry_run`` calcula todo pero no escribe nada.
+    Con ``dry_run`` calcula todo pero no escribe nada. Con ``descartar_sin_ignicion`` las
+    muestras con ignición apagada no cuentan para el sensor (una ventana entera con el motor
+    apagado queda descartada por sin_lectura_sensor).
     """
     desde = align_down(desde, minutes)
     hasta = align_down(hasta, minutes)
@@ -446,7 +455,14 @@ def consolidate(
     cursor = desde
     while cursor < hasta:
         end = min(cursor + timedelta(hours=chunk_hours), hasta)
-        aggs = fetch_aggregates(conn, cursor, end, imei=imei, minutes=minutes)
+        aggs = fetch_aggregates(
+            conn,
+            cursor,
+            end,
+            imei=imei,
+            minutes=minutes,
+            descartar_sin_ignicion=descartar_sin_ignicion,
+        )
         windows = [build_window(a, minutes, base_rules) for a in aggs]
 
         for a, w in zip(aggs, windows, strict=True):
