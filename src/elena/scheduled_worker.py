@@ -131,7 +131,7 @@ def ejecutar_ciclo(
                 hasta,
                 minutes=WINDOW_MINUTES,
                 base_rules=QualityRules(fcc_inclinacion=0.0),
-                descartar_sin_ignicion=True,  # con el motor apagado el sensor lee ~130
+                descartar_sin_ignicion=None,  # lo decide fuel_config.descartar_sin_ignicion por autobús
             )
             conn.commit()
             c = res.consolidacion

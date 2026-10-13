@@ -174,12 +174,13 @@ def consolidate_cmd(
         ),
     ] = False,
     descartar_sin_ignicion: Annotated[
-        bool,
+        bool | None,
         typer.Option(
             "--descartar-sin-ignicion/--conservar-sin-ignicion",
-            help="Ignora las lecturas del sensor con el motor apagado (el sensor da ~130).",
+            help="Fuerza descartar (o conservar) las lecturas con el motor apagado en todos "
+            "los autobuses. Sin la opción, cada autobús usa fuel_config.descartar_sin_ignicion.",
         ),
-    ] = True,
+    ] = None,
     verbose: Annotated[bool, typer.Option("--verbose", "-v")] = False,
 ) -> None:
     """Agrupa gps_records en ventanas de 5 min y las guarda (o simula) en fuel_windows."""

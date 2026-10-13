@@ -442,3 +442,48 @@ def test_odometro_por_defecto_es_metros():
     out = run(ventana(5, odo=1000.0 + 60_000), cfg)  # 60 000 m = 60 km
     assert out.resultado.km_desde_ultimo_confiable == 60.0
     assert out.resultado.consumo_esperado == 5.0
+
+
+def test_procesa_un_autobus_con_sensor_ascendente():
+    """CORBER (gps_records.fuel): la lectura sube con el nivel; el flujo no cambia."""
+    corber = CalibrationTable.from_json(
+        [
+            {"litros": 0, "sensor": 2},
+            {"litros": 5, "sensor": 700},
+            {"litros": 10, "sensor": 1374},
+            {"litros": 14, "sensor": 1918},
+        ]
+    )
+    cfg = ProcesadorConfig(calibracion=corber, calibracion_version=1, odometro_a_km=1.0)
+    ini = T0
+    v0 = VentanaEntrada(
+        "a",
+        "350",
+        ini,
+        ini + timedelta(minutes=5),
+        WindowQuality.VALIDA,
+        None,
+        700.0,
+        0.0,
+        1000.0,
+        None,
+        None,
+    )
+    o0 = procesar_ventana(v0, cfg, EstadoConfiable(), "CORBER")
+    assert o0.resultado.litros_calculados == 5.0
+    v1 = VentanaEntrada(
+        "b",
+        "350",
+        ini + timedelta(minutes=5),
+        ini + timedelta(minutes=10),
+        WindowQuality.VALIDA,
+        None,
+        1374.0,
+        0.0,
+        1000.0,
+        None,
+        None,
+    )
+    o1 = procesar_ventana(v1, cfg, o0.estado, "CORBER", o0.resultado.estado_resultado)
+    assert o1.resultado.estado_resultado is R.CARGA_CONFIRMADA
+    assert o1.evento is not None and o1.evento.litros_evento == 5.0
