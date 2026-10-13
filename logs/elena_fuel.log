@@ -12,3 +12,1104 @@
 2026-10-10 11:19:46,586 INFO elena.consolidation: consolidación 2026-10-10 17:15 -> 2026-10-10 18:15 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
 2026-10-10 11:19:46,646 INFO elena.worker: Consolidación 2026-10-10T10:15-07:00 -> 2026-10-10T18:15+00:00: 6 ventanas (nuevas 0, actualizadas 6)
 2026-10-10 11:19:47,497 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 12:54:41,653 INFO elena.consolidation: consolidación 2026-10-12 18:50 -> 2026-10-12 19:50 UTC: 7 ventanas (0 nuevas, 7 actualizadas)
+2026-10-12 12:57:19,390 INFO elena.worker: Consolidación 2026-10-12T11:50-07:00 -> 2026-10-12T19:50+00:00: 7 ventanas (nuevas 0, actualizadas 7)
+2026-10-12 12:57:19,437 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 12:58:48,816 INFO elena.consolidation: consolidación 2026-10-12 18:50 -> 2026-10-12 19:55 UTC: 8 ventanas (1 nuevas, 7 actualizadas)
+2026-10-12 12:58:48,822 INFO elena.worker: Consolidación 2026-10-12T11:50-07:00 -> 2026-10-12T19:55+00:00: 8 ventanas (nuevas 1, actualizadas 7)
+2026-10-12 12:58:48,920 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 13:09:54,589 INFO elena.consolidation: consolidación 2026-10-12 18:55 -> 2026-10-12 20:05 UTC: 9 ventanas (2 nuevas, 7 actualizadas)
+2026-10-12 13:09:54,596 INFO elena.worker: Consolidación 2026-10-12T11:55-07:00 -> 2026-10-12T20:05+00:00: 9 ventanas (nuevas 2, actualizadas 7)
+2026-10-12 13:09:54,658 INFO elena.worker: 1 ok: ventanas=2 eventos=0 tardías=0 {'descartado': 2}
+2026-10-12 13:11:14,538 INFO elena.consolidation: consolidación 2026-10-12 19:05 -> 2026-10-12 20:05 UTC: 8 ventanas (0 nuevas, 8 actualizadas)
+2026-10-12 13:11:14,546 INFO elena.worker: Consolidación 2026-10-12T12:05-07:00 -> 2026-10-12T20:05+00:00: 8 ventanas (nuevas 0, actualizadas 8)
+2026-10-12 13:11:14,588 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 13:15:07,532 INFO elena.consolidation: consolidación 2026-10-12 19:05 -> 2026-10-12 20:10 UTC: 8 ventanas (0 nuevas, 8 actualizadas)
+2026-10-12 13:15:07,537 INFO elena.worker: Consolidación 2026-10-12T12:05-07:00 -> 2026-10-12T20:10+00:00: 8 ventanas (nuevas 0, actualizadas 8)
+2026-10-12 13:15:07,581 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 13:20:06,707 INFO elena.consolidation: consolidación 2026-10-12 19:05 -> 2026-10-12 20:15 UTC: 8 ventanas (0 nuevas, 8 actualizadas)
+2026-10-12 13:20:06,713 INFO elena.worker: Consolidación 2026-10-12T12:05-07:00 -> 2026-10-12T20:15+00:00: 8 ventanas (nuevas 0, actualizadas 8)
+2026-10-12 13:20:06,758 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 13:25:06,345 INFO elena.consolidation: consolidación 2026-10-12 19:05 -> 2026-10-12 20:20 UTC: 9 ventanas (1 nuevas, 8 actualizadas)
+2026-10-12 13:25:06,350 INFO elena.worker: Consolidación 2026-10-12T12:05-07:00 -> 2026-10-12T20:20+00:00: 9 ventanas (nuevas 1, actualizadas 8)
+2026-10-12 13:25:06,396 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 13:27:01,080 INFO elena.consolidation: consolidación 2026-10-12 19:15 -> 2026-10-12 20:25 UTC: 9 ventanas (1 nuevas, 8 actualizadas)
+2026-10-12 13:27:01,084 INFO elena.worker: Consolidación 2026-10-12T12:15-07:00 -> 2026-10-12T20:25+00:00: 9 ventanas (nuevas 1, actualizadas 8)
+2026-10-12 13:27:01,136 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 13:30:12,974 INFO elena.consolidation: consolidación 2026-10-12 19:25 -> 2026-10-12 20:25 UTC: 8 ventanas (0 nuevas, 8 actualizadas)
+2026-10-12 13:30:12,995 INFO elena.worker: Consolidación 2026-10-12T12:25-07:00 -> 2026-10-12T20:25+00:00: 8 ventanas (nuevas 0, actualizadas 8)
+2026-10-12 13:30:13,053 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 13:35:17,259 INFO elena.consolidation: consolidación 2026-10-12 19:25 -> 2026-10-12 20:30 UTC: 9 ventanas (1 nuevas, 8 actualizadas)
+2026-10-12 13:35:17,266 INFO elena.worker: Consolidación 2026-10-12T12:25-07:00 -> 2026-10-12T20:30+00:00: 9 ventanas (nuevas 1, actualizadas 8)
+2026-10-12 13:35:17,340 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 13:40:17,257 INFO elena.consolidation: consolidación 2026-10-12 19:30 -> 2026-10-12 20:35 UTC: 10 ventanas (1 nuevas, 9 actualizadas)
+2026-10-12 13:40:17,265 INFO elena.worker: Consolidación 2026-10-12T12:30-07:00 -> 2026-10-12T20:35+00:00: 10 ventanas (nuevas 1, actualizadas 9)
+2026-10-12 13:40:17,351 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 13:45:09,145 INFO elena.consolidation: consolidación 2026-10-12 19:35 -> 2026-10-12 20:40 UTC: 10 ventanas (1 nuevas, 9 actualizadas)
+2026-10-12 13:45:09,153 INFO elena.worker: Consolidación 2026-10-12T12:35-07:00 -> 2026-10-12T20:40+00:00: 10 ventanas (nuevas 1, actualizadas 9)
+2026-10-12 13:45:09,242 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 13:50:09,962 INFO elena.consolidation: consolidación 2026-10-12 19:40 -> 2026-10-12 20:45 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 13:50:09,969 INFO elena.worker: Consolidación 2026-10-12T12:40-07:00 -> 2026-10-12T20:45+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 13:50:10,025 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 13:55:06,720 INFO elena.consolidation: consolidación 2026-10-12 19:45 -> 2026-10-12 20:50 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 13:55:06,727 INFO elena.worker: Consolidación 2026-10-12T12:45-07:00 -> 2026-10-12T20:50+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 13:55:06,797 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'consumo_normal': 1}
+2026-10-12 14:00:05,784 INFO elena.consolidation: consolidación 2026-10-12 19:50 -> 2026-10-12 20:55 UTC: 10 ventanas (0 nuevas, 10 actualizadas)
+2026-10-12 14:00:05,789 INFO elena.worker: Consolidación 2026-10-12T12:50-07:00 -> 2026-10-12T20:55+00:00: 10 ventanas (nuevas 0, actualizadas 10)
+2026-10-12 14:00:05,833 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 14:05:09,671 INFO elena.consolidation: consolidación 2026-10-12 19:50 -> 2026-10-12 21:00 UTC: 10 ventanas (0 nuevas, 10 actualizadas)
+2026-10-12 14:05:09,676 INFO elena.worker: Consolidación 2026-10-12T12:50-07:00 -> 2026-10-12T21:00+00:00: 10 ventanas (nuevas 0, actualizadas 10)
+2026-10-12 14:05:09,710 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 14:10:09,564 INFO elena.consolidation: consolidación 2026-10-12 19:50 -> 2026-10-12 21:05 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 14:10:09,571 INFO elena.worker: Consolidación 2026-10-12T12:50-07:00 -> 2026-10-12T21:05+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 14:10:09,634 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 14:15:08,395 INFO elena.consolidation: consolidación 2026-10-12 20:00 -> 2026-10-12 21:10 UTC: 10 ventanas (1 nuevas, 9 actualizadas)
+2026-10-12 14:15:08,400 INFO elena.worker: Consolidación 2026-10-12T13:00-07:00 -> 2026-10-12T21:10+00:00: 10 ventanas (nuevas 1, actualizadas 9)
+2026-10-12 14:15:08,447 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 14:20:04,502 INFO elena.consolidation: consolidación 2026-10-12 20:10 -> 2026-10-12 21:15 UTC: 10 ventanas (1 nuevas, 9 actualizadas)
+2026-10-12 14:20:04,506 INFO elena.worker: Consolidación 2026-10-12T13:10-07:00 -> 2026-10-12T21:15+00:00: 10 ventanas (nuevas 1, actualizadas 9)
+2026-10-12 14:20:04,560 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 14:25:05,009 INFO elena.consolidation: consolidación 2026-10-12 20:15 -> 2026-10-12 21:20 UTC: 10 ventanas (1 nuevas, 9 actualizadas)
+2026-10-12 14:25:05,019 INFO elena.worker: Consolidación 2026-10-12T13:15-07:00 -> 2026-10-12T21:20+00:00: 10 ventanas (nuevas 1, actualizadas 9)
+2026-10-12 14:25:05,064 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 14:30:06,523 INFO elena.consolidation: consolidación 2026-10-12 20:20 -> 2026-10-12 21:25 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 14:30:06,527 INFO elena.worker: Consolidación 2026-10-12T13:20-07:00 -> 2026-10-12T21:25+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 14:30:06,570 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 14:35:04,285 INFO elena.consolidation: consolidación 2026-10-12 20:25 -> 2026-10-12 21:30 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 14:35:04,289 INFO elena.worker: Consolidación 2026-10-12T13:25-07:00 -> 2026-10-12T21:30+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 14:35:04,326 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 14:40:04,246 INFO elena.consolidation: consolidación 2026-10-12 20:30 -> 2026-10-12 21:35 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 14:40:04,250 INFO elena.worker: Consolidación 2026-10-12T13:30-07:00 -> 2026-10-12T21:35+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 14:40:04,297 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 14:45:06,028 INFO elena.consolidation: consolidación 2026-10-12 20:35 -> 2026-10-12 21:40 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 14:45:06,034 INFO elena.worker: Consolidación 2026-10-12T13:35-07:00 -> 2026-10-12T21:40+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 14:45:06,086 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 14:50:05,247 INFO elena.consolidation: consolidación 2026-10-12 20:40 -> 2026-10-12 21:45 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 14:50:05,252 INFO elena.worker: Consolidación 2026-10-12T13:40-07:00 -> 2026-10-12T21:45+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 14:50:05,298 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 14:55:04,424 INFO elena.consolidation: consolidación 2026-10-12 20:45 -> 2026-10-12 21:50 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 14:55:04,428 INFO elena.worker: Consolidación 2026-10-12T13:45-07:00 -> 2026-10-12T21:50+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 14:55:04,466 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 15:00:04,737 INFO elena.consolidation: consolidación 2026-10-12 20:50 -> 2026-10-12 21:55 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 15:00:04,742 INFO elena.worker: Consolidación 2026-10-12T13:50-07:00 -> 2026-10-12T21:55+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 15:00:04,803 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 15:05:08,105 INFO elena.consolidation: consolidación 2026-10-12 20:55 -> 2026-10-12 22:00 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 15:05:08,114 INFO elena.worker: Consolidación 2026-10-12T13:55-07:00 -> 2026-10-12T22:00+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 15:05:08,149 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 15:10:06,351 INFO elena.consolidation: consolidación 2026-10-12 21:00 -> 2026-10-12 22:05 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 15:10:06,358 INFO elena.worker: Consolidación 2026-10-12T14:00-07:00 -> 2026-10-12T22:05+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 15:10:06,416 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 15:15:07,928 INFO elena.consolidation: consolidación 2026-10-12 21:05 -> 2026-10-12 22:10 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-12 15:15:07,934 INFO elena.worker: Consolidación 2026-10-12T14:05-07:00 -> 2026-10-12T22:10+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-12 15:15:07,968 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 15:20:12,535 INFO elena.consolidation: consolidación 2026-10-12 21:10 -> 2026-10-12 22:15 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-12 15:20:12,545 INFO elena.worker: Consolidación 2026-10-12T14:10-07:00 -> 2026-10-12T22:15+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-12 15:20:12,813 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 15:25:07,412 INFO elena.consolidation: consolidación 2026-10-12 21:15 -> 2026-10-12 22:20 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-12 15:25:07,417 INFO elena.worker: Consolidación 2026-10-12T14:15-07:00 -> 2026-10-12T22:20+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-12 15:25:07,453 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 15:30:04,494 INFO elena.consolidation: consolidación 2026-10-12 21:20 -> 2026-10-12 22:25 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-12 15:30:04,498 INFO elena.worker: Consolidación 2026-10-12T14:20-07:00 -> 2026-10-12T22:25+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-12 15:30:04,542 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 15:35:06,248 INFO elena.consolidation: consolidación 2026-10-12 21:25 -> 2026-10-12 22:30 UTC: 12 ventanas (0 nuevas, 12 actualizadas)
+2026-10-12 15:35:06,255 INFO elena.worker: Consolidación 2026-10-12T14:25-07:00 -> 2026-10-12T22:30+00:00: 12 ventanas (nuevas 0, actualizadas 12)
+2026-10-12 15:35:06,293 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 15:40:10,270 INFO elena.consolidation: consolidación 2026-10-12 21:25 -> 2026-10-12 22:35 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-12 15:40:10,286 INFO elena.worker: Consolidación 2026-10-12T14:25-07:00 -> 2026-10-12T22:35+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-12 15:40:10,327 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 15:45:04,722 INFO elena.consolidation: consolidación 2026-10-12 21:35 -> 2026-10-12 22:40 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 15:45:04,727 INFO elena.worker: Consolidación 2026-10-12T14:35-07:00 -> 2026-10-12T22:40+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 15:45:04,783 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 15:50:05,247 INFO elena.consolidation: consolidación 2026-10-12 21:40 -> 2026-10-12 22:45 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 15:50:05,251 INFO elena.worker: Consolidación 2026-10-12T14:40-07:00 -> 2026-10-12T22:45+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 15:50:05,290 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 15:55:04,827 INFO elena.consolidation: consolidación 2026-10-12 21:45 -> 2026-10-12 22:50 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 15:55:04,831 INFO elena.worker: Consolidación 2026-10-12T14:45-07:00 -> 2026-10-12T22:50+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 15:55:04,882 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 16:00:06,592 INFO elena.consolidation: consolidación 2026-10-12 21:50 -> 2026-10-12 22:55 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 16:00:06,597 INFO elena.worker: Consolidación 2026-10-12T14:50-07:00 -> 2026-10-12T22:55+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 16:00:06,639 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 16:05:06,801 INFO elena.consolidation: consolidación 2026-10-12 21:55 -> 2026-10-12 23:00 UTC: 11 ventanas (0 nuevas, 11 actualizadas)
+2026-10-12 16:05:06,807 INFO elena.worker: Consolidación 2026-10-12T14:55-07:00 -> 2026-10-12T23:00+00:00: 11 ventanas (nuevas 0, actualizadas 11)
+2026-10-12 16:05:06,840 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 16:10:07,189 INFO elena.consolidation: consolidación 2026-10-12 21:55 -> 2026-10-12 23:05 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 16:10:07,197 INFO elena.worker: Consolidación 2026-10-12T14:55-07:00 -> 2026-10-12T23:05+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 16:10:07,244 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 16:15:07,803 INFO elena.consolidation: consolidación 2026-10-12 22:05 -> 2026-10-12 23:10 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 16:15:07,809 INFO elena.worker: Consolidación 2026-10-12T15:05-07:00 -> 2026-10-12T23:10+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 16:15:07,850 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 16:20:08,318 INFO elena.consolidation: consolidación 2026-10-12 22:10 -> 2026-10-12 23:15 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 16:20:08,324 INFO elena.worker: Consolidación 2026-10-12T15:10-07:00 -> 2026-10-12T23:15+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 16:20:08,382 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 16:25:06,663 INFO elena.consolidation: consolidación 2026-10-12 22:15 -> 2026-10-12 23:20 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 16:25:06,669 INFO elena.worker: Consolidación 2026-10-12T15:15-07:00 -> 2026-10-12T23:20+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 16:25:06,698 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 16:30:06,831 INFO elena.consolidation: consolidación 2026-10-12 22:20 -> 2026-10-12 23:25 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 16:30:06,837 INFO elena.worker: Consolidación 2026-10-12T15:20-07:00 -> 2026-10-12T23:25+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 16:30:06,873 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 16:35:09,204 INFO elena.consolidation: consolidación 2026-10-12 22:25 -> 2026-10-12 23:30 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 16:35:09,211 INFO elena.worker: Consolidación 2026-10-12T15:25-07:00 -> 2026-10-12T23:30+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 16:35:09,265 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 16:40:06,615 INFO elena.consolidation: consolidación 2026-10-12 22:30 -> 2026-10-12 23:35 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 16:40:06,619 INFO elena.worker: Consolidación 2026-10-12T15:30-07:00 -> 2026-10-12T23:35+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 16:40:06,659 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 16:45:05,309 INFO elena.consolidation: consolidación 2026-10-12 22:35 -> 2026-10-12 23:40 UTC: 11 ventanas (0 nuevas, 11 actualizadas)
+2026-10-12 16:45:05,313 INFO elena.worker: Consolidación 2026-10-12T15:35-07:00 -> 2026-10-12T23:40+00:00: 11 ventanas (nuevas 0, actualizadas 11)
+2026-10-12 16:45:05,355 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 16:50:05,154 INFO elena.consolidation: consolidación 2026-10-12 22:35 -> 2026-10-12 23:45 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 16:50:05,158 INFO elena.worker: Consolidación 2026-10-12T15:35-07:00 -> 2026-10-12T23:45+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 16:50:05,204 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 16:55:06,956 INFO elena.consolidation: consolidación 2026-10-12 22:45 -> 2026-10-12 23:50 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 16:55:06,970 INFO elena.worker: Consolidación 2026-10-12T15:45-07:00 -> 2026-10-12T23:50+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 16:55:07,018 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 17:00:09,711 INFO elena.consolidation: consolidación 2026-10-12 22:50 -> 2026-10-12 23:55 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 17:00:09,716 INFO elena.worker: Consolidación 2026-10-12T15:50-07:00 -> 2026-10-12T23:55+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 17:00:09,766 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'confiable': 1}
+2026-10-12 17:05:06,162 INFO elena.consolidation: consolidación 2026-10-12 22:55 -> 2026-10-13 00:00 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 17:05:06,166 INFO elena.worker: Consolidación 2026-10-12T15:55-07:00 -> 2026-10-13T00:00+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 17:05:06,202 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 17:10:04,626 INFO elena.consolidation: consolidación 2026-10-12 23:00 -> 2026-10-13 00:05 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 17:10:04,630 INFO elena.worker: Consolidación 2026-10-12T16:00-07:00 -> 2026-10-13T00:05+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 17:10:04,684 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 17:15:05,101 INFO elena.consolidation: consolidación 2026-10-12 23:05 -> 2026-10-13 00:10 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 17:15:05,106 INFO elena.worker: Consolidación 2026-10-12T16:05-07:00 -> 2026-10-13T00:10+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 17:15:05,165 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 17:20:05,510 INFO elena.consolidation: consolidación 2026-10-12 23:10 -> 2026-10-13 00:15 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 17:20:05,515 INFO elena.worker: Consolidación 2026-10-12T16:10-07:00 -> 2026-10-13T00:15+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 17:20:05,558 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'confiable': 1}
+2026-10-12 17:25:06,318 INFO elena.consolidation: consolidación 2026-10-12 23:15 -> 2026-10-13 00:20 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 17:25:06,322 INFO elena.worker: Consolidación 2026-10-12T16:15-07:00 -> 2026-10-13T00:20+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 17:25:06,381 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'confiable': 1}
+2026-10-12 17:30:09,546 INFO elena.consolidation: consolidación 2026-10-12 23:20 -> 2026-10-13 00:25 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 17:30:09,551 INFO elena.worker: Consolidación 2026-10-12T16:20-07:00 -> 2026-10-13T00:25+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 17:30:09,596 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 17:35:07,586 INFO elena.consolidation: consolidación 2026-10-12 23:25 -> 2026-10-13 00:30 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 17:35:07,591 INFO elena.worker: Consolidación 2026-10-12T16:25-07:00 -> 2026-10-13T00:30+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 17:35:07,634 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 17:40:09,028 INFO elena.consolidation: consolidación 2026-10-12 23:30 -> 2026-10-13 00:35 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 17:40:09,036 INFO elena.worker: Consolidación 2026-10-12T16:30-07:00 -> 2026-10-13T00:35+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 17:40:09,088 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 17:45:07,318 INFO elena.consolidation: consolidación 2026-10-12 23:35 -> 2026-10-13 00:40 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 17:45:07,325 INFO elena.worker: Consolidación 2026-10-12T16:35-07:00 -> 2026-10-13T00:40+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 17:45:07,380 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 17:50:05,130 INFO elena.consolidation: consolidación 2026-10-12 23:40 -> 2026-10-13 00:45 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-12 17:50:05,134 INFO elena.worker: Consolidación 2026-10-12T16:40-07:00 -> 2026-10-13T00:45+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-12 17:50:05,165 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 17:55:04,603 INFO elena.consolidation: consolidación 2026-10-12 23:45 -> 2026-10-13 00:50 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-12 17:55:04,607 INFO elena.worker: Consolidación 2026-10-12T16:45-07:00 -> 2026-10-13T00:50+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-12 17:55:04,647 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 18:00:06,924 INFO elena.consolidation: consolidación 2026-10-12 23:50 -> 2026-10-13 00:55 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-12 18:00:06,929 INFO elena.worker: Consolidación 2026-10-12T16:50-07:00 -> 2026-10-13T00:55+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-12 18:00:06,991 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 18:05:07,271 INFO elena.consolidation: consolidación 2026-10-12 23:55 -> 2026-10-13 01:00 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-12 18:05:07,277 INFO elena.worker: Consolidación 2026-10-12T16:55-07:00 -> 2026-10-13T01:00+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-12 18:05:07,324 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 18:10:06,277 INFO elena.consolidation: consolidación 2026-10-13 00:00 -> 2026-10-13 01:05 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-12 18:10:06,285 INFO elena.worker: Consolidación 2026-10-12T17:00-07:00 -> 2026-10-13T01:05+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-12 18:10:06,325 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 18:15:05,214 INFO elena.consolidation: consolidación 2026-10-13 00:05 -> 2026-10-13 01:10 UTC: 12 ventanas (0 nuevas, 12 actualizadas)
+2026-10-12 18:15:05,218 INFO elena.worker: Consolidación 2026-10-12T17:05-07:00 -> 2026-10-13T01:10+00:00: 12 ventanas (nuevas 0, actualizadas 12)
+2026-10-12 18:15:05,241 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 18:20:05,925 INFO elena.consolidation: consolidación 2026-10-13 00:05 -> 2026-10-13 01:15 UTC: 12 ventanas (0 nuevas, 12 actualizadas)
+2026-10-12 18:20:05,931 INFO elena.worker: Consolidación 2026-10-12T17:05-07:00 -> 2026-10-13T01:15+00:00: 12 ventanas (nuevas 0, actualizadas 12)
+2026-10-12 18:20:05,959 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 18:25:04,373 INFO elena.consolidation: consolidación 2026-10-13 00:05 -> 2026-10-13 01:20 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-12 18:25:04,378 INFO elena.worker: Consolidación 2026-10-12T17:05-07:00 -> 2026-10-13T01:20+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-12 18:25:04,419 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 18:30:04,878 INFO elena.consolidation: consolidación 2026-10-13 00:15 -> 2026-10-13 01:25 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-12 18:30:04,883 INFO elena.worker: Consolidación 2026-10-12T17:15-07:00 -> 2026-10-13T01:25+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-12 18:30:04,927 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 18:35:04,484 INFO elena.consolidation: consolidación 2026-10-13 00:25 -> 2026-10-13 01:30 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 18:35:04,488 INFO elena.worker: Consolidación 2026-10-12T17:25-07:00 -> 2026-10-13T01:30+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 18:35:04,522 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 18:40:06,366 INFO elena.consolidation: consolidación 2026-10-13 00:30 -> 2026-10-13 01:35 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 18:40:06,382 INFO elena.worker: Consolidación 2026-10-12T17:30-07:00 -> 2026-10-13T01:35+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 18:40:06,433 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'confiable': 1}
+2026-10-12 18:45:07,006 INFO elena.consolidation: consolidación 2026-10-13 00:35 -> 2026-10-13 01:40 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 18:45:07,012 INFO elena.worker: Consolidación 2026-10-12T17:35-07:00 -> 2026-10-13T01:40+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 18:45:07,047 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 18:50:06,211 INFO elena.consolidation: consolidación 2026-10-13 00:40 -> 2026-10-13 01:45 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 18:50:06,216 INFO elena.worker: Consolidación 2026-10-12T17:40-07:00 -> 2026-10-13T01:45+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 18:50:06,279 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 18:55:06,066 INFO elena.consolidation: consolidación 2026-10-13 00:45 -> 2026-10-13 01:50 UTC: 10 ventanas (0 nuevas, 10 actualizadas)
+2026-10-12 18:55:06,073 INFO elena.worker: Consolidación 2026-10-12T17:45-07:00 -> 2026-10-13T01:50+00:00: 10 ventanas (nuevas 0, actualizadas 10)
+2026-10-12 18:55:06,103 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 19:00:06,886 INFO elena.consolidation: consolidación 2026-10-13 00:45 -> 2026-10-13 01:55 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 19:00:06,891 INFO elena.worker: Consolidación 2026-10-12T17:45-07:00 -> 2026-10-13T01:55+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 19:00:06,934 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'confiable': 1}
+2026-10-12 19:05:05,785 INFO elena.consolidation: consolidación 2026-10-13 00:55 -> 2026-10-13 02:00 UTC: 10 ventanas (1 nuevas, 9 actualizadas)
+2026-10-12 19:05:05,790 INFO elena.worker: Consolidación 2026-10-12T17:55-07:00 -> 2026-10-13T02:00+00:00: 10 ventanas (nuevas 1, actualizadas 9)
+2026-10-12 19:05:05,832 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 19:10:08,563 INFO elena.consolidation: consolidación 2026-10-13 01:00 -> 2026-10-13 02:05 UTC: 10 ventanas (1 nuevas, 9 actualizadas)
+2026-10-12 19:10:08,570 INFO elena.worker: Consolidación 2026-10-12T18:00-07:00 -> 2026-10-13T02:05+00:00: 10 ventanas (nuevas 1, actualizadas 9)
+2026-10-12 19:10:08,620 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 19:15:04,527 INFO elena.consolidation: consolidación 2026-10-13 01:05 -> 2026-10-13 02:10 UTC: 10 ventanas (1 nuevas, 9 actualizadas)
+2026-10-12 19:15:04,532 INFO elena.worker: Consolidación 2026-10-12T18:05-07:00 -> 2026-10-13T02:10+00:00: 10 ventanas (nuevas 1, actualizadas 9)
+2026-10-12 19:15:04,605 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-12 19:20:04,726 INFO elena.consolidation: consolidación 2026-10-13 01:10 -> 2026-10-13 02:15 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 19:20:04,730 INFO elena.worker: Consolidación 2026-10-12T18:10-07:00 -> 2026-10-13T02:15+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 19:20:04,763 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'dudoso': 1}
+2026-10-12 19:25:05,474 INFO elena.consolidation: consolidación 2026-10-13 01:15 -> 2026-10-13 02:20 UTC: 10 ventanas (0 nuevas, 10 actualizadas)
+2026-10-12 19:25:05,480 INFO elena.worker: Consolidación 2026-10-12T18:15-07:00 -> 2026-10-13T02:20+00:00: 10 ventanas (nuevas 0, actualizadas 10)
+2026-10-12 19:25:05,519 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 19:30:04,598 INFO elena.consolidation: consolidación 2026-10-13 01:15 -> 2026-10-13 02:25 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 19:30:04,603 INFO elena.worker: Consolidación 2026-10-12T18:15-07:00 -> 2026-10-13T02:25+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 19:30:04,642 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 19:35:04,797 INFO elena.consolidation: consolidación 2026-10-13 01:25 -> 2026-10-13 02:30 UTC: 10 ventanas (0 nuevas, 10 actualizadas)
+2026-10-12 19:35:04,802 INFO elena.worker: Consolidación 2026-10-12T18:25-07:00 -> 2026-10-13T02:30+00:00: 10 ventanas (nuevas 0, actualizadas 10)
+2026-10-12 19:35:04,836 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 19:40:07,126 INFO elena.consolidation: consolidación 2026-10-13 01:25 -> 2026-10-13 02:35 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-12 19:40:07,133 INFO elena.worker: Consolidación 2026-10-12T18:25-07:00 -> 2026-10-13T02:35+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-12 19:40:07,177 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 19:45:05,556 INFO elena.consolidation: consolidación 2026-10-13 01:35 -> 2026-10-13 02:40 UTC: 9 ventanas (0 nuevas, 9 actualizadas)
+2026-10-12 19:45:05,560 INFO elena.worker: Consolidación 2026-10-12T18:35-07:00 -> 2026-10-13T02:40+00:00: 9 ventanas (nuevas 0, actualizadas 9)
+2026-10-12 19:45:05,589 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 19:50:07,309 INFO elena.consolidation: consolidación 2026-10-13 01:35 -> 2026-10-13 02:45 UTC: 10 ventanas (1 nuevas, 9 actualizadas)
+2026-10-12 19:50:07,315 INFO elena.worker: Consolidación 2026-10-12T18:35-07:00 -> 2026-10-13T02:45+00:00: 10 ventanas (nuevas 1, actualizadas 9)
+2026-10-12 19:50:07,355 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 19:55:06,549 INFO elena.consolidation: consolidación 2026-10-13 01:45 -> 2026-10-13 02:50 UTC: 8 ventanas (0 nuevas, 8 actualizadas)
+2026-10-12 19:55:06,554 INFO elena.worker: Consolidación 2026-10-12T18:45-07:00 -> 2026-10-13T02:50+00:00: 8 ventanas (nuevas 0, actualizadas 8)
+2026-10-12 19:55:06,582 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 20:00:06,921 INFO elena.consolidation: consolidación 2026-10-13 01:45 -> 2026-10-13 02:55 UTC: 9 ventanas (1 nuevas, 8 actualizadas)
+2026-10-12 20:00:06,926 INFO elena.worker: Consolidación 2026-10-12T18:45-07:00 -> 2026-10-13T02:55+00:00: 9 ventanas (nuevas 1, actualizadas 8)
+2026-10-12 20:00:06,968 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 20:05:05,165 INFO elena.consolidation: consolidación 2026-10-13 01:55 -> 2026-10-13 03:00 UTC: 8 ventanas (0 nuevas, 8 actualizadas)
+2026-10-12 20:05:05,168 INFO elena.worker: Consolidación 2026-10-12T18:55-07:00 -> 2026-10-13T03:00+00:00: 8 ventanas (nuevas 0, actualizadas 8)
+2026-10-12 20:05:05,204 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 20:10:04,782 INFO elena.consolidation: consolidación 2026-10-13 01:55 -> 2026-10-13 03:05 UTC: 9 ventanas (1 nuevas, 8 actualizadas)
+2026-10-12 20:10:04,787 INFO elena.worker: Consolidación 2026-10-12T18:55-07:00 -> 2026-10-13T03:05+00:00: 9 ventanas (nuevas 1, actualizadas 8)
+2026-10-12 20:10:04,828 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 20:15:04,348 INFO elena.consolidation: consolidación 2026-10-13 02:05 -> 2026-10-13 03:10 UTC: 7 ventanas (0 nuevas, 7 actualizadas)
+2026-10-12 20:15:04,352 INFO elena.worker: Consolidación 2026-10-12T19:05-07:00 -> 2026-10-13T03:10+00:00: 7 ventanas (nuevas 0, actualizadas 7)
+2026-10-12 20:15:04,381 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 20:20:04,382 INFO elena.consolidation: consolidación 2026-10-13 02:05 -> 2026-10-13 03:15 UTC: 8 ventanas (1 nuevas, 7 actualizadas)
+2026-10-12 20:20:04,386 INFO elena.worker: Consolidación 2026-10-12T19:05-07:00 -> 2026-10-13T03:15+00:00: 8 ventanas (nuevas 1, actualizadas 7)
+2026-10-12 20:20:04,425 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 20:25:04,034 INFO elena.consolidation: consolidación 2026-10-13 02:15 -> 2026-10-13 03:20 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 20:25:04,037 INFO elena.worker: Consolidación 2026-10-12T19:15-07:00 -> 2026-10-13T03:20+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 20:25:04,073 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 20:30:04,742 INFO elena.consolidation: consolidación 2026-10-13 02:15 -> 2026-10-13 03:25 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 20:30:04,747 INFO elena.worker: Consolidación 2026-10-12T19:15-07:00 -> 2026-10-13T03:25+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 20:30:04,789 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 20:35:04,261 INFO elena.consolidation: consolidación 2026-10-13 02:25 -> 2026-10-13 03:30 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 20:35:04,268 INFO elena.worker: Consolidación 2026-10-12T19:25-07:00 -> 2026-10-13T03:30+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 20:35:04,307 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 20:40:04,284 INFO elena.consolidation: consolidación 2026-10-13 02:25 -> 2026-10-13 03:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 20:40:04,289 INFO elena.worker: Consolidación 2026-10-12T19:25-07:00 -> 2026-10-13T03:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 20:40:04,328 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 20:45:04,412 INFO elena.consolidation: consolidación 2026-10-13 02:35 -> 2026-10-13 03:40 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 20:45:04,416 INFO elena.worker: Consolidación 2026-10-12T19:35-07:00 -> 2026-10-13T03:40+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 20:45:04,445 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 20:50:04,896 INFO elena.consolidation: consolidación 2026-10-13 02:35 -> 2026-10-13 03:45 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 20:50:04,900 INFO elena.worker: Consolidación 2026-10-12T19:35-07:00 -> 2026-10-13T03:45+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 20:50:04,946 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 20:55:06,595 INFO elena.consolidation: consolidación 2026-10-13 02:45 -> 2026-10-13 03:50 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 20:55:06,601 INFO elena.worker: Consolidación 2026-10-12T19:45-07:00 -> 2026-10-13T03:50+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 20:55:06,646 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 21:00:06,135 INFO elena.consolidation: consolidación 2026-10-13 02:45 -> 2026-10-13 03:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 21:00:06,139 INFO elena.worker: Consolidación 2026-10-12T19:45-07:00 -> 2026-10-13T03:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 21:00:06,191 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 21:05:04,449 INFO elena.consolidation: consolidación 2026-10-13 02:55 -> 2026-10-13 04:00 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 21:05:04,454 INFO elena.worker: Consolidación 2026-10-12T19:55-07:00 -> 2026-10-13T04:00+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 21:05:04,481 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 21:10:04,449 INFO elena.consolidation: consolidación 2026-10-13 02:55 -> 2026-10-13 04:05 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 21:10:04,453 INFO elena.worker: Consolidación 2026-10-12T19:55-07:00 -> 2026-10-13T04:05+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 21:10:04,500 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 21:15:06,074 INFO elena.consolidation: consolidación 2026-10-13 03:05 -> 2026-10-13 04:10 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 21:15:06,079 INFO elena.worker: Consolidación 2026-10-12T20:05-07:00 -> 2026-10-13T04:10+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 21:15:06,108 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 21:20:04,376 INFO elena.consolidation: consolidación 2026-10-13 03:05 -> 2026-10-13 04:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 21:20:04,380 INFO elena.worker: Consolidación 2026-10-12T20:05-07:00 -> 2026-10-13T04:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 21:20:04,417 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 21:25:04,644 INFO elena.consolidation: consolidación 2026-10-13 03:15 -> 2026-10-13 04:20 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 21:25:04,649 INFO elena.worker: Consolidación 2026-10-12T20:15-07:00 -> 2026-10-13T04:20+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 21:25:04,699 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 21:30:04,596 INFO elena.consolidation: consolidación 2026-10-13 03:15 -> 2026-10-13 04:25 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 21:30:04,606 INFO elena.worker: Consolidación 2026-10-12T20:15-07:00 -> 2026-10-13T04:25+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 21:30:04,660 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 21:35:06,277 INFO elena.consolidation: consolidación 2026-10-13 03:25 -> 2026-10-13 04:30 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 21:35:06,284 INFO elena.worker: Consolidación 2026-10-12T20:25-07:00 -> 2026-10-13T04:30+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 21:35:06,315 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 21:40:05,455 INFO elena.consolidation: consolidación 2026-10-13 03:25 -> 2026-10-13 04:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 21:40:05,459 INFO elena.worker: Consolidación 2026-10-12T20:25-07:00 -> 2026-10-13T04:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 21:40:05,492 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 21:45:04,321 INFO elena.consolidation: consolidación 2026-10-13 03:35 -> 2026-10-13 04:40 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 21:45:04,326 INFO elena.worker: Consolidación 2026-10-12T20:35-07:00 -> 2026-10-13T04:40+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 21:45:04,353 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 21:51:40,164 INFO elena.consolidation: consolidación 2026-10-13 03:35 -> 2026-10-13 04:45 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 21:51:40,237 INFO elena.worker: Consolidación 2026-10-12T20:35-07:00 -> 2026-10-13T04:45+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 21:51:40,805 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 21:55:06,431 INFO elena.consolidation: consolidación 2026-10-13 03:45 -> 2026-10-13 04:50 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 21:55:06,438 INFO elena.worker: Consolidación 2026-10-12T20:45-07:00 -> 2026-10-13T04:50+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 21:55:06,468 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 22:00:05,921 INFO elena.consolidation: consolidación 2026-10-13 03:45 -> 2026-10-13 04:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 22:00:05,926 INFO elena.worker: Consolidación 2026-10-12T20:45-07:00 -> 2026-10-13T04:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 22:00:05,975 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 22:05:04,540 INFO elena.consolidation: consolidación 2026-10-13 03:55 -> 2026-10-13 05:00 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 22:05:04,545 INFO elena.worker: Consolidación 2026-10-12T20:55-07:00 -> 2026-10-13T05:00+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 22:05:04,578 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 22:10:05,187 INFO elena.consolidation: consolidación 2026-10-13 03:55 -> 2026-10-13 05:05 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 22:10:05,192 INFO elena.worker: Consolidación 2026-10-12T20:55-07:00 -> 2026-10-13T05:05+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 22:10:05,231 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 22:15:05,791 INFO elena.consolidation: consolidación 2026-10-13 04:05 -> 2026-10-13 05:10 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 22:15:05,796 INFO elena.worker: Consolidación 2026-10-12T21:05-07:00 -> 2026-10-13T05:10+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 22:15:05,819 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 22:20:04,468 INFO elena.consolidation: consolidación 2026-10-13 04:05 -> 2026-10-13 05:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 22:20:04,472 INFO elena.worker: Consolidación 2026-10-12T21:05-07:00 -> 2026-10-13T05:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 22:20:04,528 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 22:25:04,831 INFO elena.consolidation: consolidación 2026-10-13 04:15 -> 2026-10-13 05:20 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 22:25:04,836 INFO elena.worker: Consolidación 2026-10-12T21:15-07:00 -> 2026-10-13T05:20+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 22:25:04,863 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 22:30:06,558 INFO elena.consolidation: consolidación 2026-10-13 04:15 -> 2026-10-13 05:25 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 22:30:06,563 INFO elena.worker: Consolidación 2026-10-12T21:15-07:00 -> 2026-10-13T05:25+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 22:30:06,605 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 22:35:06,841 INFO elena.consolidation: consolidación 2026-10-13 04:25 -> 2026-10-13 05:30 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 22:35:06,847 INFO elena.worker: Consolidación 2026-10-12T21:25-07:00 -> 2026-10-13T05:30+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 22:35:06,882 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 22:40:04,515 INFO elena.consolidation: consolidación 2026-10-13 04:25 -> 2026-10-13 05:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 22:40:04,519 INFO elena.worker: Consolidación 2026-10-12T21:25-07:00 -> 2026-10-13T05:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 22:40:04,563 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 22:45:04,426 INFO elena.consolidation: consolidación 2026-10-13 04:35 -> 2026-10-13 05:40 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 22:45:04,431 INFO elena.worker: Consolidación 2026-10-12T21:35-07:00 -> 2026-10-13T05:40+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 22:45:04,461 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 22:50:04,137 INFO elena.consolidation: consolidación 2026-10-13 04:35 -> 2026-10-13 05:45 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 22:50:04,142 INFO elena.worker: Consolidación 2026-10-12T21:35-07:00 -> 2026-10-13T05:45+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 22:50:04,178 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 22:55:04,714 INFO elena.consolidation: consolidación 2026-10-13 04:35 -> 2026-10-13 05:50 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 22:55:04,718 INFO elena.worker: Consolidación 2026-10-12T21:35-07:00 -> 2026-10-13T05:50+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 22:55:04,762 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 23:00:07,024 INFO elena.consolidation: consolidación 2026-10-13 04:45 -> 2026-10-13 05:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 23:00:07,029 INFO elena.worker: Consolidación 2026-10-12T21:45-07:00 -> 2026-10-13T05:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 23:00:07,074 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 23:05:05,156 INFO elena.consolidation: consolidación 2026-10-13 04:55 -> 2026-10-13 06:00 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 23:05:05,161 INFO elena.worker: Consolidación 2026-10-12T21:55-07:00 -> 2026-10-13T06:00+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 23:05:05,187 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 23:10:05,066 INFO elena.consolidation: consolidación 2026-10-13 04:55 -> 2026-10-13 06:05 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 23:10:05,070 INFO elena.worker: Consolidación 2026-10-12T21:55-07:00 -> 2026-10-13T06:05+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 23:10:05,108 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 23:15:07,340 INFO elena.consolidation: consolidación 2026-10-13 04:55 -> 2026-10-13 06:10 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 23:15:07,347 INFO elena.worker: Consolidación 2026-10-12T21:55-07:00 -> 2026-10-13T06:10+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 23:15:07,382 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 23:20:06,128 INFO elena.consolidation: consolidación 2026-10-13 05:05 -> 2026-10-13 06:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 23:20:06,132 INFO elena.worker: Consolidación 2026-10-12T22:05-07:00 -> 2026-10-13T06:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 23:20:06,173 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 23:25:08,529 INFO elena.consolidation: consolidación 2026-10-13 05:15 -> 2026-10-13 06:20 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 23:25:08,535 INFO elena.worker: Consolidación 2026-10-12T22:15-07:00 -> 2026-10-13T06:20+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 23:25:08,571 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 23:30:07,239 INFO elena.consolidation: consolidación 2026-10-13 05:15 -> 2026-10-13 06:25 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 23:30:07,245 INFO elena.worker: Consolidación 2026-10-12T22:15-07:00 -> 2026-10-13T06:25+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 23:30:07,299 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 23:35:08,591 INFO elena.consolidation: consolidación 2026-10-13 05:15 -> 2026-10-13 06:30 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 23:35:08,596 INFO elena.worker: Consolidación 2026-10-12T22:15-07:00 -> 2026-10-13T06:30+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 23:35:08,637 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 23:40:04,643 INFO elena.consolidation: consolidación 2026-10-13 05:25 -> 2026-10-13 06:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 23:40:04,647 INFO elena.worker: Consolidación 2026-10-12T22:25-07:00 -> 2026-10-13T06:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 23:40:04,690 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-12 23:45:08,347 INFO elena.consolidation: consolidación 2026-10-13 05:35 -> 2026-10-13 06:40 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 23:45:08,357 INFO elena.worker: Consolidación 2026-10-12T22:35-07:00 -> 2026-10-13T06:40+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 23:45:08,399 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 23:50:04,714 INFO elena.consolidation: consolidación 2026-10-13 05:35 -> 2026-10-13 06:45 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-12 23:50:04,718 INFO elena.worker: Consolidación 2026-10-12T22:35-07:00 -> 2026-10-13T06:45+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-12 23:50:04,746 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-12 23:55:05,811 INFO elena.consolidation: consolidación 2026-10-13 05:35 -> 2026-10-13 06:50 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-12 23:55:05,816 INFO elena.worker: Consolidación 2026-10-12T22:35-07:00 -> 2026-10-13T06:50+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-12 23:55:05,854 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 00:00:05,102 INFO elena.consolidation: consolidación 2026-10-13 05:45 -> 2026-10-13 06:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 00:00:05,108 INFO elena.worker: Consolidación 2026-10-12T22:45-07:00 -> 2026-10-13T06:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 00:00:05,145 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 00:05:05,386 INFO elena.consolidation: consolidación 2026-10-13 05:55 -> 2026-10-13 07:00 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 00:05:05,390 INFO elena.worker: Consolidación 2026-10-12T22:55-07:00 -> 2026-10-13T07:00+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 00:05:05,411 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 00:10:06,886 INFO elena.consolidation: consolidación 2026-10-13 05:55 -> 2026-10-13 07:05 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 00:10:06,892 INFO elena.worker: Consolidación 2026-10-12T22:55-07:00 -> 2026-10-13T07:05+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 00:10:06,921 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 00:15:04,977 INFO elena.consolidation: consolidación 2026-10-13 05:55 -> 2026-10-13 07:10 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 00:15:04,981 INFO elena.worker: Consolidación 2026-10-12T22:55-07:00 -> 2026-10-13T07:10+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 00:15:05,040 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 00:20:04,012 INFO elena.consolidation: consolidación 2026-10-13 06:05 -> 2026-10-13 07:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 00:20:04,017 INFO elena.worker: Consolidación 2026-10-12T23:05-07:00 -> 2026-10-13T07:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 00:20:04,058 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 00:25:06,987 INFO elena.consolidation: consolidación 2026-10-13 06:15 -> 2026-10-13 07:20 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 00:25:06,993 INFO elena.worker: Consolidación 2026-10-12T23:15-07:00 -> 2026-10-13T07:20+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 00:25:07,026 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 00:30:06,426 INFO elena.consolidation: consolidación 2026-10-13 06:15 -> 2026-10-13 07:25 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 00:30:06,432 INFO elena.worker: Consolidación 2026-10-12T23:15-07:00 -> 2026-10-13T07:25+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 00:30:06,474 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 00:35:04,479 INFO elena.consolidation: consolidación 2026-10-13 06:15 -> 2026-10-13 07:30 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 00:35:04,483 INFO elena.worker: Consolidación 2026-10-12T23:15-07:00 -> 2026-10-13T07:30+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 00:35:04,528 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 00:40:05,389 INFO elena.consolidation: consolidación 2026-10-13 06:25 -> 2026-10-13 07:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 00:40:05,393 INFO elena.worker: Consolidación 2026-10-12T23:25-07:00 -> 2026-10-13T07:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 00:40:05,430 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 00:45:06,194 INFO elena.consolidation: consolidación 2026-10-13 06:35 -> 2026-10-13 07:40 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 00:45:06,201 INFO elena.worker: Consolidación 2026-10-12T23:35-07:00 -> 2026-10-13T07:40+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 00:45:06,239 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 00:50:06,418 INFO elena.consolidation: consolidación 2026-10-13 06:35 -> 2026-10-13 07:45 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 00:50:06,424 INFO elena.worker: Consolidación 2026-10-12T23:35-07:00 -> 2026-10-13T07:45+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 00:50:06,450 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 00:55:05,381 INFO elena.consolidation: consolidación 2026-10-13 06:35 -> 2026-10-13 07:50 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 00:55:05,385 INFO elena.worker: Consolidación 2026-10-12T23:35-07:00 -> 2026-10-13T07:50+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 00:55:05,422 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 01:00:05,569 INFO elena.consolidation: consolidación 2026-10-13 06:45 -> 2026-10-13 07:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 01:00:05,583 INFO elena.worker: Consolidación 2026-10-12T23:45-07:00 -> 2026-10-13T07:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 01:00:05,636 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 01:05:05,765 INFO elena.consolidation: consolidación 2026-10-13 06:55 -> 2026-10-13 08:00 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 01:05:05,769 INFO elena.worker: Consolidación 2026-10-12T23:55-07:00 -> 2026-10-13T08:00+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 01:05:05,800 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 01:10:05,642 INFO elena.consolidation: consolidación 2026-10-13 06:55 -> 2026-10-13 08:05 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 01:10:05,645 INFO elena.worker: Consolidación 2026-10-12T23:55-07:00 -> 2026-10-13T08:05+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 01:10:05,669 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 01:15:06,229 INFO elena.consolidation: consolidación 2026-10-13 06:55 -> 2026-10-13 08:10 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 01:15:06,233 INFO elena.worker: Consolidación 2026-10-12T23:55-07:00 -> 2026-10-13T08:10+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 01:15:06,265 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 01:20:08,196 INFO elena.consolidation: consolidación 2026-10-13 07:05 -> 2026-10-13 08:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 01:20:08,202 INFO elena.worker: Consolidación 2026-10-13T00:05-07:00 -> 2026-10-13T08:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 01:20:08,249 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 01:25:07,168 INFO elena.consolidation: consolidación 2026-10-13 07:15 -> 2026-10-13 08:20 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 01:25:07,175 INFO elena.worker: Consolidación 2026-10-13T00:15-07:00 -> 2026-10-13T08:20+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 01:25:07,206 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 01:30:07,971 INFO elena.consolidation: consolidación 2026-10-13 07:15 -> 2026-10-13 08:25 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 01:30:07,990 INFO elena.worker: Consolidación 2026-10-13T00:15-07:00 -> 2026-10-13T08:25+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 01:30:08,021 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 01:35:07,988 INFO elena.consolidation: consolidación 2026-10-13 07:15 -> 2026-10-13 08:30 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 01:35:07,998 INFO elena.worker: Consolidación 2026-10-13T00:15-07:00 -> 2026-10-13T08:30+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 01:35:08,047 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 01:40:07,930 INFO elena.consolidation: consolidación 2026-10-13 07:25 -> 2026-10-13 08:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 01:40:07,934 INFO elena.worker: Consolidación 2026-10-13T00:25-07:00 -> 2026-10-13T08:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 01:40:07,981 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 01:45:06,447 INFO elena.consolidation: consolidación 2026-10-13 07:35 -> 2026-10-13 08:40 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 01:45:06,453 INFO elena.worker: Consolidación 2026-10-13T00:35-07:00 -> 2026-10-13T08:40+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 01:45:06,500 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 01:50:07,339 INFO elena.consolidation: consolidación 2026-10-13 07:35 -> 2026-10-13 08:45 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 01:50:07,345 INFO elena.worker: Consolidación 2026-10-13T00:35-07:00 -> 2026-10-13T08:45+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 01:50:07,377 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 01:55:05,851 INFO elena.consolidation: consolidación 2026-10-13 07:35 -> 2026-10-13 08:50 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 01:55:05,856 INFO elena.worker: Consolidación 2026-10-13T00:35-07:00 -> 2026-10-13T08:50+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 01:55:05,908 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 02:00:10,958 INFO elena.consolidation: consolidación 2026-10-13 07:45 -> 2026-10-13 08:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 02:00:10,964 INFO elena.worker: Consolidación 2026-10-13T00:45-07:00 -> 2026-10-13T08:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 02:00:11,006 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 02:05:07,035 INFO elena.consolidation: consolidación 2026-10-13 07:55 -> 2026-10-13 09:00 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 02:05:07,049 INFO elena.worker: Consolidación 2026-10-13T00:55-07:00 -> 2026-10-13T09:00+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 02:05:07,264 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 02:10:04,632 INFO elena.consolidation: consolidación 2026-10-13 07:55 -> 2026-10-13 09:05 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 02:10:04,636 INFO elena.worker: Consolidación 2026-10-13T00:55-07:00 -> 2026-10-13T09:05+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 02:10:04,662 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 02:15:04,649 INFO elena.consolidation: consolidación 2026-10-13 07:55 -> 2026-10-13 09:10 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 02:15:04,658 INFO elena.worker: Consolidación 2026-10-13T00:55-07:00 -> 2026-10-13T09:10+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 02:15:04,704 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 02:20:04,787 INFO elena.consolidation: consolidación 2026-10-13 08:05 -> 2026-10-13 09:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 02:20:04,791 INFO elena.worker: Consolidación 2026-10-13T01:05-07:00 -> 2026-10-13T09:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 02:20:04,827 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 02:25:04,843 INFO elena.consolidation: consolidación 2026-10-13 08:15 -> 2026-10-13 09:20 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 02:25:04,847 INFO elena.worker: Consolidación 2026-10-13T01:15-07:00 -> 2026-10-13T09:20+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 02:25:04,877 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 02:30:05,264 INFO elena.consolidation: consolidación 2026-10-13 08:15 -> 2026-10-13 09:25 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 02:30:05,283 INFO elena.worker: Consolidación 2026-10-13T01:15-07:00 -> 2026-10-13T09:25+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 02:30:05,323 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 02:35:04,805 INFO elena.consolidation: consolidación 2026-10-13 08:15 -> 2026-10-13 09:30 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 02:35:04,809 INFO elena.worker: Consolidación 2026-10-13T01:15-07:00 -> 2026-10-13T09:30+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 02:35:04,848 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 02:40:07,108 INFO elena.consolidation: consolidación 2026-10-13 08:25 -> 2026-10-13 09:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 02:40:07,112 INFO elena.worker: Consolidación 2026-10-13T01:25-07:00 -> 2026-10-13T09:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 02:40:07,151 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 02:45:05,669 INFO elena.consolidation: consolidación 2026-10-13 08:35 -> 2026-10-13 09:40 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 02:45:05,682 INFO elena.worker: Consolidación 2026-10-13T01:35-07:00 -> 2026-10-13T09:40+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 02:45:05,719 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 02:50:07,772 INFO elena.consolidation: consolidación 2026-10-13 08:35 -> 2026-10-13 09:45 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 02:50:07,785 INFO elena.worker: Consolidación 2026-10-13T01:35-07:00 -> 2026-10-13T09:45+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 02:50:07,819 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 02:55:08,349 INFO elena.consolidation: consolidación 2026-10-13 08:35 -> 2026-10-13 09:50 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 02:55:08,355 INFO elena.worker: Consolidación 2026-10-13T01:35-07:00 -> 2026-10-13T09:50+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 02:55:08,386 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 03:00:10,356 INFO elena.consolidation: consolidación 2026-10-13 08:45 -> 2026-10-13 09:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 03:00:10,362 INFO elena.worker: Consolidación 2026-10-13T01:45-07:00 -> 2026-10-13T09:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 03:00:10,416 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 03:05:06,608 INFO elena.consolidation: consolidación 2026-10-13 08:55 -> 2026-10-13 10:00 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 03:05:06,623 INFO elena.worker: Consolidación 2026-10-13T01:55-07:00 -> 2026-10-13T10:00+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 03:05:06,665 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 03:10:04,596 INFO elena.consolidation: consolidación 2026-10-13 08:55 -> 2026-10-13 10:05 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 03:10:04,601 INFO elena.worker: Consolidación 2026-10-13T01:55-07:00 -> 2026-10-13T10:05+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 03:10:04,627 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 03:15:04,703 INFO elena.consolidation: consolidación 2026-10-13 08:55 -> 2026-10-13 10:10 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 03:15:04,707 INFO elena.worker: Consolidación 2026-10-13T01:55-07:00 -> 2026-10-13T10:10+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 03:15:04,740 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 03:20:04,774 INFO elena.consolidation: consolidación 2026-10-13 09:05 -> 2026-10-13 10:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 03:20:04,778 INFO elena.worker: Consolidación 2026-10-13T02:05-07:00 -> 2026-10-13T10:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 03:20:04,817 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 03:25:04,964 INFO elena.consolidation: consolidación 2026-10-13 09:15 -> 2026-10-13 10:20 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 03:25:04,969 INFO elena.worker: Consolidación 2026-10-13T02:15-07:00 -> 2026-10-13T10:20+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 03:25:04,996 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 03:30:04,637 INFO elena.consolidation: consolidación 2026-10-13 09:15 -> 2026-10-13 10:25 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 03:30:04,642 INFO elena.worker: Consolidación 2026-10-13T02:15-07:00 -> 2026-10-13T10:25+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 03:30:04,675 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 03:35:04,871 INFO elena.consolidation: consolidación 2026-10-13 09:15 -> 2026-10-13 10:30 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 03:35:04,875 INFO elena.worker: Consolidación 2026-10-13T02:15-07:00 -> 2026-10-13T10:30+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 03:35:04,909 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 03:40:04,508 INFO elena.consolidation: consolidación 2026-10-13 09:25 -> 2026-10-13 10:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 03:40:04,513 INFO elena.worker: Consolidación 2026-10-13T02:25-07:00 -> 2026-10-13T10:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 03:40:04,546 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 03:45:05,699 INFO elena.consolidation: consolidación 2026-10-13 09:35 -> 2026-10-13 10:40 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 03:45:05,704 INFO elena.worker: Consolidación 2026-10-13T02:35-07:00 -> 2026-10-13T10:40+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 03:45:05,742 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 03:50:04,681 INFO elena.consolidation: consolidación 2026-10-13 09:35 -> 2026-10-13 10:45 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 03:50:04,686 INFO elena.worker: Consolidación 2026-10-13T02:35-07:00 -> 2026-10-13T10:45+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 03:50:04,716 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 03:55:05,234 INFO elena.consolidation: consolidación 2026-10-13 09:35 -> 2026-10-13 10:50 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 03:55:05,239 INFO elena.worker: Consolidación 2026-10-13T02:35-07:00 -> 2026-10-13T10:50+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 03:55:05,287 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 04:00:05,086 INFO elena.consolidation: consolidación 2026-10-13 09:45 -> 2026-10-13 10:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 04:00:05,091 INFO elena.worker: Consolidación 2026-10-13T02:45-07:00 -> 2026-10-13T10:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 04:00:05,133 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 04:05:13,999 INFO elena.consolidation: consolidación 2026-10-13 09:55 -> 2026-10-13 11:00 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 04:05:14,004 INFO elena.worker: Consolidación 2026-10-13T02:55-07:00 -> 2026-10-13T11:00+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 04:05:14,060 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 04:10:05,492 INFO elena.consolidation: consolidación 2026-10-13 09:55 -> 2026-10-13 11:05 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 04:10:05,497 INFO elena.worker: Consolidación 2026-10-13T02:55-07:00 -> 2026-10-13T11:05+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 04:10:05,530 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 04:15:06,907 INFO elena.consolidation: consolidación 2026-10-13 09:55 -> 2026-10-13 11:10 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 04:15:06,913 INFO elena.worker: Consolidación 2026-10-13T02:55-07:00 -> 2026-10-13T11:10+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 04:15:06,964 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 04:20:05,777 INFO elena.consolidation: consolidación 2026-10-13 10:05 -> 2026-10-13 11:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 04:20:05,782 INFO elena.worker: Consolidación 2026-10-13T03:05-07:00 -> 2026-10-13T11:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 04:20:05,823 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 04:25:06,088 INFO elena.consolidation: consolidación 2026-10-13 10:15 -> 2026-10-13 11:20 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 04:25:06,093 INFO elena.worker: Consolidación 2026-10-13T03:15-07:00 -> 2026-10-13T11:20+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 04:25:06,125 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 04:30:06,475 INFO elena.consolidation: consolidación 2026-10-13 10:15 -> 2026-10-13 11:25 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 04:30:06,492 INFO elena.worker: Consolidación 2026-10-13T03:15-07:00 -> 2026-10-13T11:25+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 04:30:06,523 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 04:35:07,104 INFO elena.consolidation: consolidación 2026-10-13 10:15 -> 2026-10-13 11:30 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 04:35:07,110 INFO elena.worker: Consolidación 2026-10-13T03:15-07:00 -> 2026-10-13T11:30+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 04:35:07,148 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 04:39:20,143 INFO elena.consolidation: consolidación 2026-10-13 10:25 -> 2026-10-13 11:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 04:39:20,150 INFO elena.worker: Consolidación 2026-10-13T03:25-07:00 -> 2026-10-13T11:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 04:39:20,266 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 04:40:10,467 INFO elena.consolidation: consolidación 2026-10-13 10:35 -> 2026-10-13 11:35 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 04:40:10,471 INFO elena.worker: Consolidación 2026-10-13T03:35-07:00 -> 2026-10-13T11:35+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 04:40:10,519 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 04:45:05,441 INFO elena.consolidation: consolidación 2026-10-13 10:35 -> 2026-10-13 11:40 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 04:45:05,445 INFO elena.worker: Consolidación 2026-10-13T03:35-07:00 -> 2026-10-13T11:40+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 04:45:05,472 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 04:50:14,693 INFO elena.consolidation: consolidación 2026-10-13 10:35 -> 2026-10-13 11:45 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 04:50:14,699 INFO elena.worker: Consolidación 2026-10-13T03:35-07:00 -> 2026-10-13T11:45+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 04:50:14,753 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 04:55:04,942 INFO elena.consolidation: consolidación 2026-10-13 10:35 -> 2026-10-13 11:50 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 04:55:04,946 INFO elena.worker: Consolidación 2026-10-13T03:35-07:00 -> 2026-10-13T11:50+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 04:55:05,011 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 05:00:05,214 INFO elena.consolidation: consolidación 2026-10-13 10:45 -> 2026-10-13 11:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 05:00:05,217 INFO elena.worker: Consolidación 2026-10-13T03:45-07:00 -> 2026-10-13T11:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 05:00:05,256 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 05:05:10,231 INFO elena.consolidation: consolidación 2026-10-13 10:55 -> 2026-10-13 12:00 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 05:05:10,238 INFO elena.worker: Consolidación 2026-10-13T03:55-07:00 -> 2026-10-13T12:00+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 05:05:10,285 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 05:10:16,841 INFO elena.consolidation: consolidación 2026-10-13 10:55 -> 2026-10-13 12:05 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 05:10:16,850 INFO elena.worker: Consolidación 2026-10-13T03:55-07:00 -> 2026-10-13T12:05+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 05:10:16,912 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 05:15:15,473 INFO elena.consolidation: consolidación 2026-10-13 10:55 -> 2026-10-13 12:10 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 05:15:15,479 INFO elena.worker: Consolidación 2026-10-13T03:55-07:00 -> 2026-10-13T12:10+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 05:15:15,538 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 05:20:07,234 INFO elena.consolidation: consolidación 2026-10-13 11:05 -> 2026-10-13 12:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 05:20:07,241 INFO elena.worker: Consolidación 2026-10-13T04:05-07:00 -> 2026-10-13T12:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 05:20:07,291 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 05:25:07,859 INFO elena.consolidation: consolidación 2026-10-13 11:15 -> 2026-10-13 12:20 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 05:25:07,865 INFO elena.worker: Consolidación 2026-10-13T04:15-07:00 -> 2026-10-13T12:20+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 05:25:07,907 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 05:30:10,670 INFO elena.consolidation: consolidación 2026-10-13 11:15 -> 2026-10-13 12:25 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 05:30:10,675 INFO elena.worker: Consolidación 2026-10-13T04:15-07:00 -> 2026-10-13T12:25+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 05:30:10,713 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 05:35:04,588 INFO elena.consolidation: consolidación 2026-10-13 11:15 -> 2026-10-13 12:30 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 05:35:04,592 INFO elena.worker: Consolidación 2026-10-13T04:15-07:00 -> 2026-10-13T12:30+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 05:35:04,634 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 05:40:04,990 INFO elena.consolidation: consolidación 2026-10-13 11:25 -> 2026-10-13 12:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 05:40:04,995 INFO elena.worker: Consolidación 2026-10-13T04:25-07:00 -> 2026-10-13T12:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 05:40:05,039 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 05:45:04,448 INFO elena.consolidation: consolidación 2026-10-13 11:35 -> 2026-10-13 12:40 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 05:45:04,452 INFO elena.worker: Consolidación 2026-10-13T04:35-07:00 -> 2026-10-13T12:40+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 05:45:04,483 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 05:50:04,706 INFO elena.consolidation: consolidación 2026-10-13 11:35 -> 2026-10-13 12:45 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 05:50:04,710 INFO elena.worker: Consolidación 2026-10-13T04:35-07:00 -> 2026-10-13T12:45+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 05:50:04,738 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 05:55:04,469 INFO elena.consolidation: consolidación 2026-10-13 11:35 -> 2026-10-13 12:50 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 05:55:04,474 INFO elena.worker: Consolidación 2026-10-13T04:35-07:00 -> 2026-10-13T12:50+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 05:55:04,507 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 06:00:04,565 INFO elena.consolidation: consolidación 2026-10-13 11:45 -> 2026-10-13 12:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 06:00:04,569 INFO elena.worker: Consolidación 2026-10-13T04:45-07:00 -> 2026-10-13T12:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 06:00:04,607 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 06:05:06,186 INFO elena.consolidation: consolidación 2026-10-13 11:55 -> 2026-10-13 13:00 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 06:05:06,191 INFO elena.worker: Consolidación 2026-10-13T04:55-07:00 -> 2026-10-13T13:00+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 06:05:06,234 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 06:10:05,163 INFO elena.consolidation: consolidación 2026-10-13 11:55 -> 2026-10-13 13:05 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 06:10:05,167 INFO elena.worker: Consolidación 2026-10-13T04:55-07:00 -> 2026-10-13T13:05+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 06:10:05,194 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 06:15:04,547 INFO elena.consolidation: consolidación 2026-10-13 11:55 -> 2026-10-13 13:10 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 06:15:04,551 INFO elena.worker: Consolidación 2026-10-13T04:55-07:00 -> 2026-10-13T13:10+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 06:15:04,596 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 06:20:04,558 INFO elena.consolidation: consolidación 2026-10-13 12:05 -> 2026-10-13 13:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 06:20:04,561 INFO elena.worker: Consolidación 2026-10-13T05:05-07:00 -> 2026-10-13T13:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 06:20:04,595 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 06:25:04,835 INFO elena.consolidation: consolidación 2026-10-13 12:15 -> 2026-10-13 13:20 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 06:25:04,839 INFO elena.worker: Consolidación 2026-10-13T05:15-07:00 -> 2026-10-13T13:20+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 06:25:04,871 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 06:30:04,970 INFO elena.consolidation: consolidación 2026-10-13 12:15 -> 2026-10-13 13:25 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 06:30:04,974 INFO elena.worker: Consolidación 2026-10-13T05:15-07:00 -> 2026-10-13T13:25+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 06:30:05,015 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 06:35:04,672 INFO elena.consolidation: consolidación 2026-10-13 12:15 -> 2026-10-13 13:30 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 06:35:04,676 INFO elena.worker: Consolidación 2026-10-13T05:15-07:00 -> 2026-10-13T13:30+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 06:35:04,716 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 06:40:04,678 INFO elena.consolidation: consolidación 2026-10-13 12:25 -> 2026-10-13 13:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 06:40:04,682 INFO elena.worker: Consolidación 2026-10-13T05:25-07:00 -> 2026-10-13T13:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 06:40:04,726 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 06:45:04,765 INFO elena.consolidation: consolidación 2026-10-13 12:35 -> 2026-10-13 13:40 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 06:45:04,768 INFO elena.worker: Consolidación 2026-10-13T05:35-07:00 -> 2026-10-13T13:40+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 06:45:04,800 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 06:50:04,787 INFO elena.consolidation: consolidación 2026-10-13 12:35 -> 2026-10-13 13:45 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 06:50:04,792 INFO elena.worker: Consolidación 2026-10-13T05:35-07:00 -> 2026-10-13T13:45+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 06:50:04,818 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 06:55:05,165 INFO elena.consolidation: consolidación 2026-10-13 12:35 -> 2026-10-13 13:50 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 06:55:05,169 INFO elena.worker: Consolidación 2026-10-13T05:35-07:00 -> 2026-10-13T13:50+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 06:55:05,211 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 07:00:04,741 INFO elena.consolidation: consolidación 2026-10-13 12:45 -> 2026-10-13 13:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 07:00:04,744 INFO elena.worker: Consolidación 2026-10-13T05:45-07:00 -> 2026-10-13T13:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 07:00:04,786 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 07:05:04,713 INFO elena.consolidation: consolidación 2026-10-13 12:55 -> 2026-10-13 14:00 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 07:05:04,718 INFO elena.worker: Consolidación 2026-10-13T05:55-07:00 -> 2026-10-13T14:00+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 07:05:04,745 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 07:10:04,941 INFO elena.consolidation: consolidación 2026-10-13 12:55 -> 2026-10-13 14:05 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 07:10:04,944 INFO elena.worker: Consolidación 2026-10-13T05:55-07:00 -> 2026-10-13T14:05+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 07:10:04,969 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 07:15:04,996 INFO elena.consolidation: consolidación 2026-10-13 12:55 -> 2026-10-13 14:10 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 07:15:05,001 INFO elena.worker: Consolidación 2026-10-13T05:55-07:00 -> 2026-10-13T14:10+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 07:15:05,036 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 07:20:04,965 INFO elena.consolidation: consolidación 2026-10-13 13:05 -> 2026-10-13 14:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 07:20:04,969 INFO elena.worker: Consolidación 2026-10-13T06:05-07:00 -> 2026-10-13T14:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 07:20:05,018 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 07:25:04,474 INFO elena.consolidation: consolidación 2026-10-13 13:15 -> 2026-10-13 14:20 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 07:25:04,478 INFO elena.worker: Consolidación 2026-10-13T06:15-07:00 -> 2026-10-13T14:20+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 07:25:04,516 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 07:30:04,687 INFO elena.consolidation: consolidación 2026-10-13 13:15 -> 2026-10-13 14:25 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 07:30:04,690 INFO elena.worker: Consolidación 2026-10-13T06:15-07:00 -> 2026-10-13T14:25+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 07:30:04,727 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 07:35:04,512 INFO elena.consolidation: consolidación 2026-10-13 13:25 -> 2026-10-13 14:30 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 07:35:04,516 INFO elena.worker: Consolidación 2026-10-13T06:25-07:00 -> 2026-10-13T14:30+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 07:35:04,553 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 07:40:04,496 INFO elena.consolidation: consolidación 2026-10-13 13:30 -> 2026-10-13 14:35 UTC: 8 ventanas (1 nuevas, 7 actualizadas)
+2026-10-13 07:40:04,499 INFO elena.worker: Consolidación 2026-10-13T06:30-07:00 -> 2026-10-13T14:35+00:00: 8 ventanas (nuevas 1, actualizadas 7)
+2026-10-13 07:40:04,548 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 07:45:04,697 INFO elena.consolidation: consolidación 2026-10-13 13:35 -> 2026-10-13 14:40 UTC: 8 ventanas (1 nuevas, 7 actualizadas)
+2026-10-13 07:45:04,701 INFO elena.worker: Consolidación 2026-10-13T06:35-07:00 -> 2026-10-13T14:40+00:00: 8 ventanas (nuevas 1, actualizadas 7)
+2026-10-13 07:45:04,739 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 07:50:04,712 INFO elena.consolidation: consolidación 2026-10-13 13:40 -> 2026-10-13 14:45 UTC: 9 ventanas (1 nuevas, 8 actualizadas)
+2026-10-13 07:50:04,716 INFO elena.worker: Consolidación 2026-10-13T06:40-07:00 -> 2026-10-13T14:45+00:00: 9 ventanas (nuevas 1, actualizadas 8)
+2026-10-13 07:50:04,764 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 07:55:04,544 INFO elena.consolidation: consolidación 2026-10-13 13:45 -> 2026-10-13 14:50 UTC: 9 ventanas (1 nuevas, 8 actualizadas)
+2026-10-13 07:55:04,549 INFO elena.worker: Consolidación 2026-10-13T06:45-07:00 -> 2026-10-13T14:50+00:00: 9 ventanas (nuevas 1, actualizadas 8)
+2026-10-13 07:55:04,598 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 08:00:05,103 INFO elena.consolidation: consolidación 2026-10-13 13:50 -> 2026-10-13 14:55 UTC: 10 ventanas (1 nuevas, 9 actualizadas)
+2026-10-13 08:00:05,107 INFO elena.worker: Consolidación 2026-10-13T06:50-07:00 -> 2026-10-13T14:55+00:00: 10 ventanas (nuevas 1, actualizadas 9)
+2026-10-13 08:00:05,149 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 08:05:04,948 INFO elena.consolidation: consolidación 2026-10-13 13:55 -> 2026-10-13 15:00 UTC: 10 ventanas (1 nuevas, 9 actualizadas)
+2026-10-13 08:05:04,952 INFO elena.worker: Consolidación 2026-10-13T06:55-07:00 -> 2026-10-13T15:00+00:00: 10 ventanas (nuevas 1, actualizadas 9)
+2026-10-13 08:05:05,010 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 08:10:04,931 INFO elena.consolidation: consolidación 2026-10-13 14:00 -> 2026-10-13 15:05 UTC: 10 ventanas (0 nuevas, 10 actualizadas)
+2026-10-13 08:10:04,935 INFO elena.worker: Consolidación 2026-10-13T07:00-07:00 -> 2026-10-13T15:05+00:00: 10 ventanas (nuevas 0, actualizadas 10)
+2026-10-13 08:10:04,968 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 08:15:04,715 INFO elena.consolidation: consolidación 2026-10-13 14:00 -> 2026-10-13 15:10 UTC: 10 ventanas (0 nuevas, 10 actualizadas)
+2026-10-13 08:15:04,720 INFO elena.worker: Consolidación 2026-10-13T07:00-07:00 -> 2026-10-13T15:10+00:00: 10 ventanas (nuevas 0, actualizadas 10)
+2026-10-13 08:15:04,748 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 08:20:04,681 INFO elena.consolidation: consolidación 2026-10-13 14:00 -> 2026-10-13 15:15 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-13 08:20:04,685 INFO elena.worker: Consolidación 2026-10-13T07:00-07:00 -> 2026-10-13T15:15+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-13 08:20:04,723 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 08:25:05,443 INFO elena.consolidation: consolidación 2026-10-13 14:10 -> 2026-10-13 15:20 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-13 08:25:05,446 INFO elena.worker: Consolidación 2026-10-13T07:10-07:00 -> 2026-10-13T15:20+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-13 08:25:05,483 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 08:30:04,605 INFO elena.consolidation: consolidación 2026-10-13 14:20 -> 2026-10-13 15:25 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-13 08:30:04,609 INFO elena.worker: Consolidación 2026-10-13T07:20-07:00 -> 2026-10-13T15:25+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-13 08:30:04,648 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 08:35:04,615 INFO elena.consolidation: consolidación 2026-10-13 14:25 -> 2026-10-13 15:30 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-13 08:35:04,619 INFO elena.worker: Consolidación 2026-10-13T07:25-07:00 -> 2026-10-13T15:30+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-13 08:35:04,654 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 08:40:04,601 INFO elena.consolidation: consolidación 2026-10-13 14:30 -> 2026-10-13 15:35 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-13 08:40:04,605 INFO elena.worker: Consolidación 2026-10-13T07:30-07:00 -> 2026-10-13T15:35+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-13 08:40:04,644 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 08:45:04,689 INFO elena.consolidation: consolidación 2026-10-13 14:35 -> 2026-10-13 15:40 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-13 08:45:04,694 INFO elena.worker: Consolidación 2026-10-13T07:35-07:00 -> 2026-10-13T15:40+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-13 08:45:04,738 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'confiable': 1}
+2026-10-13 08:50:04,845 INFO elena.consolidation: consolidación 2026-10-13 14:40 -> 2026-10-13 15:45 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-13 08:50:04,850 INFO elena.worker: Consolidación 2026-10-13T07:40-07:00 -> 2026-10-13T15:45+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-13 08:50:04,912 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 08:55:04,632 INFO elena.consolidation: consolidación 2026-10-13 14:45 -> 2026-10-13 15:50 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-13 08:55:04,636 INFO elena.worker: Consolidación 2026-10-13T07:45-07:00 -> 2026-10-13T15:50+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-13 08:55:04,669 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 09:00:05,098 INFO elena.consolidation: consolidación 2026-10-13 14:50 -> 2026-10-13 15:55 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-13 09:00:05,101 INFO elena.worker: Consolidación 2026-10-13T07:50-07:00 -> 2026-10-13T15:55+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-13 09:00:05,142 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 09:05:04,674 INFO elena.consolidation: consolidación 2026-10-13 14:55 -> 2026-10-13 16:00 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-13 09:05:04,678 INFO elena.worker: Consolidación 2026-10-13T07:55-07:00 -> 2026-10-13T16:00+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-13 09:05:04,719 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 09:10:04,891 INFO elena.consolidation: consolidación 2026-10-13 15:00 -> 2026-10-13 16:05 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-13 09:10:04,896 INFO elena.worker: Consolidación 2026-10-13T08:00-07:00 -> 2026-10-13T16:05+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-13 09:10:04,931 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 09:15:04,780 INFO elena.consolidation: consolidación 2026-10-13 15:05 -> 2026-10-13 16:10 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-13 09:15:04,784 INFO elena.worker: Consolidación 2026-10-13T08:05-07:00 -> 2026-10-13T16:10+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-13 09:15:04,820 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 09:20:04,746 INFO elena.consolidation: consolidación 2026-10-13 15:10 -> 2026-10-13 16:15 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-13 09:20:04,751 INFO elena.worker: Consolidación 2026-10-13T08:10-07:00 -> 2026-10-13T16:15+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-13 09:20:04,848 INFO elena.worker: 1 ok: ventanas=1 eventos=1 tardías=0 {'carga_probable': 1}
+2026-10-13 09:25:04,863 INFO elena.consolidation: consolidación 2026-10-13 15:15 -> 2026-10-13 16:20 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-13 09:25:04,868 INFO elena.worker: Consolidación 2026-10-13T08:15-07:00 -> 2026-10-13T16:20+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-13 09:25:04,907 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'carga_probable': 1}
+2026-10-13 09:30:05,422 INFO elena.consolidation: consolidación 2026-10-13 15:20 -> 2026-10-13 16:25 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-13 09:30:05,427 INFO elena.worker: Consolidación 2026-10-13T08:20-07:00 -> 2026-10-13T16:25+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-13 09:30:05,471 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 09:35:04,691 INFO elena.consolidation: consolidación 2026-10-13 15:25 -> 2026-10-13 16:30 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-13 09:35:04,699 INFO elena.worker: Consolidación 2026-10-13T08:25-07:00 -> 2026-10-13T16:30+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-13 09:35:04,732 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 09:40:04,596 INFO elena.consolidation: consolidación 2026-10-13 15:30 -> 2026-10-13 16:35 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-13 09:40:04,601 INFO elena.worker: Consolidación 2026-10-13T08:30-07:00 -> 2026-10-13T16:35+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-13 09:40:04,633 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 09:45:04,787 INFO elena.consolidation: consolidación 2026-10-13 15:35 -> 2026-10-13 16:40 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-13 09:45:04,793 INFO elena.worker: Consolidación 2026-10-13T08:35-07:00 -> 2026-10-13T16:40+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-13 09:45:04,825 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'sin_actualizacion': 1}
+2026-10-13 09:50:04,874 INFO elena.consolidation: consolidación 2026-10-13 15:40 -> 2026-10-13 16:45 UTC: 12 ventanas (0 nuevas, 12 actualizadas)
+2026-10-13 09:50:04,878 INFO elena.worker: Consolidación 2026-10-13T08:40-07:00 -> 2026-10-13T16:45+00:00: 12 ventanas (nuevas 0, actualizadas 12)
+2026-10-13 09:50:04,912 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 09:55:04,571 INFO elena.consolidation: consolidación 2026-10-13 15:40 -> 2026-10-13 16:50 UTC: 12 ventanas (0 nuevas, 12 actualizadas)
+2026-10-13 09:55:04,575 INFO elena.worker: Consolidación 2026-10-13T08:40-07:00 -> 2026-10-13T16:50+00:00: 12 ventanas (nuevas 0, actualizadas 12)
+2026-10-13 09:55:04,604 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 10:00:05,358 INFO elena.consolidation: consolidación 2026-10-13 15:40 -> 2026-10-13 16:55 UTC: 13 ventanas (1 nuevas, 12 actualizadas)
+2026-10-13 10:00:05,363 INFO elena.worker: Consolidación 2026-10-13T08:40-07:00 -> 2026-10-13T16:55+00:00: 13 ventanas (nuevas 1, actualizadas 12)
+2026-10-13 10:00:05,402 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 10:05:04,765 INFO elena.consolidation: consolidación 2026-10-13 15:50 -> 2026-10-13 17:00 UTC: 12 ventanas (1 nuevas, 11 actualizadas)
+2026-10-13 10:05:04,769 INFO elena.worker: Consolidación 2026-10-13T08:50-07:00 -> 2026-10-13T17:00+00:00: 12 ventanas (nuevas 1, actualizadas 11)
+2026-10-13 10:05:04,809 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 10:10:06,402 INFO elena.consolidation: consolidación 2026-10-13 16:00 -> 2026-10-13 17:05 UTC: 10 ventanas (0 nuevas, 10 actualizadas)
+2026-10-13 10:10:06,405 INFO elena.worker: Consolidación 2026-10-13T09:00-07:00 -> 2026-10-13T17:05+00:00: 10 ventanas (nuevas 0, actualizadas 10)
+2026-10-13 10:10:06,451 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 10:15:04,921 INFO elena.consolidation: consolidación 2026-10-13 16:00 -> 2026-10-13 17:10 UTC: 10 ventanas (0 nuevas, 10 actualizadas)
+2026-10-13 10:15:04,926 INFO elena.worker: Consolidación 2026-10-13T09:00-07:00 -> 2026-10-13T17:10+00:00: 10 ventanas (nuevas 0, actualizadas 10)
+2026-10-13 10:15:04,960 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 10:20:05,067 INFO elena.consolidation: consolidación 2026-10-13 16:00 -> 2026-10-13 17:15 UTC: 11 ventanas (1 nuevas, 10 actualizadas)
+2026-10-13 10:20:05,072 INFO elena.worker: Consolidación 2026-10-13T09:00-07:00 -> 2026-10-13T17:15+00:00: 11 ventanas (nuevas 1, actualizadas 10)
+2026-10-13 10:20:05,112 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 10:25:04,953 INFO elena.consolidation: consolidación 2026-10-13 16:10 -> 2026-10-13 17:20 UTC: 10 ventanas (1 nuevas, 9 actualizadas)
+2026-10-13 10:25:04,958 INFO elena.worker: Consolidación 2026-10-13T09:10-07:00 -> 2026-10-13T17:20+00:00: 10 ventanas (nuevas 1, actualizadas 9)
+2026-10-13 10:25:05,066 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 10:30:04,982 INFO elena.consolidation: consolidación 2026-10-13 16:20 -> 2026-10-13 17:25 UTC: 8 ventanas (0 nuevas, 8 actualizadas)
+2026-10-13 10:30:04,987 INFO elena.worker: Consolidación 2026-10-13T09:20-07:00 -> 2026-10-13T17:25+00:00: 8 ventanas (nuevas 0, actualizadas 8)
+2026-10-13 10:30:05,020 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 10:35:05,776 INFO elena.consolidation: consolidación 2026-10-13 16:20 -> 2026-10-13 17:30 UTC: 8 ventanas (0 nuevas, 8 actualizadas)
+2026-10-13 10:35:05,780 INFO elena.worker: Consolidación 2026-10-13T09:20-07:00 -> 2026-10-13T17:30+00:00: 8 ventanas (nuevas 0, actualizadas 8)
+2026-10-13 10:35:05,807 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 10:40:05,399 INFO elena.consolidation: consolidación 2026-10-13 16:20 -> 2026-10-13 17:35 UTC: 9 ventanas (1 nuevas, 8 actualizadas)
+2026-10-13 10:40:05,404 INFO elena.worker: Consolidación 2026-10-13T09:20-07:00 -> 2026-10-13T17:35+00:00: 9 ventanas (nuevas 1, actualizadas 8)
+2026-10-13 10:40:05,444 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 10:45:05,232 INFO elena.consolidation: consolidación 2026-10-13 16:30 -> 2026-10-13 17:40 UTC: 8 ventanas (1 nuevas, 7 actualizadas)
+2026-10-13 10:45:05,242 INFO elena.worker: Consolidación 2026-10-13T09:30-07:00 -> 2026-10-13T17:40+00:00: 8 ventanas (nuevas 1, actualizadas 7)
+2026-10-13 10:45:05,282 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 10:50:04,813 INFO elena.consolidation: consolidación 2026-10-13 16:40 -> 2026-10-13 17:45 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 10:50:04,818 INFO elena.worker: Consolidación 2026-10-13T09:40-07:00 -> 2026-10-13T17:45+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 10:50:04,849 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 10:55:05,322 INFO elena.consolidation: consolidación 2026-10-13 16:40 -> 2026-10-13 17:50 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 10:55:05,326 INFO elena.worker: Consolidación 2026-10-13T09:40-07:00 -> 2026-10-13T17:50+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 10:55:05,356 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 11:00:04,795 INFO elena.consolidation: consolidación 2026-10-13 16:40 -> 2026-10-13 17:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 11:00:04,799 INFO elena.worker: Consolidación 2026-10-13T09:40-07:00 -> 2026-10-13T17:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 11:00:04,831 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 11:05:05,834 INFO elena.consolidation: consolidación 2026-10-13 16:50 -> 2026-10-13 18:00 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 11:05:05,838 INFO elena.worker: Consolidación 2026-10-13T09:50-07:00 -> 2026-10-13T18:00+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 11:05:05,886 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 11:10:05,769 INFO elena.consolidation: consolidación 2026-10-13 17:00 -> 2026-10-13 18:05 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 11:10:05,773 INFO elena.worker: Consolidación 2026-10-13T10:00-07:00 -> 2026-10-13T18:05+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 11:10:05,815 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 11:15:05,282 INFO elena.consolidation: consolidación 2026-10-13 17:00 -> 2026-10-13 18:10 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 11:15:05,286 INFO elena.worker: Consolidación 2026-10-13T10:00-07:00 -> 2026-10-13T18:10+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 11:15:05,316 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 11:20:04,551 INFO elena.consolidation: consolidación 2026-10-13 17:00 -> 2026-10-13 18:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 11:20:04,556 INFO elena.worker: Consolidación 2026-10-13T10:00-07:00 -> 2026-10-13T18:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 11:20:04,589 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 11:25:05,058 INFO elena.consolidation: consolidación 2026-10-13 17:10 -> 2026-10-13 18:20 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 11:25:05,062 INFO elena.worker: Consolidación 2026-10-13T10:10-07:00 -> 2026-10-13T18:20+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 11:25:05,095 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 11:30:04,694 INFO elena.consolidation: consolidación 2026-10-13 17:20 -> 2026-10-13 18:25 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 11:30:04,697 INFO elena.worker: Consolidación 2026-10-13T10:20-07:00 -> 2026-10-13T18:25+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 11:30:04,731 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 11:35:04,795 INFO elena.consolidation: consolidación 2026-10-13 17:20 -> 2026-10-13 18:30 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 11:35:04,799 INFO elena.worker: Consolidación 2026-10-13T10:20-07:00 -> 2026-10-13T18:30+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 11:35:04,821 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 11:40:04,882 INFO elena.consolidation: consolidación 2026-10-13 17:20 -> 2026-10-13 18:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 11:40:04,886 INFO elena.worker: Consolidación 2026-10-13T10:20-07:00 -> 2026-10-13T18:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 11:40:04,921 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 11:45:05,469 INFO elena.consolidation: consolidación 2026-10-13 17:30 -> 2026-10-13 18:40 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 11:45:05,474 INFO elena.worker: Consolidación 2026-10-13T10:30-07:00 -> 2026-10-13T18:40+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 11:45:05,511 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 11:50:05,061 INFO elena.consolidation: consolidación 2026-10-13 17:40 -> 2026-10-13 18:45 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 11:50:05,065 INFO elena.worker: Consolidación 2026-10-13T10:40-07:00 -> 2026-10-13T18:45+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 11:50:05,100 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 11:55:05,395 INFO elena.consolidation: consolidación 2026-10-13 17:40 -> 2026-10-13 18:50 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 11:55:05,399 INFO elena.worker: Consolidación 2026-10-13T10:40-07:00 -> 2026-10-13T18:50+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 11:55:05,430 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:00:05,302 INFO elena.consolidation: consolidación 2026-10-13 17:40 -> 2026-10-13 18:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 12:00:05,308 INFO elena.worker: Consolidación 2026-10-13T10:40-07:00 -> 2026-10-13T18:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 12:00:05,349 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 12:05:05,522 INFO elena.consolidation: consolidación 2026-10-13 17:50 -> 2026-10-13 19:00 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 12:05:05,526 INFO elena.worker: Consolidación 2026-10-13T10:50-07:00 -> 2026-10-13T19:00+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 12:05:05,576 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 12:10:04,688 INFO elena.consolidation: consolidación 2026-10-13 18:00 -> 2026-10-13 19:05 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 12:10:04,692 INFO elena.worker: Consolidación 2026-10-13T11:00-07:00 -> 2026-10-13T19:05+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 12:10:04,716 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:15:04,806 INFO elena.consolidation: consolidación 2026-10-13 18:00 -> 2026-10-13 19:10 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 12:15:04,811 INFO elena.worker: Consolidación 2026-10-13T11:00-07:00 -> 2026-10-13T19:10+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 12:15:04,842 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:20:04,397 INFO elena.consolidation: consolidación 2026-10-13 18:00 -> 2026-10-13 19:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 12:20:04,400 INFO elena.worker: Consolidación 2026-10-13T11:00-07:00 -> 2026-10-13T19:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 12:20:04,436 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:20:04,492 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 12:20:04,493 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:20:04,493 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:25:05,391 INFO elena.consolidation: consolidación 2026-10-13 18:10 -> 2026-10-13 19:20 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 12:25:05,396 INFO elena.worker: Consolidación 2026-10-13T11:10-07:00 -> 2026-10-13T19:20+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 12:25:05,437 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:25:05,443 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 12:25:05,443 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:25:05,443 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:30:04,949 INFO elena.consolidation: consolidación 2026-10-13 18:20 -> 2026-10-13 19:25 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 12:30:04,953 INFO elena.worker: Consolidación 2026-10-13T11:20-07:00 -> 2026-10-13T19:25+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 12:30:04,984 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:30:04,989 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:30:04,990 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:30:04,990 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:35:04,918 INFO elena.consolidation: consolidación 2026-10-13 18:20 -> 2026-10-13 19:30 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 12:35:04,923 INFO elena.worker: Consolidación 2026-10-13T11:20-07:00 -> 2026-10-13T19:30+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 12:35:04,959 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:35:04,965 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:35:04,965 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:35:04,965 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:40:05,996 INFO elena.consolidation: consolidación 2026-10-13 18:20 -> 2026-10-13 19:35 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 12:40:06,001 INFO elena.worker: Consolidación 2026-10-13T11:20-07:00 -> 2026-10-13T19:35+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 12:40:06,049 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:40:06,055 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 12:40:06,055 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:40:06,056 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:45:05,902 INFO elena.consolidation: consolidación 2026-10-13 18:30 -> 2026-10-13 19:40 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 12:45:05,907 INFO elena.worker: Consolidación 2026-10-13T11:30-07:00 -> 2026-10-13T19:40+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 12:45:05,986 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:45:05,993 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 12:45:05,993 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:45:05,993 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:50:05,702 INFO elena.consolidation: consolidación 2026-10-13 18:40 -> 2026-10-13 19:45 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 12:50:05,706 INFO elena.worker: Consolidación 2026-10-13T11:40-07:00 -> 2026-10-13T19:45+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 12:50:05,740 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:50:05,748 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:50:05,748 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:50:05,748 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:55:05,457 INFO elena.consolidation: consolidación 2026-10-13 18:40 -> 2026-10-13 19:50 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 12:55:05,462 INFO elena.worker: Consolidación 2026-10-13T11:40-07:00 -> 2026-10-13T19:50+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 12:55:05,513 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 12:55:05,519 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:55:05,519 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 12:55:05,519 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 13:00:05,353 INFO elena.consolidation: consolidación 2026-10-13 18:40 -> 2026-10-13 19:55 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 13:00:05,357 INFO elena.worker: Consolidación 2026-10-13T11:40-07:00 -> 2026-10-13T19:55+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 13:00:05,401 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 13:00:05,407 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 13:00:05,407 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 13:00:05,408 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 13:05:05,447 INFO elena.consolidation: consolidación 2026-10-13 18:50 -> 2026-10-13 20:00 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 13:05:05,452 INFO elena.worker: Consolidación 2026-10-13T11:50-07:00 -> 2026-10-13T20:00+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 13:05:05,524 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 13:05:05,530 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 13:05:05,530 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 13:05:05,530 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 13:10:04,938 INFO elena.consolidation: consolidación 2026-10-13 19:00 -> 2026-10-13 20:05 UTC: 6 ventanas (0 nuevas, 6 actualizadas)
+2026-10-13 13:10:04,944 INFO elena.worker: Consolidación 2026-10-13T12:00-07:00 -> 2026-10-13T20:05+00:00: 6 ventanas (nuevas 0, actualizadas 6)
+2026-10-13 13:10:05,001 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 13:10:05,009 INFO elena.worker: 1 ok: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 13:10:05,010 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 13:10:05,010 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 13:15:04,749 INFO elena.consolidation: consolidación 2026-10-13 19:00 -> 2026-10-13 20:10 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 13:15:04,752 INFO elena.worker: Consolidación 2026-10-13T12:00-07:00 -> 2026-10-13T20:10+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 13:15:04,796 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 13:15:04,802 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 13:15:04,803 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 13:15:04,803 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 13:20:05,307 INFO elena.consolidation: consolidación 2026-10-13 19:10 -> 2026-10-13 20:15 UTC: 7 ventanas (1 nuevas, 6 actualizadas)
+2026-10-13 13:20:05,311 INFO elena.worker: Consolidación 2026-10-13T12:10-07:00 -> 2026-10-13T20:15+00:00: 7 ventanas (nuevas 1, actualizadas 6)
+2026-10-13 13:20:05,355 INFO elena.pipeline: 2: otra instancia lo está procesando, se omite
+2026-10-13 13:20:05,356 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 13:20:05,357 INFO elena.worker: 2 ocupado: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 13:25:05,124 INFO elena.consolidation: consolidación 2026-10-13 19:15 -> 2026-10-13 20:20 UTC: 8 ventanas (1 nuevas, 7 actualizadas)
+2026-10-13 13:25:05,129 INFO elena.worker: Consolidación 2026-10-13T12:15-07:00 -> 2026-10-13T20:20+00:00: 8 ventanas (nuevas 1, actualizadas 7)
+2026-10-13 13:25:05,191 ERROR elena.pipeline: 2: error, se revierte solo este autobús
+Traceback (most recent call last):
+  File "C:\ELENA\src\elena\pipeline.py", line 247, in ejecutar_pipeline
+    cfg = cargar_config(conn, bus)
+  File "C:\ELENA\src\elena\fuel_repo.py", line 54, in cargar_config
+    calibracion=CalibrationTable.from_json(calib),
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "C:\ELENA\src\elena\calibration.py", line 117, in from_json
+    return cls(points)
+  File "C:\ELENA\src\elena\calibration.py", line 82, in __init__
+    raise CalibrationError(
+    ...<2 lines>...
+    )
+elena.calibration.CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
+2026-10-13 13:25:05,199 INFO elena.worker: 1 ok: ventanas=1 eventos=0 tardías=0 {'descartado': 1}
+2026-10-13 13:25:05,199 INFO elena.worker: 2 error: ventanas=0 eventos=0 tardías=0 {}
+2026-10-13 13:25:05,200 ERROR elena.worker: 2: CalibrationError: El sensor debe bajar al subir los litros (0.0 L=2.0 -> 1.0 L=151.0).
