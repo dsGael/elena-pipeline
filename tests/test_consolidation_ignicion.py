@@ -42,11 +42,11 @@ class _Conn:
 
 
 def test_el_sql_usa_la_columna_filtrada_para_las_estadisticas_del_sensor():
-    assert "s_analogo_uso" in AGGREGATE_SQL
+    assert "sensor_uso" in AGGREGATE_SQL
     for agregado in (
-        "count(s.s_analogo_uso)",
-        "ORDER BY s.s_analogo_uso",
-        "avg(s.s_analogo_uso)",
+        "count(s.sensor_uso)",
+        "ORDER BY s.sensor_uso",
+        "avg(s.sensor_uso)",
     ):
         assert agregado in AGGREGATE_SQL
     assert "s.s_analogo)" not in AGGREGATE_SQL  # ninguna estadística usa el crudo
@@ -54,17 +54,17 @@ def test_el_sql_usa_la_columna_filtrada_para_las_estadisticas_del_sensor():
     assert AGGREGATE_SQL.count("%(descartar_sin_ignicion)s") == 1
 
 
-@pytest.mark.parametrize("valor", [True, False])
+@pytest.mark.parametrize("valor", [True, False, None])
 def test_fetch_aggregates_pasa_el_parametro(valor):
     conn = _Conn()
     fetch_aggregates(conn, T0, T1, descartar_sin_ignicion=valor)
     assert conn.llamadas[0][1]["descartar_sin_ignicion"] is valor
 
 
-def test_por_defecto_no_cambia_el_comportamiento_anterior():
+def test_por_defecto_cada_autobus_decide_con_su_configuracion():
     conn = _Conn()
     fetch_aggregates(conn, T0, T1)
-    assert conn.llamadas[0][1]["descartar_sin_ignicion"] is False
+    assert conn.llamadas[0][1]["descartar_sin_ignicion"] is None
 
 
 @pytest.mark.integration
@@ -103,3 +103,16 @@ def test_ventana_mixta_usa_solo_las_muestras_con_motor_encendido(conn):
     consolidate(conn, T0, T1, descartar_sin_ignicion=True)
     mediana = conn.execute("SELECT sensor_mediana FROM fuel_windows").fetchone()[0]
     assert float(mediana) == 5036.0
+
+
+def test_el_sql_elige_la_columna_del_sensor_por_autobus():
+    assert "c.columna_sensor" in AGGREGATE_SQL
+    assert "WHEN 'fuel' THEN CASE WHEN g.fuel >= 0 THEN g.fuel END" in AGGREGATE_SQL
+    assert "ELSE g.s_analogo END" in AGGREGATE_SQL
+    assert "c.descartar_sin_ignicion" in AGGREGATE_SQL
+    assert (
+        "COALESCE(%(descartar_sin_ignicion)s::boolean, cfg.descartar_sin_ignicion)"
+        in AGGREGATE_SQL
+    )
+    assert AGGREGATE_SQL.count("g.s_analogo") == 1  # ninguna estadística usa el crudo
+    assert AGGREGATE_SQL.count("%(descartar_sin_ignicion)s") == 1

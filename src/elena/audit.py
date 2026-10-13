@@ -32,6 +32,8 @@ EXPECTED_COLUMNS: dict[str, dict[str, str]] = {
         "umbral_extraccion": "numeric",
         "velocidad_max_carga": "numeric",
         "ventanas_sostenidas": "int4",
+        "columna_sensor": "text",
+        "descartar_sin_ignicion": "bool",
         "rendimiento_default": "numeric",
         "calibracion": "jsonb",
         "calibracion_version": "int4",

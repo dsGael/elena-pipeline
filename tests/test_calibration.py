@@ -105,7 +105,14 @@ def test_from_json_texto_y_formato_con_puntos():
     [
         ([{"litros": 4, "sensor": 5735}], "al menos 2"),
         ([{"litros": 5, "sensor": 5604}, {"litros": 4, "sensor": 5735}], "ascendente"),
-        ([{"litros": 4, "sensor": 5600}, {"litros": 5, "sensor": 5700}], "debe bajar"),
+        (
+            [
+                {"litros": 4, "sensor": 5600},
+                {"litros": 5, "sensor": 5700},
+                {"litros": 6, "sensor": 5650},
+            ],
+            "monótono",
+        ),
         (
             [{"litros": 0, "sensor": 5735}, {"litros": 1, "sensor": 5735}],
             "Sensor repetido",
@@ -122,3 +129,59 @@ def test_validacion(puntos, texto):
         CalibrationTable.from_json(puntos)
     if texto:
         assert texto in str(exc.value)
+
+
+# --- sensor ascendente (a más combustible, mayor lectura): CORBER, gps_records.fuel -------
+
+CORBER = [
+    {"litros": 0, "sensor": 2},
+    {"litros": 1, "sensor": 151},
+    {"litros": 2, "sensor": 289},
+    {"litros": 3, "sensor": 425},
+    {"litros": 4, "sensor": 560},
+    {"litros": 5, "sensor": 700},
+    {"litros": 6, "sensor": 832},
+    {"litros": 7, "sensor": 967},
+    {"litros": 8, "sensor": 1103},
+    {"litros": 9, "sensor": 1232},
+    {"litros": 10, "sensor": 1374},
+    {"litros": 11, "sensor": 1511},
+    {"litros": 12, "sensor": 1651},
+    {"litros": 13, "sensor": 1777},
+    {"litros": 14, "sensor": 1918},
+]
+
+
+@pytest.fixture
+def corber() -> CalibrationTable:
+    return CalibrationTable.from_json(CORBER)
+
+
+@pytest.mark.parametrize("p", CORBER)
+def test_ascendente_puntos_exactos(corber, p):
+    r = corber.to_liters(p["sensor"])
+    assert r.litros == pytest.approx(p["litros"])
+    assert r.estado in (CalibStatus.OK, CalibStatus.ZONA_BAJA)
+
+
+def test_ascendente_interpola(corber):
+    # 1300 está entre 9 L (1232) y 10 L (1374)
+    r = corber.to_liters(1300)
+    assert r.estado is CalibStatus.OK
+    assert r.litros == pytest.approx(9 + (1300 - 1232) / (1374 - 1232))
+
+
+def test_ascendente_extremos_son_cotas(corber):
+    bajo = corber.to_liters(0)
+    assert bajo.estado is CalibStatus.ZONA_BAJA and bajo.litros == 0
+    alto = corber.to_liters(2500)
+    assert alto.estado is CalibStatus.ARRIBA_DE_CALIBRACION and alto.litros == 14
+    assert not bajo.utilizable and not alto.utilizable
+
+
+def test_ascendente_monotonia(corber):
+    prev = -1.0
+    for s in range(3, 1918, 7):
+        litros = corber.to_liters(s).litros
+        assert litros is not None and litros >= prev
+        prev = litros

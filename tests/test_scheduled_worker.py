@@ -140,7 +140,9 @@ def test_configurar_logging_crea_archivo_rotativo(tmp_path):
     sw.configurar_logging(None)  # deja el estado limpio para otras pruebas
 
 
-def test_el_ciclo_descarta_lecturas_con_ignicion_apagada(monkeypatch, pasos):
+def test_el_ciclo_deja_que_cada_autobus_decida_el_descarte_por_ignicion(
+    monkeypatch, pasos
+):
     recibido = {}
 
     def consolidar(conn, desde, hasta, **kw):
@@ -149,4 +151,6 @@ def test_el_ciclo_descarta_lecturas_con_ignicion_apagada(monkeypatch, pasos):
 
     monkeypatch.setattr(sw, "consolidate", consolidar)
     sw.ejecutar_ciclo(ConexionFalsa())
-    assert recibido["descartar_sin_ignicion"] is True
+    assert (
+        recibido["descartar_sin_ignicion"] is None
+    )  # lo decide fuel_config por autobús
