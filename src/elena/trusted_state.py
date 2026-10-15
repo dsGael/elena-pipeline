@@ -15,11 +15,10 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any
 
-
 VENTANAS_INICIALES_REQUERIDAS = 3
 INTERVALO_MAXIMO_MINUTOS = 10
 VARIACION_MAXIMA_LITROS = Decimal("0.75")
-VELOCIDAD_IMPLICITA_MAXIMA_KMH = Decimal("140")
+VELOCIDAD_IMPLICITA_MAXIMA_KMH = Decimal(140)
 
 
 @dataclass(frozen=True, slots=True)
@@ -168,8 +167,8 @@ def _continuidad_valida(
     if delta_m < 0:
         return False
 
-    delta_km = delta_m / Decimal("1000")
-    horas = Decimal(str(segundos)) / Decimal("3600")
+    delta_km = delta_m / Decimal(1000)
+    horas = Decimal(str(segundos)) / Decimal(3600)
     velocidad_kmh = delta_km / horas
 
     return velocidad_kmh <= VELOCIDAD_IMPLICITA_MAXIMA_KMH

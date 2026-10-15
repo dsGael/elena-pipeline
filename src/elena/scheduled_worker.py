@@ -6,7 +6,10 @@ Un ciclo hace, en este orden:
   2. Consolida gps_records -> fuel_windows desde la última ventana guardada (con traslape para
      datos tardíos) hasta la última ventana cerrada, y confirma.
   3. Procesa las ventanas nuevas de cada autobús (pipeline.ejecutar_pipeline).
-  4. Libera el lock, también si algo falla.
+  4. Actualiza el rendimiento reciente (fuel_rendimiento_reciente) y agrega al historial los
+     bloques de km ya definitivos (fuel_rendimiento_historial). Un fallo aquí se registra pero
+     no cambia el código de salida: no es parte del procesamiento.
+  5. Libera el lock, también si algo falla.
 
 Códigos de salida: 0 = bien u omitido por ciclo en curso; 1 = error en algún autobús o fallo del
 ciclo; 2 = no hay punto de partida (fuel_windows vacía: corre antes ``consolidate --desde``).
@@ -29,7 +32,13 @@ from .consolidation import (
     consolidate,
     plan_range,
 )
+from .fuel_repo import (
+    autobuses_activos,
+    bloques_rendimiento_nuevos,
+    rendimiento_reciente,
+)
 from .pipeline import ResumenPipeline, ejecutar_pipeline
+from .pipeline_repo import guardar_bloques, guardar_rendimiento_reciente
 from .quality import QualityRules
 
 log = logging.getLogger("elena.worker")
@@ -40,6 +49,10 @@ LOCK_CICLO = "ciclo"
 EXIT_OK = 0
 EXIT_ERROR = 1
 EXIT_SIN_INICIO = 2
+
+RENDIMIENTO_KM_VENTANA = 100.0  # "últimos kilómetros" que mira el rendimiento reciente
+RENDIMIENTO_DIAS = 30  # cuánto histórico se revisa para juntar esos km
+RENDIMIENTO_KM_BLOQUE = 50.0  # tamaño de los bloques del historial
 
 
 @dataclass(slots=True)
@@ -89,6 +102,86 @@ def _unlock_ciclo(conn: Connection) -> None:
         (LOCK_NAMESPACE, LOCK_CICLO),
     )
     conn.commit()
+
+
+def actualizar_rendimiento_reciente(
+    conn: Connection,
+    *,
+    ahora: datetime,
+    km_ventana: float = RENDIMIENTO_KM_VENTANA,
+    dias: int = RENDIMIENTO_DIAS,
+) -> int:
+    """Recalcula y guarda el rendimiento reciente de cada autobús activo. Devuelve cuántos.
+
+    Cada autobús va en su propia transacción: si uno falla se revierte solo ese y siguen los
+    demás. Nunca lanza: este paso es secundario y no debe tirar el ciclo.
+    """
+    try:
+        buses = autobuses_activos(conn)
+        conn.commit()  # cierra la transacción implícita: cada autobús abre la suya
+    except Exception:
+        log.exception("Rendimiento reciente: no se pudo listar los autobuses")
+        return 0
+    guardados = 0
+    for bus in buses:
+        try:
+            with conn.transaction():
+                est = rendimiento_reciente(
+                    conn, bus, ahora=ahora, km_ventana=km_ventana, dias=dias
+                )
+                guardar_rendimiento_reciente(conn, bus, est, km_ventana)
+            guardados += 1
+            if est.rendimiento_km_l is None:
+                log.info(
+                    "%s rendimiento reciente: sin estimación (%s)", bus, est.motivo
+                )
+            else:
+                log.info(
+                    "%s rendimiento reciente: %.2f km/L ±%s%% (%.1f km, %d ventanas)",
+                    bus,
+                    est.rendimiento_km_l,
+                    "?" if est.error_pct is None else f"{est.error_pct:.1f}",
+                    est.km,
+                    est.puntos,
+                )
+        except Exception:
+            log.exception("%s: falló el rendimiento reciente", bus)
+    return guardados
+
+
+def actualizar_historial_rendimiento(
+    conn: Connection,
+    *,
+    ahora: datetime,
+    km_bloque: float = RENDIMIENTO_KM_BLOQUE,
+    dias_inicial: int = RENDIMIENTO_DIAS,
+) -> int:
+    """Agrega al historial los bloques de km que ya son definitivos. Devuelve cuántos.
+
+    Retoma en el último bloque guardado de cada autobús; un autobús sin historial empieza
+    ``dias_inicial`` días atrás (para rellenar más, usa ``elena-fuel historial-rendimiento
+    --desde``). Igual que el rendimiento reciente: una transacción por autobús y nunca lanza.
+    """
+    try:
+        buses = autobuses_activos(conn)
+        conn.commit()
+    except Exception:
+        log.exception("Historial de rendimiento: no se pudo listar los autobuses")
+        return 0
+    nuevos = 0
+    for bus in buses:
+        try:
+            with conn.transaction():
+                bloques = bloques_rendimiento_nuevos(
+                    conn, bus, ahora=ahora, km_bloque=km_bloque, dias_inicial=dias_inicial
+                )
+                n = guardar_bloques(conn, bus, bloques, km_bloque)
+            nuevos += n
+            if n:
+                log.info("%s historial de rendimiento: %d bloques nuevos", bus, n)
+        except Exception:
+            log.exception("%s: falló el historial de rendimiento", bus)
+    return nuevos
 
 
 def ejecutar_ciclo(
@@ -163,6 +256,8 @@ def ejecutar_ciclo(
                 log.error("%s: %s", a.idautobus, a.error)
         if not res.pipeline.ok:
             res.codigo = EXIT_ERROR
+        actualizar_rendimiento_reciente(conn, ahora=ahora)
+        actualizar_historial_rendimiento(conn, ahora=ahora)
         return res
     except Exception:
         log.exception("El ciclo falló")

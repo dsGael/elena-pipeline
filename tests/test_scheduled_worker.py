@@ -68,6 +68,9 @@ def pasos(monkeypatch):
     monkeypatch.setattr(sw, "plan_range", plan)
     monkeypatch.setattr(sw, "consolidate", consolidar)
     monkeypatch.setattr(sw, "ejecutar_pipeline", pipeline)
+    # el rendimiento reciente se prueba aparte; aquí no toca la conexión falsa
+    monkeypatch.setattr(sw, "actualizar_rendimiento_reciente", lambda conn, **kw: 0)
+    monkeypatch.setattr(sw, "actualizar_historial_rendimiento", lambda conn, **kw: 0)
     return estado
 
 
@@ -154,3 +157,116 @@ def test_el_ciclo_deja_que_cada_autobus_decida_el_descarte_por_ignicion(
     assert (
         recibido["descartar_sin_ignicion"] is None
     )  # lo decide fuel_config por autobús
+
+
+def test_el_ciclo_actualiza_el_rendimiento_reciente_despues_del_pipeline(
+    monkeypatch, pasos
+):
+    def rendimiento(conn, **kw):
+        pasos["orden"].append("rendimiento")
+        pasos["ahora"] = kw["ahora"]
+        return 1
+
+    def historial(conn, **kw):
+        pasos["orden"].append("historial")
+        return 1
+
+    monkeypatch.setattr(sw, "actualizar_rendimiento_reciente", rendimiento)
+    monkeypatch.setattr(sw, "actualizar_historial_rendimiento", historial)
+    r = sw.ejecutar_ciclo(ConexionFalsa(), now=T1)
+    assert r.codigo == sw.EXIT_OK
+    assert pasos["orden"] == [
+        "plan",
+        "consolidar",
+        "pipeline",
+        "rendimiento",
+        "historial",
+    ]
+    assert pasos["ahora"] == T1
+
+
+def test_un_error_de_pipeline_no_impide_actualizar_el_rendimiento(monkeypatch, pasos):
+    llamado = []
+    monkeypatch.setattr(
+        sw, "actualizar_rendimiento_reciente", lambda conn, **kw: llamado.append(1)
+    )
+    pasos["pipeline"] = ResumenPipeline(
+        [ResumenAutobus("B", resultado="error", error="Boom")]
+    )
+    assert sw.ejecutar_ciclo(ConexionFalsa()).codigo == sw.EXIT_ERROR
+    assert llamado == [1]
+
+
+class ConexionRendimiento:
+    """Conexión falsa para ``actualizar_rendimiento_reciente``."""
+
+    def __init__(self):
+        self.eventos = []
+
+    def commit(self):
+        self.eventos.append("commit")
+
+    def transaction(self):
+        from contextlib import nullcontext
+
+        return nullcontext()
+
+
+def test_rendimiento_reciente_un_autobus_con_error_no_detiene_a_los_demas(monkeypatch):
+    from elena.rendimiento import RendimientoReciente
+
+    guardados = []
+    monkeypatch.setattr(sw, "autobuses_activos", lambda conn: ["1", "2", "3"])
+
+    def calcular(conn, bus, **kw):
+        if bus == "2":
+            raise RuntimeError("boom")
+        return RendimientoReciente(10.0, 2.0, 90.0, 9.0, 40, 2, T0, T1, None)
+
+    monkeypatch.setattr(sw, "rendimiento_reciente", calcular)
+    monkeypatch.setattr(
+        sw,
+        "guardar_rendimiento_reciente",
+        lambda conn, bus, est, km: guardados.append((bus, km)),
+    )
+    n = sw.actualizar_rendimiento_reciente(
+        ConexionRendimiento(), ahora=T1, km_ventana=80
+    )
+    assert n == 2 and guardados == [("1", 80), ("3", 80)]
+
+
+def test_rendimiento_reciente_nunca_lanza_aunque_falle_el_listado(monkeypatch):
+    def falla(conn):
+        raise RuntimeError("sin base")
+
+    monkeypatch.setattr(sw, "autobuses_activos", falla)
+    assert sw.actualizar_rendimiento_reciente(ConexionRendimiento(), ahora=T1) == 0
+
+
+def test_historial_un_autobus_con_error_no_detiene_a_los_demas(monkeypatch):
+    guardados = []
+    monkeypatch.setattr(sw, "autobuses_activos", lambda conn: ["1", "2", "3"])
+
+    def nuevos(conn, bus, **kw):
+        if bus == "2":
+            raise RuntimeError("boom")
+        return [f"bloque-{bus}-a", f"bloque-{bus}-b"]
+
+    monkeypatch.setattr(sw, "bloques_rendimiento_nuevos", nuevos)
+    monkeypatch.setattr(
+        sw,
+        "guardar_bloques",
+        lambda conn, bus, bloques, km: guardados.append((bus, km)) or len(bloques),
+    )
+    n = sw.actualizar_historial_rendimiento(
+        ConexionRendimiento(), ahora=T1, km_bloque=40
+    )
+    assert n == 4 and guardados == [("1", 40), ("3", 40)]
+
+
+def test_historial_nunca_lanza_aunque_falle_el_listado(monkeypatch):
+    def falla(conn):
+        raise RuntimeError("sin base")
+
+    monkeypatch.setattr(sw, "autobuses_activos", falla)
+    assert sw.actualizar_historial_rendimiento(ConexionRendimiento(), ahora=T1) == 0

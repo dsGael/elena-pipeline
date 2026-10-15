@@ -7,14 +7,20 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from datetime import datetime, tzinfo
+from datetime import datetime, timedelta, tzinfo
 from typing import Any
 
 from psycopg import Connection
 
 from .calibration import CalibrationTable
 from .processor import ProcesadorConfig
-from .rendimiento import PuntoRendimiento
+from .rendimiento import (
+    BloqueRendimiento,
+    PuntoRendimiento,
+    RendimientoReciente,
+    calcular_bloques,
+    estimar_rendimiento_reciente,
+)
 
 CONFIG_SQL = """
 SELECT calibracion, calibracion_version, umbral_carga_dudosa, umbral_carga_candidata,
@@ -89,6 +95,43 @@ def cargar_puntos_rendimiento(
         VENTANAS_VALIDAS_SQL, {"idautobus": idautobus, "desde": desde, "hasta": hasta}
     ).fetchall()
     return puntos_desde_filas(filas, calibracion)
+
+
+AUTOBUSES_ACTIVOS_SQL = """
+SELECT idautobus FROM public.fuel_config
+WHERE activo AND (%(bus)s::text IS NULL OR idautobus = %(bus)s::text)
+ORDER BY idautobus
+"""
+
+
+def autobuses_activos(conn: Connection, idautobus: str | None = None) -> list[str]:
+    return [r[0] for r in conn.execute(AUTOBUSES_ACTIVOS_SQL, {"bus": idautobus})]
+
+
+def rendimiento_reciente(
+    conn: Connection,
+    idautobus: str,
+    *,
+    ahora: datetime,
+    km_ventana: float = 100.0,
+    dias: int = 30,
+) -> RendimientoReciente:
+    """Rendimiento del autobús en sus últimos ``km_ventana`` km (mira ``dias`` hacia atrás).
+
+    Usa los umbrales ya configurados del autobús: ``umbral_carga_candidata`` como salto de nivel
+    y ``rendimiento_default`` (si existe) como consumo esperado al atravesar huecos.
+    """
+    cfg = cargar_config(conn, idautobus)
+    puntos = cargar_puntos_rendimiento(
+        conn, idautobus, ahora - timedelta(days=dias), ahora, cfg.calibracion
+    )
+    return estimar_rendimiento_reciente(
+        puntos,
+        km_ventana=km_ventana,
+        odometro_a_km=cfg.odometro_a_km,
+        salto_litros=cfg.umbral_carga_candidata,
+        rendimiento_esperado=cfg.rendimiento_default,
+    )
 
 
 # --------------------------------------------------------------------------------------
@@ -188,3 +231,78 @@ def formatear_eventos(filas: Sequence[EventoFila], tz: tzinfo) -> list[str]:
             f"{ubic}  {e.motivo or ''}"
         )
     return out
+
+
+# --------------------------------------------------------------------------------------
+# Historial de rendimiento por bloques
+# --------------------------------------------------------------------------------------
+
+ULTIMO_FIN_HISTORIAL_SQL = """
+SELECT max(fecha_fin) FROM public.fuel_rendimiento_historial WHERE idautobus = %s
+"""
+
+# Las últimas ventanas válidas ANTES de un instante: contexto para detectar cargas al retomar.
+VENTANAS_PREVIAS_SQL = """
+SELECT w.ventana_inicio, w.sensor_mediana, w.odometro_total
+FROM public.fuel_windows w
+JOIN public.dispositivos d ON d.imei = w.imei
+WHERE d.idautobus = %(idautobus)s
+  AND w.calidad_ventana = 'valida'
+  AND w.ventana_inicio < %(antes)s
+ORDER BY w.ventana_inicio DESC
+LIMIT %(n)s
+"""
+
+# Con k_salto=5 y recorte=1 hacen falta 11 lecturas; sobra margen por las que la calibración omite.
+CONTEXTO_VENTANAS = 24
+
+
+def ultimo_fin_historial(conn: Connection, idautobus: str) -> datetime | None:
+    row = conn.execute(ULTIMO_FIN_HISTORIAL_SQL, (idautobus,)).fetchone()
+    return row[0] if row else None
+
+
+def cargar_puntos_previos(
+    conn: Connection,
+    idautobus: str,
+    antes: datetime,
+    n: int,
+    calibracion: CalibrationTable,
+) -> list[PuntoRendimiento]:
+    filas = conn.execute(
+        VENTANAS_PREVIAS_SQL, {"idautobus": idautobus, "antes": antes, "n": n}
+    ).fetchall()
+    return puntos_desde_filas(reversed(filas), calibracion)
+
+
+def bloques_rendimiento_nuevos(
+    conn: Connection,
+    idautobus: str,
+    *,
+    ahora: datetime,
+    km_bloque: float = 50.0,
+    dias_inicial: int = 30,
+    desde: datetime | None = None,
+) -> list[BloqueRendimiento]:
+    """Bloques definitivos que aún no están en el historial del autobús.
+
+    Retoma en el ``fin`` del último bloque guardado. Si el autobús no tiene historial, empieza
+    en ``desde`` (para rellenar hacia atrás) o, si no se indica, ``dias_inicial`` días atrás.
+    """
+    cfg = cargar_config(conn, idautobus)
+    ancla = ultimo_fin_historial(conn, idautobus)
+    inicio = ancla or desde or ahora - timedelta(days=dias_inicial)
+    puntos = cargar_puntos_rendimiento(conn, idautobus, inicio, ahora, cfg.calibracion)
+    if ancla is not None:
+        previos = cargar_puntos_previos(
+            conn, idautobus, ancla, CONTEXTO_VENTANAS, cfg.calibracion
+        )
+        puntos = previos + puntos
+    return calcular_bloques(
+        puntos,
+        km_bloque=km_bloque,
+        desde=ancla,
+        odometro_a_km=cfg.odometro_a_km,
+        salto_litros=cfg.umbral_carga_candidata,
+        rendimiento_esperado=cfg.rendimiento_default,
+    )
