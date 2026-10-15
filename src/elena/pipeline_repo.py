@@ -1,6 +1,7 @@
 """Implementación PostgreSQL del ``Repositorio`` del pipeline (SQL manual, sin ORM).
 
-Escribe solo en fuel_processed_result, fuel_events y fuel_estado_confiable; lee fuel_windows,
+Escribe solo en fuel_processed_result, fuel_events, fuel_estado_confiable y
+fuel_rendimiento_reciente y fuel_rendimiento_historial; lee fuel_windows,
 dispositivos y gps_records (nunca modifica gps_records).
 """
 
@@ -21,6 +22,7 @@ from .processor import (
     VentanaEntrada,
 )
 from .quality import WindowQuality
+from .rendimiento import BloqueRendimiento, RendimientoReciente
 
 LOCK_NAMESPACE = "elena_fuel"
 
@@ -275,3 +277,152 @@ class PgRepositorio:
                 e.pendiente_ventanas,
             ),
         )
+
+
+# fuel_windows no guarda posición: se toma de gps_records dentro de la ventana de 5 min que
+# empieza en el instante dado (la primera muestra para el inicio, la última para el fin).
+# Se guarda como texto 'lat,lon' (5 decimales). Si no hay muestra con coordenadas, queda NULL.
+_POS_INICIO = """
+LEFT JOIN LATERAL (
+    SELECT concat(round(g.latitude::numeric, 5), ',', round(g.longitude::numeric, 5)) AS coord
+    FROM public.gps_records g
+    JOIN public.dispositivos d ON d.imei = g.imei
+    WHERE d.idautobus = %(bus)s
+      AND g.recorded_at >= {t} AND g.recorded_at < {t} + interval '5 minutes'
+      AND g.latitude IS NOT NULL AND g.longitude IS NOT NULL
+    ORDER BY g.recorded_at ASC LIMIT 1
+) p_ini ON true"""
+_POS_FIN = """
+LEFT JOIN LATERAL (
+    SELECT concat(round(g.latitude::numeric, 5), ',', round(g.longitude::numeric, 5)) AS coord
+    FROM public.gps_records g
+    JOIN public.dispositivos d ON d.imei = g.imei
+    WHERE d.idautobus = %(bus)s
+      AND g.recorded_at >= {t} AND g.recorded_at < {t} + interval '5 minutes'
+      AND g.latitude IS NOT NULL AND g.longitude IS NOT NULL
+    ORDER BY g.recorded_at DESC LIMIT 1
+) p_fin ON true"""
+
+
+GUARDAR_RENDIMIENTO_RECIENTE_SQL = (
+    """
+INSERT INTO public.fuel_rendimiento_reciente (
+    idautobus, calculado_en, km_ventana, rendimiento_km_l, error_pct, km, litros,
+    puntos, segmentos, desde, hasta, motivo,
+    coordenadas_inicio, coordenadas_fin)
+SELECT %(bus)s::varchar, now(), %(km_ventana)s::numeric, %(rend)s::numeric,
+       %(error)s::numeric, %(km)s::numeric, %(litros)s::numeric,
+       %(puntos)s::integer, %(segmentos)s::integer, %(desde)s::timestamptz,
+       %(hasta)s::timestamptz, %(motivo)s::text,
+       p_ini.coord, p_fin.coord
+FROM (SELECT 1) x"""
+    + _POS_INICIO.format(t="%(desde)s::timestamptz")
+    + _POS_FIN.format(t="%(hasta)s::timestamptz")
+    + """
+ON CONFLICT (idautobus) DO UPDATE SET
+    calculado_en = now(),
+    km_ventana = EXCLUDED.km_ventana,
+    rendimiento_km_l = EXCLUDED.rendimiento_km_l,
+    error_pct = EXCLUDED.error_pct,
+    km = EXCLUDED.km,
+    litros = EXCLUDED.litros,
+    puntos = EXCLUDED.puntos,
+    segmentos = EXCLUDED.segmentos,
+    desde = EXCLUDED.desde,
+    hasta = EXCLUDED.hasta,
+    motivo = EXCLUDED.motivo,
+    coordenadas_inicio = EXCLUDED.coordenadas_inicio,
+    coordenadas_fin = EXCLUDED.coordenadas_fin
+"""
+)
+
+# Sin estimación: se conserva el último valor bueno y solo se avisa el motivo.
+SIN_ESTIMACION_RENDIMIENTO_RECIENTE_SQL = """
+INSERT INTO public.fuel_rendimiento_reciente (idautobus, calculado_en, km_ventana, km, puntos, segmentos, motivo)
+VALUES (%(bus)s, now(), %(km_ventana)s, 0, 0, 0, %(motivo)s)
+ON CONFLICT (idautobus) DO UPDATE SET calculado_en = now(), motivo = EXCLUDED.motivo
+"""
+
+
+def guardar_rendimiento_reciente(
+    conn: Connection, idautobus: str, est: RendimientoReciente, km_ventana: float
+) -> None:
+    """Una fila por autobús con su rendimiento más reciente (la lee el dashboard)."""
+    if est.rendimiento_km_l is None:
+        conn.execute(
+            SIN_ESTIMACION_RENDIMIENTO_RECIENTE_SQL,
+            {"bus": idautobus, "km_ventana": km_ventana, "motivo": est.motivo},
+        )
+        return
+    conn.execute(
+        GUARDAR_RENDIMIENTO_RECIENTE_SQL,
+        {
+            "bus": idautobus,
+            "km_ventana": km_ventana,
+            "rend": est.rendimiento_km_l,
+            "error": est.error_pct,
+            "km": est.km,
+            "litros": est.litros,
+            "puntos": est.puntos,
+            "segmentos": est.segmentos,
+            "desde": est.desde,
+            "hasta": est.hasta,
+            "motivo": None,
+        },
+    )
+
+
+INSERTAR_BLOQUE_SQL = (
+    """
+INSERT INTO public.fuel_rendimiento_historial (
+    idautobus, fecha_inicio, fecha_fin, odometro_inicio_km, odometro_fin_km, km_recorridos,
+    litros_inicio, litros_fin, litros_consumidos, rendimiento_km_l, error_pct, puntos,
+    cierre, completo, estado, km_bloque,
+    coordenadas_inicio, coordenadas_fin)
+SELECT %(bus)s::varchar, %(inicio)s::timestamptz, %(fin)s::timestamptz,
+       %(odo_ini)s::numeric, %(odo_fin)s::numeric, %(km)s::numeric,
+       %(l_ini)s::numeric, %(l_fin)s::numeric, %(litros)s::numeric, %(rend)s::numeric,
+       %(error)s::numeric, %(puntos)s::integer,
+       %(cierre)s::text, %(completo)s::boolean, %(estado)s::text, %(km_bloque)s::numeric,
+       p_ini.coord, p_fin.coord
+FROM (SELECT 1) x"""
+    + _POS_INICIO.format(t="%(inicio)s::timestamptz")
+    + _POS_FIN.format(t="%(fin)s::timestamptz")
+    + """
+ON CONFLICT (idautobus, fecha_inicio) DO NOTHING
+"""
+)
+
+
+def guardar_bloques(
+    conn: Connection,
+    idautobus: str,
+    bloques: list[BloqueRendimiento],
+    km_bloque: float,
+) -> int:
+    """Agrega bloques al historial (idempotente). Devuelve cuántos eran nuevos."""
+    nuevos = 0
+    for b in bloques:
+        cur = conn.execute(
+            INSERTAR_BLOQUE_SQL,
+            {
+                "bus": idautobus,
+                "inicio": b.inicio,
+                "fin": b.fin,
+                "odo_ini": b.odometro_inicio_km,
+                "odo_fin": b.odometro_fin_km,
+                "km": b.km,
+                "l_ini": b.litros_inicio,
+                "l_fin": b.litros_fin,
+                "litros": b.litros_consumidos,
+                "rend": b.rendimiento_km_l,
+                "error": b.error_pct,
+                "puntos": b.puntos,
+                "cierre": b.cierre,
+                "completo": b.completo,
+                "estado": b.estado,
+                "km_bloque": km_bloque,
+            },
+        )
+        nuevos += cur.rowcount
+    return nuevos

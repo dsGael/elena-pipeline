@@ -1,7 +1,8 @@
 import typer
 
-from .db import get_connection
 from .cli_fuel import app as fuel_app
+from .db import get_connection
+
 app = typer.Typer()
 app.add_typer(fuel_app)
 

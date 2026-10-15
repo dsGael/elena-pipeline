@@ -9,6 +9,8 @@ Comandos:
     elena-fuel audit-schema
     elena-fuel consolidate [--desde ...] [--hasta ...] [--imei ...] [--dry-run] [--show N]
     elena-fuel estimar-rendimiento --idautobus X [--desde ...] [--hasta ...]
+    elena-fuel rendimiento-reciente [--idautobus X] [--km 100] [--dias 30] [--guardar]
+    elena-fuel historial-rendimiento [--idautobus X] [--km-bloque 50] [--desde ...] [--guardar]
     elena-fuel process [--idautobus X] [--max-ventanas N]
     elena-fuel run-cycle [--log-dir logs]      (lo que ejecuta el Task Scheduler)
     elena-fuel reprocess --idautobus X [--desde ...] [--aplicar]
@@ -35,14 +37,18 @@ from .consolidation import (
 from .db import get_connection
 from .fuel_repo import (
     ConfigError,
+    autobuses_activos,
+    bloques_rendimiento_nuevos,
     cargar_config,
     cargar_puntos_rendimiento,
     formatear_eventos,
     listar_eventos,
+    rendimiento_reciente,
 )
 from .pipeline import ejecutar_pipeline
+from .pipeline_repo import guardar_bloques, guardar_rendimiento_reciente
 from .quality import QualityRules
-from .rendimiento import estimar_rendimiento
+from .rendimiento import BloqueRendimiento, RendimientoReciente, estimar_rendimiento
 from .reprocess import AutobusOcupado, planificar, reiniciar
 from .scheduled_worker import configurar_logging, ejecutar_ciclo
 from .settings import settings
@@ -293,6 +299,137 @@ def estimar_rendimiento_cmd(
         f"  UPDATE fuel_config SET rendimiento_default = {est.rendimiento_km_l:.2f}\n"
         f"   WHERE idautobus = '{idautobus}';"
     )
+
+
+def _linea_rendimiento_reciente(
+    idautobus: str, est: RendimientoReciente, tz: ZoneInfo
+) -> str:
+    if est.rendimiento_km_l is None:
+        return f"{idautobus:<12} sin estimación ({est.motivo})"
+    error = "" if est.error_pct is None else f" ±{est.error_pct:.1f}%"
+    desde = est.desde.astimezone(tz).strftime("%Y-%m-%d %H:%M") if est.desde else "-"
+    hasta = est.hasta.astimezone(tz).strftime("%Y-%m-%d %H:%M") if est.hasta else "-"
+    return (
+        f"{idautobus:<12} {est.rendimiento_km_l:6.2f} km/L{error:<9} "
+        f"{est.km:7.1f} km  {est.litros:6.1f} L  {est.puntos:>4} ventanas  "
+        f"{est.segmentos:>2} tramos  {desde} -> {hasta}"
+    )
+
+
+@app.command("rendimiento-reciente")
+def rendimiento_reciente_cmd(
+    idautobus: Annotated[
+        str | None,
+        typer.Option(help="Solo este autobús (por defecto, todos los activos)."),
+    ] = None,
+    km: Annotated[
+        float, typer.Option(help="Ventana: los últimos N km recorridos.")
+    ] = 100.0,
+    dias: Annotated[
+        int, typer.Option(help="Días hacia atrás que se miran para juntar esos km.")
+    ] = 30,
+    guardar: Annotated[
+        bool,
+        typer.Option(
+            "--guardar",
+            help="Guarda el resultado en fuel_rendimiento_reciente (sin esto solo lo muestra).",
+        ),
+    ] = False,
+) -> None:
+    """Cómo está rindiendo cada autobús en sus últimos km, con su margen de error."""
+    ahora = datetime.now(UTC)
+    hubo_error = False
+    with get_connection() as conn:
+        buses = autobuses_activos(conn, idautobus)
+        if not buses:
+            typer.echo("No hay autobuses activos en fuel_config.")
+            raise typer.Exit(code=1)
+        for bus in buses:
+            try:
+                est = rendimiento_reciente(
+                    conn, bus, ahora=ahora, km_ventana=km, dias=dias
+                )
+            except ConfigError as exc:
+                typer.echo(f"{bus:<12} ERROR: {exc}", err=True)
+                hubo_error = True
+                continue
+            typer.echo(_linea_rendimiento_reciente(bus, est, _tz()))
+            if est.descartes:
+                typer.echo(
+                    "             descartes: "
+                    + "  ".join(f"{k}={v}" for k, v in est.descartes.most_common())
+                )
+            if guardar:
+                guardar_rendimiento_reciente(conn, bus, est, km)
+    if guardar:
+        typer.echo(f"\nGuardado en fuel_rendimiento_reciente ({len(buses)} autobuses).")
+    raise typer.Exit(code=1 if hubo_error else 0)
+
+
+def _linea_bloque(b: BloqueRendimiento, tz: ZoneInfo) -> str:
+    ini = b.inicio.astimezone(tz).strftime("%Y-%m-%d %H:%M")
+    fin = b.fin.astimezone(tz).strftime("%Y-%m-%d %H:%M")
+    if b.rendimiento_km_l is None:
+        medida = f"sin rendimiento ({b.estado})"
+    else:
+        error = "" if b.error_pct is None else f" ±{b.error_pct:.1f}%"
+        medida = f"{b.rendimiento_km_l:6.2f} km/L{error}  {b.litros_consumidos:5.1f} L"
+    cierre = "" if b.completo else f"  [incompleto: {b.cierre}]"
+    return f"  {ini} -> {fin}  {b.km:6.1f} km  {b.puntos:>3} ventanas  {medida}{cierre}"
+
+
+@app.command("historial-rendimiento")
+def historial_rendimiento_cmd(
+    idautobus: Annotated[
+        str | None,
+        typer.Option(help="Solo este autobús (por defecto, todos los activos)."),
+    ] = None,
+    km_bloque: Annotated[
+        float, typer.Option(help="Tamaño de cada bloque del historial, en km.")
+    ] = 50.0,
+    desde: Annotated[
+        str | None,
+        typer.Option(
+            help="Inicio local 'AAAA-MM-DD HH:MM' para rellenar historial hacia atrás. "
+            "Solo aplica a un autobús que todavía no tiene bloques guardados."
+        ),
+    ] = None,
+    guardar: Annotated[
+        bool,
+        typer.Option(
+            "--guardar",
+            help="Agrega los bloques a fuel_rendimiento_historial (sin esto solo los muestra).",
+        ),
+    ] = False,
+) -> None:
+    """Bloques de rendimiento que faltan en el historial (los que ya son definitivos)."""
+    ahora = datetime.now(UTC)
+    d = _parse_local(desde, "--desde")
+    hubo_error = False
+    with get_connection() as conn:
+        buses = autobuses_activos(conn, idautobus)
+        if not buses:
+            typer.echo("No hay autobuses activos en fuel_config.")
+            raise typer.Exit(code=1)
+        for bus in buses:
+            try:
+                bloques = bloques_rendimiento_nuevos(
+                    conn, bus, ahora=ahora, km_bloque=km_bloque, desde=d
+                )
+            except ConfigError as exc:
+                typer.echo(f"{bus:<12} ERROR: {exc}", err=True)
+                hubo_error = True
+                continue
+            km = sum(b.km for b in bloques)
+            typer.echo(f"{bus}: {len(bloques)} bloques nuevos ({km:.1f} km)")
+            for b in bloques:
+                typer.echo(_linea_bloque(b, _tz()))
+            if guardar and bloques:
+                n = guardar_bloques(conn, bus, bloques, km_bloque)
+                typer.echo(f"  guardados: {n}")
+    if not guardar:
+        typer.echo("\n(simulación: agrega --guardar para escribir en el historial)")
+    raise typer.Exit(code=1 if hubo_error else 0)
 
 
 @app.command("process")
