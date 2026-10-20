@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 
 from elena.calibration import CalibrationTable
 from elena.processor import (
+    M_NIVEL_CONSERVADO,
     EstadoConfiable,
     PendienteTipo,
     ProcesadorConfig,
@@ -122,11 +123,55 @@ def test_aumento_dudoso_entre_1_y_2_litros_sin_evento():
     assert out.evento is None and not out.resultado.actualizo_final
 
 
-def test_aumento_menor_a_1_litro_es_ruido_y_se_acepta():
-    out = run(ventana(sensor=5000))  # ~10.4 L (sensor entre 5036 y 4953)
-    assert out.resultado.diferencia_litros < 1
+def test_aumento_menor_a_1_litro_es_ruido_y_no_sube_el_nivel():
+    out = run(ventana(sensor=5000))  # ~10.4 L, referencia 10.0
+    assert 0 < out.resultado.diferencia_litros < 1
     assert out.resultado.estado_resultado is R.CONFIABLE
-    assert out.evento is None and out.resultado.actualizo_final
+    assert out.evento is None and not out.resultado.actualizo_final
+    assert out.resultado.litros_finales == 10.0
+    assert out.estado.ultimo_litro_confiable == 10.0
+    # la referencia (fecha y odómetro) tampoco se mueve
+    assert out.estado.fecha_ultimo_confiable == estado().fecha_ultimo_confiable
+    assert out.estado.odometro_ultimo_confiable == 1000.0
+    assert M_NIVEL_CONSERVADO in out.resultado.motivo
+
+
+def test_sin_trinquete_las_oscilaciones_al_alza_no_se_acumulan():
+    est, previo = estado(), None
+    for i, sensor in enumerate([5000, 4990, 5010, 5000, 4995]):  # 10.4 a 10.6 L
+        out = procesar_ventana(
+            ventana(sensor=sensor, minuto=5 * i), CFG, est, "YARIS1", previo
+        )
+        assert out.resultado.estado_resultado is R.CONFIABLE
+        assert out.resultado.litros_finales == 10.0
+        est, previo = out.estado, out.resultado.estado_resultado
+
+
+def test_tras_ruido_al_alza_una_bajada_explicada_si_actualiza_el_nivel():
+    o1 = run(ventana(sensor=5000))  # ~10.4 L: ruido, el nivel sigue en 10.0
+    o2 = procesar_ventana(ventana(9, minuto=5), CFG, o1.estado, "YARIS1", R.CONFIABLE)
+    assert o2.resultado.estado_resultado is R.CONSUMO_NORMAL
+    assert o2.resultado.actualizo_final and o2.estado.ultimo_litro_confiable == 9.0
+
+
+def test_lectura_igual_a_la_referencia_refresca_fecha_y_odometro():
+    out = run(ventana(10, minuto=5, odo=1200.0))
+    assert out.resultado.estado_resultado is R.CONFIABLE
+    assert out.resultado.actualizo_final
+    assert out.estado.odometro_ultimo_confiable == 1200.0
+
+
+def test_ruido_que_resuelve_un_pendiente_de_carga_lo_limpia_sin_subir_el_nivel():
+    o1 = run(ventana(13), CFG_FULL)  # +3 L, 1 de 2 ventanas necesarias
+    assert o1.resultado.estado_resultado is R.CARGA_PROBABLE
+    assert o1.estado.pendiente_tipo is PendienteTipo.AUMENTO
+    o2 = procesar_ventana(
+        ventana(sensor=5000, minuto=5), CFG_FULL, o1.estado, "YARIS1", R.CARGA_PROBABLE
+    )
+    assert o2.resultado.estado_resultado is R.CONFIABLE
+    assert not o2.resultado.actualizo_final
+    assert o2.estado.ultimo_litro_confiable == 10.0
+    assert o2.estado.pendiente_tipo is None and o2.estado.pendiente_ventanas == 0
 
 
 # --- 2. consumo y extracción -------------------------------------------------------------

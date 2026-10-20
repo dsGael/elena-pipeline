@@ -6,7 +6,7 @@ SQL manual (sin ORM). Nada aquí escribe en la base.
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, tzinfo
 from typing import Any
 
@@ -27,6 +27,13 @@ SELECT calibracion, calibracion_version, umbral_carga_dudosa, umbral_carga_candi
        umbral_carga_confirmada, umbral_extraccion, velocidad_max_carga,
        ventanas_sostenidas, rendimiento_default
 FROM public.fuel_config
+WHERE idautobus = %(idautobus)s
+"""
+
+# Rendimiento más reciente del autobús (lo escribe el run-cycle; ver sql/12).
+RENDIMIENTO_RECIENTE_SQL = """
+SELECT rendimiento_km_l
+FROM public.fuel_rendimiento_reciente
 WHERE idautobus = %(idautobus)s
 """
 
@@ -51,12 +58,27 @@ def _f(v: Any) -> float | None:
     return None if v is None else float(v)
 
 
-def cargar_config(conn: Connection, idautobus: str) -> ProcesadorConfig:
+def rendimiento_guardado(conn: Connection, idautobus: str) -> float | None:
+    """Rendimiento (km/L) de ``fuel_rendimiento_reciente``; None si no hay un valor usable."""
+    row = conn.execute(RENDIMIENTO_RECIENTE_SQL, {"idautobus": idautobus}).fetchone()
+    valor = _f(row[0]) if row else None
+    return valor if valor is not None and valor > 0 else None
+
+
+def cargar_config(
+    conn: Connection, idautobus: str, *, rendimiento_de_tabla: bool = False
+) -> ProcesadorConfig:
+    """Config del autobús desde fuel_config.
+
+    Con ``rendimiento_de_tabla`` el rendimiento sale de ``fuel_rendimiento_reciente`` y
+    ``fuel_config.rendimiento_default`` queda solo como respaldo (si la tabla no tiene un valor).
+    Quien estima el rendimiento NO debe pedirlo así: dependería de su propio resultado.
+    """
     row = conn.execute(CONFIG_SQL, {"idautobus": idautobus}).fetchone()
     if row is None:
         raise ConfigError(f"El autobús {idautobus!r} no tiene fila en fuel_config.")
     (calib, version, dudosa, candidata, confirmada, extraccion, vmax, sost, rend) = row
-    return ProcesadorConfig(
+    cfg = ProcesadorConfig(
         calibracion=CalibrationTable.from_json(calib),
         calibracion_version=int(version),
         umbral_carga_dudosa=float(dudosa),
@@ -66,7 +88,15 @@ def cargar_config(conn: Connection, idautobus: str) -> ProcesadorConfig:
         velocidad_max_carga=_f(vmax),
         ventanas_sostenidas=None if sost is None else int(sost),
         rendimiento_default=_f(rend),
+        rendimiento_origen="config" if _f(rend) is not None else None,
     )
+    if rendimiento_de_tabla:
+        reciente = rendimiento_guardado(conn, idautobus)
+        if reciente is not None:
+            cfg = replace(
+                cfg, rendimiento_default=reciente, rendimiento_origen="reciente"
+            )
+    return cfg
 
 
 def puntos_desde_filas(

@@ -35,6 +35,56 @@ def test_puntos_desde_filas_convierte_y_omite_cotas():
     ]
 
 
+class _Res:
+    def __init__(self, row):
+        self._row = row
+
+    def fetchone(self):
+        return self._row
+
+
+class _ConnFalsa:
+    """Responde a las dos consultas de cargar_config sin base de datos.
+
+    ``reciente``: valor de fuel_rendimiento_reciente, o "sin_fila" si la tabla no tiene fila.
+    """
+
+    def __init__(self, reciente, rend_config=5.0):
+        self.reciente = reciente
+        self.rend_config = rend_config
+
+    def execute(self, sql, params=None):
+        if "fuel_rendimiento_reciente" in sql:
+            if self.reciente == "sin_fila":
+                return _Res(None)
+            return _Res((self.reciente,))
+        return _Res((YARIS_CALIBRACION, 2, 1, 2, 3, 5, 20, 3, self.rend_config))
+
+
+def test_rendimiento_sale_de_la_tabla_reciente_cuando_se_pide():
+    cfg = cargar_config(_ConnFalsa(Decimal("11.5")), "1", rendimiento_de_tabla=True)
+    assert cfg.rendimiento_default == 11.5 and cfg.rendimiento_origen == "reciente"
+
+
+@pytest.mark.parametrize("reciente", [None, "sin_fila", Decimal(0), Decimal(-3)])
+def test_sin_valor_usable_en_la_tabla_se_usa_fuel_config(reciente):
+    cfg = cargar_config(_ConnFalsa(reciente), "1", rendimiento_de_tabla=True)
+    assert cfg.rendimiento_default == 5.0 and cfg.rendimiento_origen == "config"
+
+
+def test_sin_valor_en_ninguna_parte_no_hay_rendimiento():
+    cfg = cargar_config(
+        _ConnFalsa("sin_fila", rend_config=None), "1", rendimiento_de_tabla=True
+    )
+    assert cfg.rendimiento_default is None and cfg.rendimiento_origen is None
+
+
+def test_por_defecto_cargar_config_ignora_la_tabla_reciente():
+    # el estimador de rendimiento no debe depender de su propio resultado
+    cfg = cargar_config(_ConnFalsa(Decimal("11.5")), "1")
+    assert cfg.rendimiento_default == 5.0 and cfg.rendimiento_origen == "config"
+
+
 @pytest.mark.integration
 def test_cargar_config_lee_fuel_config(conn):
     cfg = cargar_config(conn, "YARIS1")

@@ -27,6 +27,15 @@ pendiente por inclinación, el contador reinicia en 1 (esa ventana no era eviden
 
 Un evento se emite solo cuando el estado del resultado CAMBIA respecto a la ventana anterior
 (``estado_resultado_previo``), para no duplicar eventos mientras la condición persiste.
+
+Sin "trinquete": una subida menor a ``umbral_carga_dudosa`` en una ventana válida es ruido (el
+líquido se mueve, la lectura arranca inestable...). La ventana sale ``confiable``, pero el
+último valor confiable NO sube (``actualizo_final`` False, motivo ``nivel_conservado``): solo
+una carga confirmada puede subir el nivel. Si cada subidita se aceptara como nueva referencia,
+las oscilaciones se acumularían escalón por escalón. Las bajadas explicadas por consumo siguen
+actualizando el nivel. Con diferencia exactamente 0 sí se refresca la referencia (fecha y
+odómetro). Si la ventana de ruido resuelve un pendiente (carga o extracción sin confirmar),
+el pendiente se limpia aunque el nivel no cambie.
 """
 
 from __future__ import annotations
@@ -83,6 +92,7 @@ _PENDIENTES_POR_INCLINACION = frozenset(
 M_PRIMERA_REFERENCIA = "primera_referencia"
 M_SIN_REFERENCIA = "sin_referencia_ventana_no_valida"
 M_RUIDO = "variacion_menor_al_umbral_de_ruido"
+M_NIVEL_CONSERVADO = "nivel_conservado"
 M_AUMENTO_DUDOSO = "aumento_dudoso"
 M_VELOCIDAD_DESCONOCIDA = "velocidad_desconocida"
 M_NO_CONFIRMADA_MAGNITUD = "aumento_menor_al_umbral_de_confirmacion"
@@ -134,7 +144,10 @@ class ProcesadorConfig:
     umbral_extraccion: float = 5.0
     velocidad_max_carga: float | None = None
     ventanas_sostenidas: int | None = None
-    rendimiento_default: float | None = None  # km por litro
+    # km por litro. Es el valor que se usa, venga de donde venga; ``rendimiento_origen`` dice de
+    # dónde: "config" (fuel_config), "reciente" (fuel_rendimiento_reciente) o None si no hay.
+    rendimiento_default: float | None = None
+    rendimiento_origen: str | None = "config"
     # Factor para pasar odometro_total a km. gps_records lo guarda en METROS (Teltonika).
     odometro_a_km: float = 0.001
 
@@ -243,6 +256,17 @@ def _actualizado(ventana: VentanaEntrada, litros: float) -> EstadoConfiable:
         ultimo_litro_confiable=litros,
         fecha_ultimo_confiable=ventana.ventana_inicio,
         odometro_ultimo_confiable=ventana.odometro_total,
+    )
+
+
+def _sin_pendiente(estado: EstadoConfiable) -> EstadoConfiable:
+    """Limpia el pendiente (carga/extracción) pero conserva el último valor confiable."""
+    return replace(
+        estado,
+        pendiente_tipo=None,
+        pendiente_desde=None,
+        pendiente_litros=None,
+        pendiente_ventanas=0,
     )
 
 
@@ -520,11 +544,19 @@ def _clasificar_aumento(
 ) -> SalidaProceso:
     """Ventana válida con diferencia >= 0 (sube o se mantiene)."""
     if diferencia < cfg.umbral_carga_dudosa:
+        if diferencia == 0:
+            # Lectura igual a la referencia: se refresca (fecha y odómetro), el nivel no cambia.
+            return salida(
+                ResultadoEstado.CONFIABLE,
+                [M_RUIDO],
+                _actualizado(ventana, litros),
+                actualiza=True,
+            )
+        # Subida chica = ruido: la ventana es confiable pero el nivel NO sube (sin trinquete).
         return salida(
             ResultadoEstado.CONFIABLE,
-            [M_RUIDO],
-            _actualizado(ventana, litros),
-            actualiza=True,
+            [M_RUIDO, M_NIVEL_CONSERVADO],
+            _sin_pendiente(estado),
         )
     if diferencia < cfg.umbral_carga_candidata:
         return salida(ResultadoEstado.DUDOSO, [M_AUMENTO_DUDOSO])

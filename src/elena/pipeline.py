@@ -244,7 +244,13 @@ def ejecutar_pipeline(
                     r.resultado = "ocupado"
                     log.info("%s: otra instancia lo está procesando, se omite", bus)
                 else:
-                    cfg = cargar_config(conn, bus)
+                    cfg = cargar_config(conn, bus, rendimiento_de_tabla=True)
+                    log.info(
+                        "%s: rendimiento %s km/L (origen: %s)",
+                        bus,
+                        cfg.rendimiento_default,
+                        cfg.rendimiento_origen,
+                    )
                     r = procesar_autobus(
                         PgRepositorio(conn), bus, cfg, max_ventanas=max_ventanas
                     )
