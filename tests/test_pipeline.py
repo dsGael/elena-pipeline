@@ -78,6 +78,13 @@ class RepoMemoria:
         tardias = len(sin) - len(nuevas)
         return (nuevas if limite is None else nuevas[:limite]), tardias
 
+    def ventanas_previas(self, idautobus, antes_de, limite):
+        prev = sorted(
+            (v for v in self.ventanas if v.ventana_inicio < antes_de),
+            key=lambda v: v.ventana_inicio,
+        )
+        return prev[-limite:]
+
     def posicion(self, imei, desde, hasta):
         return self.pos
 
@@ -267,3 +274,45 @@ def test_sin_ventanas_no_escribe_estado():
     repo = RepoMemoria([])
     res = correr(repo)
     assert res.procesadas == 0 and repo.imei_ultimo is None
+
+
+# --- concordancia ----------------------------------------------------------------------
+CFG_CONC = replace(
+    CFG,
+    concordancia_ventanas=3,
+    concordancia_tolerancia=0.6,
+    concordancia_max_minutos=20,
+)
+
+
+def _viaje():
+    # referencia 12 L parado; luego 3 ventanas en movimiento que concuerdan en ~9 L
+    # (12 km/L y odómetro en metros: 12 km = 1 L)
+    return [
+        vent(0, 12, odo=100_000.0),
+        vent(1, 11, odo=112_000.0, vel=30.0),
+        vent(2, 10, odo=124_000.0, vel=30.0),
+        vent(3, 9, odo=136_000.0, vel=30.0),
+    ]
+
+
+def test_concordancia_dentro_de_una_corrida():
+    repo = RepoMemoria(_viaje())
+    correr(repo, CFG_CONC)
+    # la lectura parada inicial también cuenta: con 3 lecturas ya concuerda en la 3a ventana
+    assert estados(repo) == [
+        R.CONFIABLE,
+        R.SIN_ACTUALIZACION,
+        R.CONSUMO_NORMAL,
+        R.CONSUMO_NORMAL,
+    ]
+    assert repo.estado.ultimo_litro_confiable == 9.0
+
+
+def test_concordancia_usa_ventanas_de_corridas_anteriores():
+    repo = RepoMemoria(_viaje())
+    correr(repo, CFG_CONC, max_ventanas=2)  # la 3a llega en el siguiente ciclo
+    assert repo.estado.ultimo_litro_confiable == 12.0
+    correr(repo, CFG_CONC, max_ventanas=1)  # necesita las 2 anteriores, ya procesadas
+    assert estados(repo)[-1] is R.CONSUMO_NORMAL
+    assert repo.estado.ultimo_litro_confiable == 10.0

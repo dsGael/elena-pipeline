@@ -35,6 +35,9 @@ EXPECTED_COLUMNS: dict[str, dict[str, str]] = {
         "columna_sensor": "text",
         "descartar_sin_ignicion": "bool",
         "rendimiento_default": "numeric",
+        "concordancia_ventanas": "int4",
+        "concordancia_tolerancia": "numeric",
+        "concordancia_max_minutos": "int4",
         "calibracion": "jsonb",
         "calibracion_version": "int4",
         "updated_at": "timestamptz",
@@ -172,6 +175,9 @@ PARAMETROS_PENDIENTES = (
     "velocidad_max_carga",
     "ventanas_sostenidas",
     "rendimiento_default",
+    "concordancia_ventanas",
+    "concordancia_tolerancia",
+    "concordancia_max_minutos",
 )
 
 _SHORT_TYPES = {

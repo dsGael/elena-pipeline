@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 
 from elena.calibration import CalibrationTable
 from elena.processor import (
+    M_CONCORDANCIA,
     M_NIVEL_CONSERVADO,
     EstadoConfiable,
     PendienteTipo,
@@ -532,3 +533,105 @@ def test_procesa_un_autobus_con_sensor_ascendente():
     o1 = procesar_ventana(v1, cfg, o0.estado, "CORBER", o0.resultado.estado_resultado)
     assert o1.resultado.estado_resultado is R.CARGA_CONFIRMADA
     assert o1.evento is not None and o1.evento.litros_evento == 5.0
+
+
+# --- concordancia ----------------------------------------------------------------------
+# CFG_FULL: rendimiento 12 km/L, velocidad_max_carga 10, odómetro en km (factor 1.0).
+CFG_CONC = replace(
+    CFG_FULL,
+    concordancia_ventanas=3,
+    concordancia_tolerancia=0.6,
+    concordancia_max_minutos=20,
+)
+
+
+def _conc(actual, recientes, cfg=CFG_CONC, est=None, previo=None):
+    return procesar_ventana(actual, cfg, est or EST12, "YARIS1", previo, recientes)
+
+
+def _viaje(*puntos, vel=30.0):
+    """(litros, minuto, odómetro) -> ventanas en movimiento."""
+    return [ventana(lit, minuto=m, odo=o, vel=vel) for lit, m, o in puntos]
+
+
+def test_concordancia_en_movimiento_baja_el_nivel():
+    # 12 L en odo 1000; a 12 km/L, cada 12 km se gasta 1 L: las 3 lecturas dicen "9 L ahora"
+    *prev, actual = _viaje((11, 0, 1012.0), (10, 5, 1024.0), (9, 10, 1036.0))
+    out = _conc(actual, prev)
+    assert out.resultado.estado_resultado is R.CONSUMO_NORMAL
+    assert out.resultado.motivo == M_CONCORDANCIA and out.resultado.actualizo_final
+    assert out.estado.ultimo_litro_confiable == 9.0
+    assert out.estado.odometro_ultimo_confiable == 1036.0
+
+
+def test_sin_concordancia_en_movimiento_no_actualiza():
+    *prev, actual = _viaje((11, 0, 1012.0), (8, 5, 1024.0), (9, 10, 1036.0))
+    out = _conc(actual, prev)  # ajustadas 9, 7, 9: rango 2 L > 0.6
+    assert out.resultado.estado_resultado is R.SIN_ACTUALIZACION
+    assert out.estado.ultimo_litro_confiable == 12.0
+
+
+def test_concordancia_pide_suficientes_lecturas():
+    *prev, actual = _viaje((10, 5, 1024.0), (9, 10, 1036.0))
+    out = _conc(actual, prev)  # 2 lecturas, se piden 3
+    assert out.resultado.estado_resultado is R.SIN_ACTUALIZACION
+
+
+def test_concordancia_ignora_lecturas_viejas():
+    *prev, actual = _viaje((11, -30, 1012.0), (10, 5, 1024.0), (9, 10, 1036.0))
+    out = _conc(actual, prev)  # la de hace 40 min queda fuera de los 20 min
+    assert out.resultado.estado_resultado is R.SIN_ACTUALIZACION
+
+
+def test_concordancia_nunca_sube_el_nivel():
+    *prev, actual = _viaje((13, 0, 1000.0), (13, 5, 1000.0), (13, 10, 1000.0))
+    out = _conc(actual, prev)  # todas dicen 13 L con referencia 12 L
+    assert out.resultado.estado_resultado is R.SIN_ACTUALIZACION
+    assert out.estado.ultimo_litro_confiable == 12.0
+
+
+def test_concordancia_no_decide_bajadas_que_el_consumo_no_explica():
+    *prev, actual = _viaje((5, 0, 1000.0), (5, 5, 1000.0), (5, 10, 1000.0))
+    out = _conc(actual, prev)  # 7 L menos sin km: posible extracción, no es su trabajo
+    assert out.resultado.estado_resultado is R.SIN_ACTUALIZACION
+    assert out.estado.pendiente_tipo is None
+
+
+def test_desactivada_se_comporta_como_antes():
+    *prev, actual = _viaje((11, 0, 1012.0), (10, 5, 1024.0), (9, 10, 1036.0))
+    out = _conc(actual, prev, cfg=CFG_FULL)
+    assert out.resultado.estado_resultado is R.SIN_ACTUALIZACION
+
+
+def test_fin_de_viaje_con_pocas_muestras_entra_por_concordancia():
+    prev = _viaje((11, 0, 1012.0), (10, 5, 1024.0))
+    actual = replace(
+        ventana(
+            9, minuto=10, odo=1036.0, calidad=WindowQuality.DUDOSA, motivo=M_MUESTRAS
+        ),
+        muestras_validas=4,
+    )
+    out = _conc(actual, prev)
+    assert out.resultado.estado_resultado is R.CONSUMO_NORMAL
+    assert out.estado.ultimo_litro_confiable == 9.0
+
+
+def test_ventana_con_muy_pocas_muestras_no_entra_a_la_concordancia():
+    prev = _viaje((11, 0, 1012.0), (10, 5, 1024.0))
+    actual = replace(
+        ventana(
+            9, minuto=10, odo=1036.0, calidad=WindowQuality.DUDOSA, motivo=M_MUESTRAS
+        ),
+        muestras_validas=2,
+    )
+    out = _conc(actual, prev)
+    assert out.resultado.estado_resultado is R.DUDOSO
+
+
+def test_ventana_inclinada_no_entra_a_la_concordancia():
+    prev = _viaje((11, 0, 1012.0), (10, 5, 1024.0))
+    actual = ventana(
+        9, minuto=10, odo=1036.0, calidad=WindowQuality.DUDOSA, motivo=M_ANGULO
+    )
+    out = _conc(actual, prev)
+    assert out.resultado.estado_resultado is R.DUDOSO

@@ -68,6 +68,9 @@ _CONFIRMACION_DE = {
 }
 
 MOTIVO_REEMPLAZADO = "reemplazado_por_evento_posterior"
+# Cuántas ventanas anteriores se le pasan al procesador para la concordancia. Sobra: el
+# procesador además las limita por concordancia_max_minutos.
+VENTANAS_PREVIAS = 24
 MOTIVO_SIN_CONFIRMAR = "resuelto_sin_confirmar"
 
 
@@ -93,6 +96,13 @@ class Repositorio(Protocol):
     ) -> tuple[list[VentanaEntrada], int]:
         """Ventanas sin resultado posteriores a ``despues_de`` (orden cronológico) y la
         cantidad de ventanas sin resultado que NO lo son (llegaron tarde)."""
+        ...
+
+    def ventanas_previas(
+        self, idautobus: str, antes_de: datetime, limite: int
+    ) -> list[VentanaEntrada]:
+        """Las ``limite`` ventanas inmediatamente anteriores a ``antes_de`` (cualquier calidad,
+        orden cronológico). Las usa la concordancia."""
         ...
 
     def posicion(
@@ -203,8 +213,19 @@ def procesar_autobus(
             tardias,
         )
 
+    # Ventanas anteriores para la concordancia (solo si está activada).
+    previas: list[VentanaEntrada] = []
+    if ventanas and cfg.concordancia_ventanas:
+        previas = list(
+            repo.ventanas_previas(
+                idautobus, ventanas[0].ventana_inicio, VENTANAS_PREVIAS
+            )
+        )
+
     for v in ventanas:
-        salida = procesar_ventana(v, cfg, estado, idautobus, previo)
+        salida = procesar_ventana(v, cfg, estado, idautobus, previo, previas)
+        if cfg.concordancia_ventanas:
+            previas = (previas + [v])[-VENTANAS_PREVIAS:]
         repo.guardar_resultado(salida.resultado)
         resumen.eventos += _gestionar_eventos(
             repo, idautobus, estado, salida.estado, salida.resultado, salida.evento, v

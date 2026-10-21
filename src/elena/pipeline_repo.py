@@ -56,7 +56,8 @@ ORDER BY ventana_inicio DESC LIMIT 1
 # Ventanas del autobús (por sus dispositivos) que aún no tienen resultado.
 VENTANAS_SQL = """
 SELECT w.id::text, w.imei, w.ventana_inicio, w.ventana_fin, w.calidad_ventana,
-       w.motivo_calidad, w.sensor_mediana, w.velocidad_promedio, w.odometro_total
+       w.motivo_calidad, w.sensor_mediana, w.velocidad_promedio, w.odometro_total,
+       w.muestras_validas
 FROM public.fuel_windows w
 JOIN public.dispositivos d ON d.imei = w.imei
 WHERE d.idautobus = %(bus)s
@@ -65,6 +66,35 @@ WHERE d.idautobus = %(bus)s
 ORDER BY w.ventana_inicio
 LIMIT %(limite)s
 """
+
+# Ventanas inmediatamente anteriores a una fecha (para la concordancia), la más reciente primero.
+VENTANAS_PREVIAS_SQL = """
+SELECT w.id::text, w.imei, w.ventana_inicio, w.ventana_fin, w.calidad_ventana,
+       w.motivo_calidad, w.sensor_mediana, w.velocidad_promedio, w.odometro_total,
+       w.muestras_validas
+FROM public.fuel_windows w
+JOIN public.dispositivos d ON d.imei = w.imei
+WHERE d.idautobus = %(bus)s
+  AND w.ventana_inicio < %(antes)s::timestamptz
+ORDER BY w.ventana_inicio DESC
+LIMIT %(limite)s
+"""
+
+
+def _ventana(r: Any) -> VentanaEntrada:
+    return VentanaEntrada(
+        ventana_id=r[0],
+        imei=r[1],
+        ventana_inicio=r[2],
+        ventana_fin=r[3],
+        calidad=WindowQuality(r[4]),
+        motivo_calidad=r[5],
+        sensor_mediana=_f(r[6]),
+        velocidad_promedio=_f(r[7]),
+        odometro_total=_f(r[8]),
+        muestras_validas=None if r[9] is None else int(r[9]),
+    )
+
 
 TARDIAS_SQL = """
 SELECT count(*)
@@ -106,25 +136,19 @@ class PgRepositorio:
     ) -> tuple[list[VentanaEntrada], int]:
         params = {"bus": idautobus, "despues": despues_de, "limite": limite}
         filas = self.conn.execute(VENTANAS_SQL, params).fetchall()
-        ventanas = [
-            VentanaEntrada(
-                ventana_id=r[0],
-                imei=r[1],
-                ventana_inicio=r[2],
-                ventana_fin=r[3],
-                calidad=WindowQuality(r[4]),
-                motivo_calidad=r[5],
-                sensor_mediana=_f(r[6]),
-                velocidad_promedio=_f(r[7]),
-                odometro_total=_f(r[8]),
-            )
-            for r in filas
-        ]
+        ventanas = [_ventana(r) for r in filas]
         tardias = 0
         if despues_de is not None:
             row = self.conn.execute(TARDIAS_SQL, params).fetchone()
             tardias = int(row[0]) if row else 0
         return ventanas, tardias
+
+    def ventanas_previas(
+        self, idautobus: str, antes_de: datetime, limite: int
+    ) -> list[VentanaEntrada]:
+        params = {"bus": idautobus, "antes": antes_de, "limite": limite}
+        filas = self.conn.execute(VENTANAS_PREVIAS_SQL, params).fetchall()
+        return [_ventana(r) for r in reversed(filas)]
 
     def posicion(
         self, imei: str, desde: datetime, hasta: datetime

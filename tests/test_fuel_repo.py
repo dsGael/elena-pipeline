@@ -49,16 +49,20 @@ class _ConnFalsa:
     ``reciente``: valor de fuel_rendimiento_reciente, o "sin_fila" si la tabla no tiene fila.
     """
 
-    def __init__(self, reciente, rend_config=5.0):
+    def __init__(self, reciente, rend_config=5.0, concordancia=(None, None, None)):
         self.reciente = reciente
         self.rend_config = rend_config
+        self.concordancia = concordancia
 
     def execute(self, sql, params=None):
         if "fuel_rendimiento_reciente" in sql:
             if self.reciente == "sin_fila":
                 return _Res(None)
             return _Res((self.reciente,))
-        return _Res((YARIS_CALIBRACION, 2, 1, 2, 3, 5, 20, 3, self.rend_config))
+        return _Res(
+            (YARIS_CALIBRACION, 2, 1, 2, 3, 5, 20, 3, self.rend_config)
+            + tuple(self.concordancia)
+        )
 
 
 def test_rendimiento_sale_de_la_tabla_reciente_cuando_se_pide():
@@ -77,6 +81,17 @@ def test_sin_valor_en_ninguna_parte_no_hay_rendimiento():
         _ConnFalsa("sin_fila", rend_config=None), "1", rendimiento_de_tabla=True
     )
     assert cfg.rendimiento_default is None and cfg.rendimiento_origen is None
+
+
+def test_cargar_config_lee_la_concordancia():
+    cfg = cargar_config(_ConnFalsa(None, concordancia=(3, Decimal("0.80"), 20)), "1")
+    assert cfg.concordancia_ventanas == 3
+    assert cfg.concordancia_tolerancia == 0.8 and cfg.concordancia_max_minutos == 20.0
+
+
+def test_concordancia_nula_queda_desactivada():
+    cfg = cargar_config(_ConnFalsa(None), "1")
+    assert cfg.concordancia_ventanas is None and cfg.concordancia_tolerancia is None
 
 
 def test_por_defecto_cargar_config_ignora_la_tabla_reciente():

@@ -36,17 +36,27 @@ las oscilaciones se acumularían escalón por escalón. Las bajadas explicadas p
 actualizando el nivel. Con diferencia exactamente 0 sí se refresca la referencia (fecha y
 odómetro). Si la ventana de ruido resuelve un pendiente (carga o extracción sin confirmar),
 el pendiente se limpia aunque el nivel no cambie.
+
+Concordancia (opcional; NULL en fuel_config = desactivada): una ventana que por sí sola no
+alcanza para actualizar (en movimiento, o parada con pocas muestras porque el motor se apagó)
+puede BAJAR el nivel si las últimas ``concordancia_ventanas`` lecturas utilizables, dentro de
+``concordancia_max_minutos``, coinciden entre sí una vez descontado el consumo por kilómetro
+(rango <= ``concordancia_tolerancia`` L). El nuevo nivel es la mediana de esas lecturas
+llevadas al odómetro actual. Nunca sube el nivel (sin trinquete) ni confirma cargas o
+extracciones: si la bajada no la explica el consumo (exceso > umbral_extraccion) no decide.
+Requiere rendimiento.
 """
 
 from __future__ import annotations
 
-from collections.abc import Callable
+import statistics
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, replace
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import StrEnum
 
 from .calibration import CalibrationTable, CalibStatus
-from .quality import M_ANGULO, WindowQuality
+from .quality import M_ANGULO, M_MUESTRAS, WindowQuality
 
 
 class ResultadoEstado(StrEnum):
@@ -114,6 +124,10 @@ M_NIVEL_COTA = "nivel_cota_"  # + zona_baja | arriba_de_calibracion
 M_DIFERENCIA_MINIMA = "diferencia_es_minimo"
 M_EN_MOVIMIENTO = "velocidad_alta_nivel_no_confiable"
 M_DESDE_ARRIBA_CALIBRACION = "descenso_desde_arriba_de_calibracion"
+M_CONCORDANCIA = "nivel_por_concordancia"
+
+# Mínimo de muestras para que una ventana parada con pocas muestras entre a la concordancia.
+MIN_MUESTRAS_CONCORDANCIA = 3
 
 
 @dataclass(frozen=True, slots=True)
@@ -132,6 +146,7 @@ class VentanaEntrada:
     # fuel_windows no guarda posición: el pipeline la toma de gps_records (opcional).
     latitude: float | None = None
     longitude: float | None = None
+    muestras_validas: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -150,6 +165,10 @@ class ProcesadorConfig:
     rendimiento_origen: str | None = "config"
     # Factor para pasar odometro_total a km. gps_records lo guarda en METROS (Teltonika).
     odometro_a_km: float = 0.001
+    # Concordancia (ver cabecera). Cualquiera en None = desactivada.
+    concordancia_ventanas: int | None = None
+    concordancia_tolerancia: float | None = None  # litros (rango máx - mín permitido)
+    concordancia_max_minutos: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -276,17 +295,82 @@ def _motivos_calidad(motivo_calidad: str | None) -> set[str]:
     return {m.strip() for m in motivo_calidad.split(";") if m.strip()}
 
 
+def _lectura_concordancia(v: VentanaEntrada, cfg: ProcesadorConfig) -> float | None:
+    """Litros de una ventana si sirve para la concordancia (None si no).
+
+    Sirven las válidas (a cualquier velocidad) y las dudosas cuyo ÚNICO problema es tener pocas
+    muestras (con al menos MIN_MUESTRAS_CONCORDANCIA). Las cotas de calibración no sirven.
+    """
+    if v.sensor_mediana is None or v.odometro_total is None:
+        return None
+    if v.calidad is WindowQuality.DESCARTADA:
+        return None
+    if v.calidad is WindowQuality.DUDOSA and _motivos_calidad(v.motivo_calidad) != {
+        M_MUESTRAS
+    }:
+        return None
+    if (
+        v.muestras_validas is not None
+        and v.muestras_validas < MIN_MUESTRAS_CONCORDANCIA
+    ):
+        return None
+    conv = cfg.calibracion.to_liters(v.sensor_mediana)
+    if not conv.utilizable or conv.litros is None:
+        return None
+    return _r2(conv.litros)
+
+
+def _nivel_por_concordancia(
+    ventana: VentanaEntrada,
+    recientes: Sequence[VentanaEntrada],
+    cfg: ProcesadorConfig,
+) -> float | None:
+    """Mediana de las últimas lecturas que concuerdan (llevadas al odómetro actual), o None."""
+    k = cfg.concordancia_ventanas
+    tol = cfg.concordancia_tolerancia
+    span = cfg.concordancia_max_minutos
+    rend = cfg.rendimiento_default
+    if not k or k < 2 or tol is None or not span or not rend or rend <= 0:
+        return None
+    actual = _lectura_concordancia(ventana, cfg)
+    if actual is None or ventana.odometro_total is None:
+        return None
+    odo = ventana.odometro_total
+    desde = ventana.ventana_inicio - timedelta(minutes=span)
+    ajustadas = [actual]
+    for v in sorted(recientes, key=lambda x: x.ventana_inicio, reverse=True):
+        if len(ajustadas) >= k:
+            break
+        if v.ventana_inicio >= ventana.ventana_inicio:
+            continue
+        if v.ventana_inicio < desde:
+            break
+        litros = _lectura_concordancia(v, cfg)
+        if litros is None or v.odometro_total is None:
+            continue
+        if v.odometro_total > odo:
+            return None  # odómetro inconsistente
+        # lo que se consumió desde esa lectura hasta ahora
+        ajustadas.append(litros - (odo - v.odometro_total) * cfg.odometro_a_km / rend)
+    if len(ajustadas) < k or max(ajustadas) - min(ajustadas) > tol:
+        return None
+    return _r2(statistics.median(ajustadas))
+
+
 def procesar_ventana(
     ventana: VentanaEntrada,
     cfg: ProcesadorConfig,
     estado: EstadoConfiable,
     idautobus: str,
     estado_resultado_previo: ResultadoEstado | None = None,
+    recientes: Sequence[VentanaEntrada] = (),
 ) -> SalidaProceso:
     """Clasifica una ventana. Debe llamarse en orden cronológico por autobús.
 
     ``estado_resultado_previo``: estado_resultado de la ventana anterior ya procesada del mismo
     autobús (el pipeline lo lee de fuel_processed_result); evita duplicar eventos.
+    ``recientes``: ventanas anteriores del mismo autobús (cualquier calidad), para la
+    concordancia. Si está desactivada se ignoran.
     """
     ultimo = estado.ultimo_litro_confiable
 
@@ -407,6 +491,28 @@ def procesar_ventana(
             )
         return SalidaProceso(resultado, evento, estado_nuevo)
 
+    def por_concordancia() -> SalidaProceso | None:
+        """Baja el nivel si las lecturas recientes concuerdan (ver cabecera)."""
+        if ultimo is None or litros is None or cota or ultimo == ref_alta:
+            return None
+        if consumo is None:  # sin km o sin rendimiento no se puede validar la bajada
+            return None
+        nivel = _nivel_por_concordancia(ventana, recientes, cfg)
+        if nivel is None:
+            return None
+        caida_c = _r2(ultimo - nivel)
+        if caida_c <= 0:  # sin trinquete: la concordancia nunca sube el nivel
+            return None
+        if caida_c - consumo > cfg.umbral_extraccion:
+            # no la explica el consumo: eso solo lo decide una ventana válida
+            return None
+        return salida(
+            ResultadoEstado.CONSUMO_NORMAL,
+            [M_CONCORDANCIA],
+            _actualizado(ventana, nivel),
+            actualiza=True,
+        )
+
     # 1. Ventana descartada: no hay lectura utilizable.
     if ventana.calidad is WindowQuality.DESCARTADA:
         return salida(
@@ -429,7 +535,9 @@ def procesar_ventana(
         and ventana.velocidad_promedio is not None
         and ventana.velocidad_promedio > vmax
     ):
-        return salida(ResultadoEstado.SIN_ACTUALIZACION, [M_EN_MOVIMIENTO])
+        return por_concordancia() or salida(
+            ResultadoEstado.SIN_ACTUALIZACION, [M_EN_MOVIMIENTO]
+        )
 
     # 3. Primera referencia: solo una ventana válida puede fijar el valor inicial.
     if ultimo is None:
@@ -475,6 +583,10 @@ def procesar_ventana(
                         estado, PendienteTipo.CAIDA, ventana, litros, cuenta
                     ),
                 )
+        if _motivos_calidad(ventana.motivo_calidad) == {M_MUESTRAS}:
+            concordada = por_concordancia()
+            if concordada is not None:
+                return concordada
         return salida(
             ResultadoEstado.DUDOSO,
             [M_DUDOSA_SIN_ACCION]

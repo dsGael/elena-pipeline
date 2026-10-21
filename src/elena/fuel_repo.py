@@ -25,7 +25,8 @@ from .rendimiento import (
 CONFIG_SQL = """
 SELECT calibracion, calibracion_version, umbral_carga_dudosa, umbral_carga_candidata,
        umbral_carga_confirmada, umbral_extraccion, velocidad_max_carga,
-       ventanas_sostenidas, rendimiento_default
+       ventanas_sostenidas, rendimiento_default,
+       concordancia_ventanas, concordancia_tolerancia, concordancia_max_minutos
 FROM public.fuel_config
 WHERE idautobus = %(idautobus)s
 """
@@ -77,7 +78,20 @@ def cargar_config(
     row = conn.execute(CONFIG_SQL, {"idautobus": idautobus}).fetchone()
     if row is None:
         raise ConfigError(f"El autobús {idautobus!r} no tiene fila en fuel_config.")
-    (calib, version, dudosa, candidata, confirmada, extraccion, vmax, sost, rend) = row
+    (
+        calib,
+        version,
+        dudosa,
+        candidata,
+        confirmada,
+        extraccion,
+        vmax,
+        sost,
+        rend,
+        conc_k,
+        conc_tol,
+        conc_min,
+    ) = row
     cfg = ProcesadorConfig(
         calibracion=CalibrationTable.from_json(calib),
         calibracion_version=int(version),
@@ -89,6 +103,9 @@ def cargar_config(
         ventanas_sostenidas=None if sost is None else int(sost),
         rendimiento_default=_f(rend),
         rendimiento_origen="config" if _f(rend) is not None else None,
+        concordancia_ventanas=None if conc_k is None else int(conc_k),
+        concordancia_tolerancia=_f(conc_tol),
+        concordancia_max_minutos=_f(conc_min),
     )
     if rendimiento_de_tabla:
         reciente = rendimiento_guardado(conn, idautobus)
