@@ -635,3 +635,45 @@ def test_ventana_inclinada_no_entra_a_la_concordancia():
     )
     out = _conc(actual, prev)
     assert out.resultado.estado_resultado is R.DUDOSO
+
+
+# --- nivel estimado ----------------------------------------------------------------------
+# CFG_FULL: 12 km/L, odómetro en km. Referencia: 12 L en odo 1000.
+
+
+def test_estimado_baja_con_los_km_aunque_la_ventana_este_descartada():
+    v = ventana(minuto=5, odo=1024.0, calidad=WindowQuality.DESCARTADA, sensor=None)
+    out = run(v, CFG_FULL, EST12)
+    assert out.resultado.estado_resultado is R.DESCARTADO
+    assert out.resultado.litros_finales == 12.0
+    assert out.resultado.litros_estimados == 10.0  # 24 km / 12 km/L = 2 L
+
+
+def test_estimado_en_movimiento_sin_actualizar():
+    out = run(ventana(11, minuto=5, odo=1006.0, vel=30.0), CFG_FULL, EST12)
+    assert out.resultado.estado_resultado is R.SIN_ACTUALIZACION
+    assert out.resultado.litros_estimados == 11.5
+
+
+def test_estimado_es_igual_al_final_cuando_se_actualiza():
+    out = run(ventana(10, minuto=5, odo=1024.0), CFG_FULL, EST12)
+    assert out.resultado.actualizo_final
+    assert out.resultado.litros_estimados == out.resultado.litros_finales == 10.0
+
+
+def test_estimado_sin_rendimiento_es_el_final():
+    v = ventana(minuto=5, odo=1024.0, calidad=WindowQuality.DESCARTADA, sensor=None)
+    out = run(v, CFG, EST12)  # CFG no tiene rendimiento
+    assert out.resultado.litros_estimados == 12.0
+
+
+def test_estimado_sin_referencia_es_nulo():
+    v = ventana(minuto=5, odo=1024.0, calidad=WindowQuality.DESCARTADA, sensor=None)
+    out = procesar_ventana(v, CFG_FULL, EstadoConfiable(), "YARIS1")
+    assert out.resultado.litros_estimados is None
+
+
+def test_estimado_no_baja_de_cero():
+    v = ventana(minuto=5, odo=2000.0, calidad=WindowQuality.DESCARTADA, sensor=None)
+    out = run(v, CFG_FULL, EST12)  # 1000 km: se "gastarían" 83 L
+    assert out.resultado.litros_estimados == 0.0

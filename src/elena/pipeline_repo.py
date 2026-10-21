@@ -170,8 +170,8 @@ class PgRepositorio:
                 litros_finales, ultimo_valor_confiable_anterior, diferencia_litros,
                 km_desde_ultimo_confiable, rendimiento_usado, consumo_esperado,
                 exceso_no_explicado, estado_resultado, actualizo_final, motivo,
-                calibracion_version_usada)
-            VALUES (%s,%s,%s::uuid,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                calibracion_version_usada, litros_estimados)
+            VALUES (%s,%s,%s::uuid,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             ON CONFLICT (ventana_id) DO NOTHING
             """,
             (
@@ -191,6 +191,7 @@ class PgRepositorio:
                 r.actualizo_final,
                 r.motivo,
                 r.calibracion_version_usada,
+                r.litros_estimados,
             ),
         )
 

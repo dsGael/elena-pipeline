@@ -92,6 +92,7 @@ EXPECTED_COLUMNS: dict[str, dict[str, str]] = {
         "actualizo_final": "bool",
         "motivo": "text",
         "calibracion_version_usada": "int4",
+        "litros_estimados": "numeric",
         "fecha_proceso": "timestamptz",
     },
     "fuel_rejected_data": {

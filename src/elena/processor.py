@@ -45,6 +45,13 @@ puede BAJAR el nivel si las últimas ``concordancia_ventanas`` lecturas utilizab
 llevadas al odómetro actual. Nunca sube el nivel (sin trinquete) ni confirma cargas o
 extracciones: si la bajada no la explica el consumo (exceso > umbral_extraccion) no decide.
 Requiere rendimiento.
+
+Nivel estimado (``litros_estimados``): ``litros_finales`` solo cambia cuando hay una lectura
+confiable, así que durante un viaje se queda fijo y al llegar baja de golpe todo lo consumido.
+Para mostrar el nivel "en vivo", cada ventana guarda además
+``último confiable - km desde entonces / rendimiento`` (también las descartadas, que tienen
+odómetro aunque no tengan sensor). Es solo informativo: no interviene en ninguna decisión. Sin
+rendimiento u odómetro vale lo mismo que ``litros_finales``.
 """
 
 from __future__ import annotations
@@ -204,6 +211,8 @@ class ResultadoProcesado:
     actualizo_final: bool
     motivo: str
     calibracion_version_usada: int
+    # Nivel estimado después de esta ventana (ver cabecera). Solo informativo.
+    litros_estimados: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -276,6 +285,25 @@ def _actualizado(ventana: VentanaEntrada, litros: float) -> EstadoConfiable:
         fecha_ultimo_confiable=ventana.ventana_inicio,
         odometro_ultimo_confiable=ventana.odometro_total,
     )
+
+
+def _litros_estimados(
+    ventana: VentanaEntrada,
+    cfg: ProcesadorConfig,
+    estado: EstadoConfiable,
+    actualiza: bool,
+) -> float | None:
+    """Último confiable menos lo que se debió consumir desde entonces (ver cabecera)."""
+    ultimo = estado.ultimo_litro_confiable
+    if ultimo is None:
+        return None
+    if actualiza:
+        return ultimo
+    rend = cfg.rendimiento_default
+    odo, base = ventana.odometro_total, estado.odometro_ultimo_confiable
+    if not rend or rend <= 0 or odo is None or base is None or odo < base:
+        return ultimo
+    return _r2(max(0.0, ultimo - (odo - base) * cfg.odometro_a_km / rend))
 
 
 def _sin_pendiente(estado: EstadoConfiable) -> EstadoConfiable:
@@ -448,6 +476,7 @@ def procesar_ventana(
             actualizo_final=actualiza,
             motivo=motivo,
             calibracion_version_usada=cfg.calibracion_version,
+            litros_estimados=_litros_estimados(ventana, cfg, estado_nuevo, actualiza),
         )
         evento = None
         if (
