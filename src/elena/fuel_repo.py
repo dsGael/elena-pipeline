@@ -26,7 +26,8 @@ CONFIG_SQL = """
 SELECT calibracion, calibracion_version, umbral_carga_dudosa, umbral_carga_candidata,
        umbral_carga_confirmada, umbral_extraccion, velocidad_max_carga,
        ventanas_sostenidas, rendimiento_default,
-       concordancia_ventanas, concordancia_tolerancia, concordancia_max_minutos
+       concordancia_ventanas, concordancia_tolerancia, concordancia_max_minutos,
+       concordancia_carga, pendiente_max_minutos
 FROM public.fuel_config
 WHERE idautobus = %(idautobus)s
 """
@@ -91,6 +92,8 @@ def cargar_config(
         conc_k,
         conc_tol,
         conc_min,
+        conc_carga,
+        pend_min,
     ) = row
     cfg = ProcesadorConfig(
         calibracion=CalibrationTable.from_json(calib),
@@ -106,6 +109,8 @@ def cargar_config(
         concordancia_ventanas=None if conc_k is None else int(conc_k),
         concordancia_tolerancia=_f(conc_tol),
         concordancia_max_minutos=_f(conc_min),
+        concordancia_carga=bool(conc_carga),
+        pendiente_max_minutos=_f(pend_min),
     )
     if rendimiento_de_tabla:
         reciente = rendimiento_guardado(conn, idautobus)

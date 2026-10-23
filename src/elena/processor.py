@@ -46,6 +46,14 @@ llevadas al odómetro actual. Nunca sube el nivel (sin trinquete) ni confirma ca
 extracciones: si la bajada no la explica el consumo (exceso > umbral_extraccion) no decide.
 Requiere rendimiento.
 
+Robustez de la concordancia: se juntan hasta K+2 lecturas y basta con que K de ellas (incluida
+la actual) concuerden; una lectura rara (arranque, ráfaga en movimiento) no la anula. Con
+``concordancia_carga`` activa también puede CONFIRMAR UNA CARGA: solo con lecturas de ventanas
+VÁLIDAS (>= min_muestras) y subida >= umbral_carga_confirmada. Nunca baja el nivel por debajo de
+``litros_zona_baja`` (la calibración no mide menos). ``pendiente_max_minutos``: un pendiente
+(carga/extracción sin confirmar) con más de esos minutos se descarta, para que ventanas sueltas
+de días distintos no se sumen como "sostenido".
+
 Nivel estimado (``litros_estimados``): ``litros_finales`` solo cambia cuando hay una lectura
 confiable, así que durante un viaje se queda fijo y al llegar baja de golpe todo lo consumido.
 Para mostrar el nivel "en vivo", cada ventana guarda además
@@ -138,6 +146,7 @@ M_DIFERENCIA_MINIMA = "diferencia_es_minimo"
 M_EN_MOVIMIENTO = "velocidad_alta_nivel_no_confiable"
 M_DESDE_ARRIBA_CALIBRACION = "descenso_desde_arriba_de_calibracion"
 M_CONCORDANCIA = "nivel_por_concordancia"
+M_CARGA_CONCORDANCIA = "carga_por_concordancia"
 
 # Mínimo de muestras para que una ventana parada con pocas muestras entre a la concordancia.
 MIN_MUESTRAS_CONCORDANCIA = 3
@@ -183,6 +192,10 @@ class ProcesadorConfig:
     concordancia_ventanas: int | None = None
     concordancia_tolerancia: float | None = None  # litros (rango máx - mín permitido)
     concordancia_max_minutos: float | None = None
+    # Concordancia puede confirmar cargas (solo con ventanas válidas). False = solo baja el nivel.
+    concordancia_carga: bool = False
+    # Minutos máximos que puede vivir un pendiente sin confirmarse. None = sin límite.
+    pendiente_max_minutos: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -331,6 +344,20 @@ def _sin_km_apagado(
     return replace(estado, odometro_ultimo_confiable=min(odo, base + (odo - prev)))
 
 
+def _sin_pendiente_vencido(
+    ventana: VentanaEntrada, cfg: ProcesadorConfig, estado: EstadoConfiable
+) -> EstadoConfiable:
+    """Descarta el pendiente si lleva más de ``pendiente_max_minutos`` sin confirmarse."""
+    if (
+        not cfg.pendiente_max_minutos
+        or estado.pendiente_tipo is None
+        or estado.pendiente_desde is None
+    ):
+        return estado
+    edad = (ventana.ventana_inicio - estado.pendiente_desde).total_seconds() / 60
+    return _sin_pendiente(estado) if edad > cfg.pendiente_max_minutos else estado
+
+
 def _sin_pendiente(estado: EstadoConfiable) -> EstadoConfiable:
     """Limpia el pendiente (carga/extracción) pero conserva el último valor confiable."""
     return replace(
@@ -348,7 +375,9 @@ def _motivos_calidad(motivo_calidad: str | None) -> set[str]:
     return {m.strip() for m in motivo_calidad.split(";") if m.strip()}
 
 
-def _lectura_concordancia(v: VentanaEntrada, cfg: ProcesadorConfig) -> float | None:
+def _lectura_concordancia(
+    v: VentanaEntrada, cfg: ProcesadorConfig, solo_validas: bool = False
+) -> float | None:
     """Litros de una ventana si sirve para la concordancia (None si no).
 
     Sirven las válidas (a cualquier velocidad) y las dudosas cuyo ÚNICO problema es tener pocas
@@ -357,6 +386,8 @@ def _lectura_concordancia(v: VentanaEntrada, cfg: ProcesadorConfig) -> float | N
     if v.sensor_mediana is None or v.odometro_total is None:
         return None
     if v.calidad is WindowQuality.DESCARTADA:
+        return None
+    if solo_validas and v.calidad is not WindowQuality.VALIDA:
         return None
     if v.calidad is WindowQuality.DUDOSA and _motivos_calidad(v.motivo_calidad) != {
         M_MUESTRAS
@@ -377,37 +408,56 @@ def _nivel_por_concordancia(
     ventana: VentanaEntrada,
     recientes: Sequence[VentanaEntrada],
     cfg: ProcesadorConfig,
+    solo_validas: bool = False,
 ) -> float | None:
-    """Mediana de las últimas lecturas que concuerdan (llevadas al odómetro actual), o None."""
+    """Mediana de K lecturas que concuerdan (llevadas al odómetro actual), o None.
+
+    Se miran hasta K+2 lecturas; el grupo de K más apretado que incluya la actual y quepa en la
+    tolerancia decide. ``solo_validas``: solo ventanas válidas (para confirmar cargas).
+    """
     k = cfg.concordancia_ventanas
     tol = cfg.concordancia_tolerancia
     span = cfg.concordancia_max_minutos
     rend = cfg.rendimiento_default
     if not k or k < 2 or tol is None or not span or not rend or rend <= 0:
         return None
-    actual = _lectura_concordancia(ventana, cfg)
+    actual = _lectura_concordancia(ventana, cfg, solo_validas)
     if actual is None or ventana.odometro_total is None:
         return None
     odo = ventana.odometro_total
     desde = ventana.ventana_inicio - timedelta(minutes=span)
-    ajustadas = [actual]
+    ajustadas = [(actual, True)]
     for v in sorted(recientes, key=lambda x: x.ventana_inicio, reverse=True):
-        if len(ajustadas) >= k:
+        if len(ajustadas) >= k + 2:
             break
         if v.ventana_inicio >= ventana.ventana_inicio:
             continue
         if v.ventana_inicio < desde:
             break
-        litros = _lectura_concordancia(v, cfg)
+        litros = _lectura_concordancia(v, cfg, solo_validas)
         if litros is None or v.odometro_total is None:
             continue
         if v.odometro_total > odo:
             return None  # odómetro inconsistente
         # lo que se consumió desde esa lectura hasta ahora
-        ajustadas.append(litros - (odo - v.odometro_total) * cfg.odometro_a_km / rend)
-    if len(ajustadas) < k or max(ajustadas) - min(ajustadas) > tol:
+        ajustadas.append(
+            (litros - (odo - v.odometro_total) * cfg.odometro_a_km / rend, False)
+        )
+    if len(ajustadas) < k:
         return None
-    return _r2(statistics.median(ajustadas))
+    orden = sorted(ajustadas)
+    mejor: list[float] | None = None
+    for i in range(len(orden) - k + 1):
+        grupo = orden[i : i + k]
+        valores = [g[0] for g in grupo]
+        rango = valores[-1] - valores[0]
+        if rango > tol or not any(g[1] for g in grupo):
+            continue
+        if mejor is None or rango < mejor[-1] - mejor[0]:
+            mejor = valores
+    if mejor is None:
+        return None
+    return _r2(statistics.median(mejor))
 
 
 def procesar_ventana(
@@ -429,6 +479,7 @@ def procesar_ventana(
     que avanzó el odómetro sin ignición. None = no se descuenta.
     """
     estado = _sin_km_apagado(ventana, estado, odometro_previo)
+    estado = _sin_pendiente_vencido(ventana, cfg, estado)
     ultimo = estado.ultimo_litro_confiable
 
     # --- conversión sensor -> litros ----------------------------------------------------
@@ -556,20 +607,31 @@ def procesar_ventana(
         if consumo is None:  # sin km o sin rendimiento no se puede validar la bajada
             return None
         nivel = _nivel_por_concordancia(ventana, recientes, cfg)
-        if nivel is None:
-            return None
-        caida_c = _r2(ultimo - nivel)
-        if caida_c <= 0:  # sin trinquete: la concordancia nunca sube el nivel
-            return None
-        if caida_c - consumo > cfg.umbral_extraccion:
-            # no la explica el consumo: eso solo lo decide una ventana válida
-            return None
-        return salida(
-            ResultadoEstado.CONSUMO_NORMAL,
-            [M_CONCORDANCIA],
-            _actualizado(ventana, nivel),
-            actualiza=True,
-        )
+        if nivel is not None and nivel < ultimo:
+            if ref_baja is not None:
+                nivel = max(nivel, ref_baja)  # la calibración no mide menos que su piso
+            caida_c = _r2(ultimo - nivel)
+            if caida_c <= 0:
+                return None
+            if caida_c - consumo > cfg.umbral_extraccion:
+                # no la explica el consumo: eso solo lo decide una ventana válida
+                return None
+            return salida(
+                ResultadoEstado.CONSUMO_NORMAL,
+                [M_CONCORDANCIA],
+                _actualizado(ventana, nivel),
+                actualiza=True,
+            )
+        if cfg.concordancia_carga:
+            sube = _nivel_por_concordancia(ventana, recientes, cfg, solo_validas=True)
+            if sube is not None and _r2(sube - ultimo) >= cfg.umbral_carga_confirmada:
+                return salida(
+                    ResultadoEstado.CARGA_CONFIRMADA,
+                    [M_CARGA_CONCORDANCIA],
+                    _actualizado(ventana, sube),
+                    actualiza=True,
+                )
+        return None
 
     # 1. Ventana descartada: no hay lectura utilizable.
     if ventana.calidad is WindowQuality.DESCARTADA:

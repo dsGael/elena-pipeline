@@ -49,7 +49,7 @@ class _ConnFalsa:
     ``reciente``: valor de fuel_rendimiento_reciente, o "sin_fila" si la tabla no tiene fila.
     """
 
-    def __init__(self, reciente, rend_config=5.0, concordancia=(None, None, None)):
+    def __init__(self, reciente, rend_config=5.0, concordancia=(None, None, None, False, None)):
         self.reciente = reciente
         self.rend_config = rend_config
         self.concordancia = concordancia
@@ -84,9 +84,18 @@ def test_sin_valor_en_ninguna_parte_no_hay_rendimiento():
 
 
 def test_cargar_config_lee_la_concordancia():
-    cfg = cargar_config(_ConnFalsa(None, concordancia=(3, Decimal("0.80"), 20)), "1")
+    cfg = cargar_config(_ConnFalsa(None, concordancia=(3, Decimal("0.80"), 20, False, None)), "1")
     assert cfg.concordancia_ventanas == 3
     assert cfg.concordancia_tolerancia == 0.8 and cfg.concordancia_max_minutos == 20.0
+
+
+def test_cargar_config_lee_carga_y_vencimiento_del_pendiente():
+    cfg = cargar_config(
+        _ConnFalsa(None, concordancia=(3, Decimal("0.8"), 20, True, 60)), "1"
+    )
+    assert cfg.concordancia_carga is True and cfg.pendiente_max_minutos == 60.0
+    base = cargar_config(_ConnFalsa(None), "1")
+    assert base.concordancia_carga is False and base.pendiente_max_minutos is None
 
 
 def test_concordancia_nula_queda_desactivada():

@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 
 from elena.calibration import CalibrationTable
 from elena.processor import (
+    M_CARGA_CONCORDANCIA,
     M_CONCORDANCIA,
     M_NIVEL_CONSERVADO,
     EstadoConfiable,
@@ -635,6 +636,90 @@ def test_ventana_inclinada_no_entra_a_la_concordancia():
     )
     out = _conc(actual, prev)
     assert out.resultado.estado_resultado is R.DUDOSO
+
+
+
+def test_concordancia_tolera_una_lectura_rara_entre_las_recientes():
+    # ajustadas: 9 (m0), 9 (m5), 12 (m10, rara), 9 (actual). Las 3 más recientes no
+    # concuerdan, pero 3 de las 4 sí.
+    prev = _viaje((12, 0, 1000.0), (13, 10, 1024.0))
+    prev.insert(1, ventana(10, minuto=5, odo=1030.0, vel=30.0, sensor=5089.5))  # 9.5 L
+    actual = ventana(9, minuto=15, odo=1036.0, vel=30.0)
+    out = _conc(actual, prev)
+    assert out.resultado.motivo == M_CONCORDANCIA
+    assert out.estado.ultimo_litro_confiable == 9.0
+
+
+def test_concordancia_no_baja_del_piso_de_calibracion():
+    # ajustadas 3.92, 3.96 y ~4.2 (4.2 L = sensor 5709): la mediana queda bajo 4 L
+    prev = _viaje((5, 0, 1037.0), (5, 5, 1037.5))
+    actual = ventana(5, minuto=10, odo=1050.0, vel=30.0, sensor=5709.0)
+    out = _conc(actual, prev, est=estado(litros=6.0))
+    assert out.resultado.motivo == M_CONCORDANCIA
+    assert out.estado.ultimo_litro_confiable == 4.0
+
+
+EST10 = estado(litros=10.0)
+CFG_CARGA = replace(CFG_CONC, concordancia_carga=True)
+
+
+def test_concordancia_confirma_una_carga_con_lecturas_validas():
+    *prev, actual = _viaje((14, 0, 1000.0), (14, 5, 1000.0), (14, 10, 1000.0))
+    out = _conc(actual, prev, cfg=CFG_CARGA, est=EST10)
+    assert out.resultado.estado_resultado is R.CARGA_CONFIRMADA
+    assert out.resultado.motivo == M_CARGA_CONCORDANCIA
+    assert out.estado.ultimo_litro_confiable == 14.0
+    assert out.evento is not None
+
+
+def test_concordancia_carga_apagada_por_defecto():
+    *prev, actual = _viaje((14, 0, 1000.0), (14, 5, 1000.0), (14, 10, 1000.0))
+    out = _conc(actual, prev, est=EST10)
+    assert out.resultado.estado_resultado is R.SIN_ACTUALIZACION
+
+
+def test_concordancia_carga_pide_subida_minima():
+    *prev, actual = _viaje((12, 0, 1000.0), (12, 5, 1000.0), (12, 10, 1000.0))
+    out = _conc(actual, prev, cfg=CFG_CARGA, est=EST10)  # +2 L < umbral confirmada (3)
+    assert out.resultado.estado_resultado is R.SIN_ACTUALIZACION
+
+
+def test_concordancia_carga_ignora_ventanas_con_pocas_muestras():
+    prev = _viaje((14, 0, 1000.0), (14, 5, 1000.0))
+    actual = replace(
+        ventana(14, minuto=10, odo=1000.0, calidad=WindowQuality.DUDOSA, motivo=M_MUESTRAS),
+        muestras_validas=5,
+    )
+    out = _conc(actual, prev, cfg=CFG_CARGA, est=EST10)
+    assert out.resultado.estado_resultado is R.DUDOSO
+
+
+def test_pendiente_vencido_no_suma_a_lo_sostenido():
+    viejo = estado(
+        litros=10.0,
+        pendiente_tipo=PendienteTipo.AUMENTO,
+        pendiente_desde=T0 - timedelta(minutes=120),
+        pendiente_litros=3.0,
+        pendiente_ventanas=1,
+    )
+    # sin límite: 1 + 1 = 2 ventanas sostenidas -> carga confirmada
+    assert run(ventana(13), CFG_FULL, viejo).resultado.estado_resultado is R.CARGA_CONFIRMADA
+    cfg = replace(CFG_FULL, pendiente_max_minutos=60)
+    out = run(ventana(13), cfg, viejo)
+    assert out.resultado.estado_resultado is R.CARGA_PROBABLE
+    assert out.estado.pendiente_ventanas == 1
+
+
+def test_pendiente_reciente_si_suma_con_limite():
+    reciente = estado(
+        litros=10.0,
+        pendiente_tipo=PendienteTipo.AUMENTO,
+        pendiente_desde=T0 - timedelta(minutes=10),
+        pendiente_litros=3.0,
+        pendiente_ventanas=1,
+    )
+    cfg = replace(CFG_FULL, pendiente_max_minutos=60)
+    assert run(ventana(13), cfg, reciente).resultado.estado_resultado is R.CARGA_CONFIRMADA
 
 
 # --- nivel estimado ----------------------------------------------------------------------

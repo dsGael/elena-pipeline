@@ -38,6 +38,8 @@ EXPECTED_COLUMNS: dict[str, dict[str, str]] = {
         "concordancia_ventanas": "int4",
         "concordancia_tolerancia": "numeric",
         "concordancia_max_minutos": "int4",
+        "concordancia_carga": "bool",
+        "pendiente_max_minutos": "int4",
         "calibracion": "jsonb",
         "calibracion_version": "int4",
         "updated_at": "timestamptz",
@@ -179,6 +181,7 @@ PARAMETROS_PENDIENTES = (
     "concordancia_ventanas",
     "concordancia_tolerancia",
     "concordancia_max_minutos",
+    "pendiente_max_minutos",
 )
 
 _SHORT_TYPES = {
