@@ -222,10 +222,22 @@ def procesar_autobus(
             )
         )
 
+    # Odómetro de la ventana anterior, para no contar lo que avanza sin ignición.
+    odo_previo: float | None = None
+    if ventanas:
+        anterior = previas[-1:] or repo.ventanas_previas(
+            idautobus, ventanas[0].ventana_inicio, 1
+        )
+        odo_previo = anterior[-1].odometro_total if anterior else None
+
     for v in ventanas:
-        salida = procesar_ventana(v, cfg, estado, idautobus, previo, previas)
+        salida = procesar_ventana(
+            v, cfg, estado, idautobus, previo, previas, odometro_previo=odo_previo
+        )
         if cfg.concordancia_ventanas:
             previas = (previas + [v])[-VENTANAS_PREVIAS:]
+        if v.odometro_total is not None:
+            odo_previo = v.odometro_total
         repo.guardar_resultado(salida.resultado)
         resumen.eventos += _gestionar_eventos(
             repo, idautobus, estado, salida.estado, salida.resultado, salida.evento, v

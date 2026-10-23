@@ -52,6 +52,12 @@ Para mostrar el nivel "en vivo", cada ventana guarda además
 ``último confiable - km desde entonces / rendimiento`` (también las descartadas, que tienen
 odómetro aunque no tengan sensor). Es solo informativo: no interviene en ninguna decisión. Sin
 rendimiento u odómetro vale lo mismo que ``litros_finales``.
+
+Odómetro sin ignición: en la cochera el GPS pierde señal y el odómetro avanza sin movimiento
+real. Esos km no son confiables, así que una ventana con ``ignicion_dominante`` False recorre
+``odometro_ultimo_confiable`` lo mismo que avanzó el odómetro desde la ventana anterior
+(``odometro_previo``). Así no cuentan como consumo ni en ``litros_estimados`` ni en
+``km_desde_ultimo_confiable`` / ``consumo_esperado``. Ignición desconocida (None) sí cuenta.
 """
 
 from __future__ import annotations
@@ -154,6 +160,7 @@ class VentanaEntrada:
     latitude: float | None = None
     longitude: float | None = None
     muestras_validas: int | None = None
+    ignicion_dominante: bool | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -306,6 +313,24 @@ def _litros_estimados(
     return _r2(max(0.0, ultimo - (odo - base) * cfg.odometro_a_km / rend))
 
 
+def _sin_km_apagado(
+    ventana: VentanaEntrada,
+    estado: EstadoConfiable,
+    odometro_previo: float | None,
+) -> EstadoConfiable:
+    """Recorre el odómetro de referencia lo que avanzó sin ignición (ver cabecera)."""
+    odo, prev, base = (
+        ventana.odometro_total,
+        odometro_previo,
+        estado.odometro_ultimo_confiable,
+    )
+    if ventana.ignicion_dominante is not False or odo is None or prev is None:
+        return estado
+    if base is None or odo <= prev:
+        return estado
+    return replace(estado, odometro_ultimo_confiable=min(odo, base + (odo - prev)))
+
+
 def _sin_pendiente(estado: EstadoConfiable) -> EstadoConfiable:
     """Limpia el pendiente (carga/extracción) pero conserva el último valor confiable."""
     return replace(
@@ -392,6 +417,7 @@ def procesar_ventana(
     idautobus: str,
     estado_resultado_previo: ResultadoEstado | None = None,
     recientes: Sequence[VentanaEntrada] = (),
+    odometro_previo: float | None = None,
 ) -> SalidaProceso:
     """Clasifica una ventana. Debe llamarse en orden cronológico por autobús.
 
@@ -399,7 +425,10 @@ def procesar_ventana(
     autobús (el pipeline lo lee de fuel_processed_result); evita duplicar eventos.
     ``recientes``: ventanas anteriores del mismo autobús (cualquier calidad), para la
     concordancia. Si está desactivada se ignoran.
+    ``odometro_previo``: odometro_total de la ventana anterior del autobús, para descontar lo
+    que avanzó el odómetro sin ignición. None = no se descuenta.
     """
+    estado = _sin_km_apagado(ventana, estado, odometro_previo)
     ultimo = estado.ultimo_litro_confiable
 
     # --- conversión sensor -> litros ----------------------------------------------------

@@ -270,6 +270,30 @@ def test_ventanas_descartadas_no_mueven_el_estado_pero_se_registran():
     assert repo.estado.ultimo_litro_confiable == 10.0
 
 
+def test_odometro_sin_ignicion_entre_corridas_no_cuenta():
+    # referencia en 100 km; 12 km "fantasma" apagado; la corrida siguiente arranca con ignición
+    apagada = replace(
+        vent(1, 10, odo=112_000.0),
+        calidad=WindowQuality.DESCARTADA,
+        sensor_mediana=None,
+        ignicion_dominante=False,
+    )
+    encendida = replace(
+        apagada,
+        ventana_id="w002",
+        ventana_inicio=T0 + timedelta(minutes=10),
+        ventana_fin=T0 + timedelta(minutes=15),
+        odometro_total=124_000.0,
+        ignicion_dominante=True,
+    )
+    repo = RepoMemoria([vent(0, 12), apagada])
+    correr(repo, max_ventanas=2)
+    repo.ventanas.append(encendida)
+    correr(repo)
+    est = [repo.resultados[k].litros_estimados for k in ("w001", "w002")]
+    assert est == [12.0, 11.0]  # solo los 12 km con ignición: 1 L
+
+
 def test_sin_ventanas_no_escribe_estado():
     repo = RepoMemoria([])
     res = correr(repo)

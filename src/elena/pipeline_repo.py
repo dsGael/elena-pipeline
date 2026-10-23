@@ -57,7 +57,7 @@ ORDER BY ventana_inicio DESC LIMIT 1
 VENTANAS_SQL = """
 SELECT w.id::text, w.imei, w.ventana_inicio, w.ventana_fin, w.calidad_ventana,
        w.motivo_calidad, w.sensor_mediana, w.velocidad_promedio, w.odometro_total,
-       w.muestras_validas
+       w.muestras_validas, w.ignicion_dominante
 FROM public.fuel_windows w
 JOIN public.dispositivos d ON d.imei = w.imei
 WHERE d.idautobus = %(bus)s
@@ -71,7 +71,7 @@ LIMIT %(limite)s
 VENTANAS_PREVIAS_SQL = """
 SELECT w.id::text, w.imei, w.ventana_inicio, w.ventana_fin, w.calidad_ventana,
        w.motivo_calidad, w.sensor_mediana, w.velocidad_promedio, w.odometro_total,
-       w.muestras_validas
+       w.muestras_validas, w.ignicion_dominante
 FROM public.fuel_windows w
 JOIN public.dispositivos d ON d.imei = w.imei
 WHERE d.idautobus = %(bus)s
@@ -93,6 +93,7 @@ def _ventana(r: Any) -> VentanaEntrada:
         velocidad_promedio=_f(r[7]),
         odometro_total=_f(r[8]),
         muestras_validas=None if r[9] is None else int(r[9]),
+        ignicion_dominante=r[10],
     )
 
 

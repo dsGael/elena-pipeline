@@ -677,3 +677,53 @@ def test_estimado_no_baja_de_cero():
     v = ventana(minuto=5, odo=2000.0, calidad=WindowQuality.DESCARTADA, sensor=None)
     out = run(v, CFG_FULL, EST12)  # 1000 km: se "gastarían" 83 L
     assert out.resultado.litros_estimados == 0.0
+
+
+# --- odómetro sin ignición ---------------------------------------------------------------
+# En la cochera el odómetro avanza sin movimiento real: esos km no cuentan.
+
+
+def _apagada(minuto, odo, ign=False):
+    v = ventana(minuto=minuto, odo=odo, calidad=WindowQuality.DESCARTADA, sensor=None)
+    return replace(v, ignicion_dominante=ign)
+
+
+def test_sin_ignicion_el_odometro_no_baja_el_estimado():
+    out = procesar_ventana(
+        _apagada(5, 1024.0), CFG_FULL, EST12, "YARIS1", odometro_previo=1000.0
+    )
+    assert out.resultado.litros_estimados == 12.0
+    assert out.estado.odometro_ultimo_confiable == 1024.0
+
+
+def test_viaje_cochera_y_arranque_solo_cuentan_km_con_ignicion():
+    # 24 km con ignición, 12 km "fantasma" apagado, luego 12 km reales con ignición
+    est, prev, estimados = EST12, 1000.0, []
+    for v in (
+        _apagada(5, 1024.0, ign=True),
+        _apagada(10, 1036.0),
+        _apagada(15, 1048.0, ign=True),
+    ):
+        out = procesar_ventana(v, CFG_FULL, est, "YARIS1", odometro_previo=prev)
+        est, prev = out.estado, v.odometro_total
+        estimados.append(out.resultado.litros_estimados)
+    assert estimados == [10.0, 10.0, 9.0]  # 36 km reales / 12 km/L = 3 L
+
+
+def test_sin_ignicion_tampoco_cuenta_en_el_consumo_esperado():
+    v = replace(ventana(12, minuto=5, odo=1024.0), ignicion_dominante=False)
+    out = procesar_ventana(v, CFG_FULL, EST12, "YARIS1", odometro_previo=1000.0)
+    assert out.resultado.km_desde_ultimo_confiable == 0.0
+    assert out.resultado.consumo_esperado == 0.0
+
+
+def test_ignicion_desconocida_si_cuenta():
+    out = procesar_ventana(
+        _apagada(5, 1024.0, ign=None), CFG_FULL, EST12, "YARIS1", odometro_previo=1000.0
+    )
+    assert out.resultado.litros_estimados == 10.0
+
+
+def test_sin_odometro_previo_no_se_descuenta():
+    out = procesar_ventana(_apagada(5, 1024.0), CFG_FULL, EST12, "YARIS1")
+    assert out.resultado.litros_estimados == 10.0
