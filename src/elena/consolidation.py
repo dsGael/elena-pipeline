@@ -3,7 +3,8 @@
 Qué hace
   1. Resuelve IMEI -> dispositivo -> autobús -> fuel_config (solo se consolidan los IMEI
      asignados a un autobús con configuración activa). fuel_config.columna_sensor indica de
-     qué columna de gps_records sale el sensor de cada autobús (s_analogo o fuel).
+     qué columna de gps_records sale el sensor de cada autobús (s_analogo o fuel). El descarte
+     por ignición apagada solo aplica a s_analogo: el sensor fuel lee bien con el motor apagado.
   2. Agrupa por (imei, ventana) usando SIEMPRE ``gps_records.recorded_at`` (nunca created_at).
   3. Quita duplicados exactos (mismo imei y recorded_at) antes de agregar.
   4. Calcula mediana, promedio, mín., máx., conteos y estadísticos de ángulo en SQL.
@@ -59,13 +60,15 @@ src AS (
     SELECT DISTINCT ON (g.imei, g.recorded_at)
            g.imei,
            g.recorded_at,
-           -- Con el motor apagado el sensor puede no ser confiable: esa lectura se descarta.
+           -- Con el motor apagado el sensor analógico puede no ser confiable: esa lectura se
+           -- descarta. El sensor 'fuel' sí lee bien apagado: nunca se descarta por ignición.
            -- La columna de origen la declara cada autobús en fuel_config.columna_sensor.
            -- En 'fuel' un valor negativo (p. ej. -4) es un código de lectura inválida: se ignora.
            -- El parámetro fuerza True/False para todos; NULL usa la opción de cada autobús.
            -- ignicion NULL = desconocida: la lectura se conserva.
            CASE WHEN COALESCE(%(descartar_sin_ignicion)s::boolean, cfg.descartar_sin_ignicion)
                      AND g.ignicion IS FALSE
+                     AND cfg.columna_sensor IS DISTINCT FROM 'fuel'
                 THEN NULL
                 ELSE CASE cfg.columna_sensor
                           WHEN 'fuel' THEN CASE WHEN g.fuel >= 0 THEN g.fuel END

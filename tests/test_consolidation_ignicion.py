@@ -105,11 +105,28 @@ def test_ventana_mixta_usa_solo_las_muestras_con_motor_encendido(conn):
     assert float(mediana) == 5036.0
 
 
+@pytest.mark.integration
+def test_sensor_fuel_conserva_lecturas_con_motor_apagado(conn):
+    conn.execute("UPDATE fuel_config SET columna_sensor = 'fuel' WHERE idautobus = 'YARIS1'")
+    for s in range(0, 40, 2):
+        conn.execute(
+            "INSERT INTO gps_records (imei, recorded_at, latitude, longitude, fuel, "
+            "inclinacion_vertical, ignicion, odometro_total) VALUES (%s,%s,0,0,%s,2.6,false,1000)",
+            (IMEI_YARIS, T0.replace(second=s), 420),
+        )
+    consolidate(conn, T0, T1, descartar_sin_ignicion=True)
+    fila = conn.execute(
+        "SELECT calidad_ventana, sensor_mediana, ignicion_dominante FROM fuel_windows"
+    ).fetchone()
+    assert fila[0] != "descartada" and float(fila[1]) == 420.0 and fila[2] is False
+
+
 def test_el_sql_elige_la_columna_del_sensor_por_autobus():
     assert "c.columna_sensor" in AGGREGATE_SQL
     assert "WHEN 'fuel' THEN CASE WHEN g.fuel >= 0 THEN g.fuel END" in AGGREGATE_SQL
     assert "ELSE g.s_analogo END" in AGGREGATE_SQL
     assert "c.descartar_sin_ignicion" in AGGREGATE_SQL
+    assert "AND cfg.columna_sensor IS DISTINCT FROM 'fuel'" in AGGREGATE_SQL
     assert (
         "COALESCE(%(descartar_sin_ignicion)s::boolean, cfg.descartar_sin_ignicion)"
         in AGGREGATE_SQL
