@@ -5,7 +5,6 @@ import pytest
 from elena.quality import (
     M_ANGULO,
     M_ANGULO_INESTABLE,
-    M_IGNICION,
     M_MUESTRAS,
     M_SENSOR_INESTABLE,
     M_SIN_INCLINACION,
@@ -23,14 +22,12 @@ def stats(**kw) -> WindowStats:
     base = WindowStats(
         muestras_totales=15,
         muestras_validas=15,
-        sensor_mediana=5036.0,
-        sensor_min=5030.0,
-        sensor_max=5042.0,
+        sensor_mediana=1374.0,
+        sensor_min=1368.0,
+        sensor_max=1380.0,
         inclinacion_mediana=2.9,
         muestras_con_angulo=15,
         muestras_angulo_valido=15,
-        muestras_con_ignicion=15,
-        muestras_ignicion_on=15,
     )
     return replace(base, **kw)
 
@@ -41,7 +38,6 @@ def test_ventana_valida():
     assert r.motivo is None
     assert r.angulo_corregido == pytest.approx(0.3)
     assert r.porcentaje_angulo_valido == 100.0
-    assert r.ignicion_dominante is True
 
 
 @pytest.mark.parametrize(
@@ -117,7 +113,7 @@ def test_min_muestras_solo_aplica_si_esta_configurado():
 
 
 def test_estabilidad_del_sensor():
-    ruido = stats(sensor_min=4900.0, sensor_max=5200.0)
+    ruido = stats(sensor_min=1250.0, sensor_max=1550.0)
     assert (
         evaluate_window(ruido, REGLAS).calidad is WindowQuality.VALIDA
     )  # regla desactivada
@@ -130,29 +126,3 @@ def test_porcentaje_de_angulo_minimo():
     assert evaluate_window(s, REGLAS).calidad is WindowQuality.VALIDA
     r = evaluate_window(s, replace(REGLAS, porcentaje_angulo_min=80.0))
     assert r.calidad is WindowQuality.DUDOSA and r.motivos == (M_ANGULO_INESTABLE,)
-
-
-def test_ignicion_apagada_no_invalida_por_defecto():
-    s = stats(muestras_ignicion_on=0)
-    r = evaluate_window(s, REGLAS)
-    assert r.calidad is WindowQuality.VALIDA
-    assert r.ignicion_dominante is False
-    r2 = evaluate_window(s, replace(REGLAS, ignicion_apagada_invalida=True))
-    assert r2.calidad is WindowQuality.DUDOSA and r2.motivos == (M_IGNICION,)
-
-
-def test_ignicion_dominante_por_mitad_o_mas():
-    assert (
-        evaluate_window(stats(muestras_ignicion_on=8), REGLAS).ignicion_dominante
-        is True
-    )
-    assert (
-        evaluate_window(stats(muestras_ignicion_on=7), REGLAS).ignicion_dominante
-        is False
-    )
-    assert (
-        evaluate_window(
-            stats(muestras_con_ignicion=0, muestras_ignicion_on=0), REGLAS
-        ).ignicion_dominante
-        is None
-    )

@@ -11,22 +11,22 @@ from elena.fuel_repo import (
     cargar_puntos_rendimiento,
     puntos_desde_filas,
 )
-from tests.conftest import YARIS_CALIBRACION
+from tests.conftest import CALIBRACION
 
 T0 = datetime(2026, 10, 8, 10, 0, tzinfo=ZoneInfo("America/Hermosillo"))
-CAL = CalibrationTable.from_json(YARIS_CALIBRACION)
+CAL = CalibrationTable.from_json(CALIBRACION)
 
 
 def test_puntos_desde_filas_convierte_y_omite_cotas():
     filas = [
-        (T0, Decimal(5036), Decimal(100000)),  # 10 L
-        (T0 + timedelta(minutes=5), Decimal(5800), Decimal(100100)),  # zona baja
+        (T0, Decimal(1374), Decimal(100000)),  # 10 L
+        (T0 + timedelta(minutes=5), Decimal(1), Decimal(100100)),  # zona baja
         (
             T0 + timedelta(minutes=10),
-            Decimal(4500),
+            Decimal(2500),
             Decimal(100200),
         ),  # arriba de calibración (cota)
-        (T0 + timedelta(minutes=15), Decimal(4953), None),  # 11 L sin odómetro
+        (T0 + timedelta(minutes=15), Decimal(1511), None),  # 11 L sin odómetro
     ]
     pts = puntos_desde_filas(filas, CAL)
     assert [(p.litros, p.odometro_total) for p in pts] == [
@@ -35,86 +35,41 @@ def test_puntos_desde_filas_convierte_y_omite_cotas():
     ]
 
 
-class _Res:
-    def __init__(self, row):
-        self._row = row
-
-    def fetchone(self):
-        return self._row
-
-
 class _ConnFalsa:
-    """Responde a las dos consultas de cargar_config sin base de datos.
+    """Responde a la consulta de cargar_config sin base de datos."""
 
-    ``reciente``: valor de fuel_rendimiento_reciente, o "sin_fila" si la tabla no tiene fila.
-    """
-
-    def __init__(self, reciente, rend_config=5.0, concordancia=(None, None, None, False, None)):
-        self.reciente = reciente
-        self.rend_config = rend_config
-        self.concordancia = concordancia
+    def __init__(self, row):
+        self.row = row
 
     def execute(self, sql, params=None):
-        if "fuel_rendimiento_reciente" in sql:
-            if self.reciente == "sin_fila":
-                return _Res(None)
-            return _Res((self.reciente,))
-        return _Res(
-            (YARIS_CALIBRACION, 2, 1, 2, 3, 5, 20, 3, self.rend_config)
-            + tuple(self.concordancia)
-        )
+        assert "fuel_config" in sql
+        return self
+
+    def fetchone(self):
+        return self.row
 
 
-def test_rendimiento_sale_de_la_tabla_reciente_cuando_se_pide():
-    cfg = cargar_config(_ConnFalsa(Decimal("11.5")), "1", rendimiento_de_tabla=True)
-    assert cfg.rendimiento_default == 11.5 and cfg.rendimiento_origen == "reciente"
-
-
-@pytest.mark.parametrize("reciente", [None, "sin_fila", Decimal(0), Decimal(-3)])
-def test_sin_valor_usable_en_la_tabla_se_usa_fuel_config(reciente):
-    cfg = cargar_config(_ConnFalsa(reciente), "1", rendimiento_de_tabla=True)
-    assert cfg.rendimiento_default == 5.0 and cfg.rendimiento_origen == "config"
-
-
-def test_sin_valor_en_ninguna_parte_no_hay_rendimiento():
-    cfg = cargar_config(
-        _ConnFalsa("sin_fila", rend_config=None), "1", rendimiento_de_tabla=True
+def test_cargar_config_lee_calibracion_salto_y_rendimiento():
+    cfg = cargar_config(_ConnFalsa((CALIBRACION, Decimal("2.0"), Decimal("11.5"))), "1")
+    assert cfg.calibracion.to_liters(1374).litros == pytest.approx(10)
+    assert cfg.umbral_carga_candidata == 2.0 and cfg.rendimiento_default == 11.5
+    assert cfg.odometro_a_km == 0.001
+    assert (
+        cargar_config(_ConnFalsa((CALIBRACION, 2, None)), "1").rendimiento_default
+        is None
     )
-    assert cfg.rendimiento_default is None and cfg.rendimiento_origen is None
 
 
-def test_cargar_config_lee_la_concordancia():
-    cfg = cargar_config(_ConnFalsa(None, concordancia=(3, Decimal("0.80"), 20, False, None)), "1")
-    assert cfg.concordancia_ventanas == 3
-    assert cfg.concordancia_tolerancia == 0.8 and cfg.concordancia_max_minutos == 20.0
-
-
-def test_cargar_config_lee_carga_y_vencimiento_del_pendiente():
-    cfg = cargar_config(
-        _ConnFalsa(None, concordancia=(3, Decimal("0.8"), 20, True, 60)), "1"
-    )
-    assert cfg.concordancia_carga is True and cfg.pendiente_max_minutos == 60.0
-    base = cargar_config(_ConnFalsa(None), "1")
-    assert base.concordancia_carga is False and base.pendiente_max_minutos is None
-
-
-def test_concordancia_nula_queda_desactivada():
-    cfg = cargar_config(_ConnFalsa(None), "1")
-    assert cfg.concordancia_ventanas is None and cfg.concordancia_tolerancia is None
-
-
-def test_por_defecto_cargar_config_ignora_la_tabla_reciente():
-    # el estimador de rendimiento no debe depender de su propio resultado
-    cfg = cargar_config(_ConnFalsa(Decimal("11.5")), "1")
-    assert cfg.rendimiento_default == 5.0 and cfg.rendimiento_origen == "config"
+def test_cargar_config_sin_fila_falla_sin_base():
+    with pytest.raises(ConfigError):
+        cargar_config(_ConnFalsa(None), "1")
 
 
 @pytest.mark.integration
 def test_cargar_config_lee_fuel_config(conn):
-    cfg = cargar_config(conn, "YARIS1")
-    assert cfg.calibracion.litros_zona_baja == 4
-    assert cfg.umbral_carga_confirmada == 3.0 and cfg.umbral_extraccion == 5.0
-    assert cfg.rendimiento_default is None and cfg.ventanas_sostenidas is None
+    cfg = cargar_config(conn, "BUS1")
+    assert cfg.calibracion.litros_zona_baja == 0
+    assert cfg.umbral_carga_candidata == 2.0 and cfg.rendimiento_default is None
     assert cfg.odometro_a_km == 0.001
 
 
@@ -126,7 +81,7 @@ def test_cargar_config_sin_fila_falla(conn):
 
 @pytest.mark.integration
 def test_cargar_puntos_rendimiento_solo_validas_del_autobus(conn):
-    from tests.conftest import IMEI_YARIS
+    from tests.conftest import IMEI_BUS
 
     def ins(minuto, calidad, sensor, odo):
         ini = T0 + timedelta(minutes=minuto)
@@ -134,48 +89,17 @@ def test_cargar_puntos_rendimiento_solo_validas_del_autobus(conn):
             "INSERT INTO fuel_windows (imei, ventana_inicio, ventana_fin, muestras_totales, "
             "muestras_validas, sensor_mediana, odometro_total, calidad_ventana) "
             "VALUES (%s,%s,%s,15,15,%s,%s,%s)",
-            (IMEI_YARIS, ini, ini + timedelta(minutes=5), sensor, odo, calidad),
+            (IMEI_BUS, ini, ini + timedelta(minutes=5), sensor, odo, calidad),
         )
 
-    ins(0, "valida", 5036, 100000)
-    ins(5, "dudosa", 5036, 100100)  # no entra
-    ins(10, "valida", 4953, 112000)
-    pts = cargar_puntos_rendimiento(conn, "YARIS1", T0, T0 + timedelta(hours=1), CAL)
+    ins(0, "valida", 1374, 100000)
+    ins(5, "dudosa", 1374, 100100)  # no entra
+    ins(10, "valida", 1511, 112000)
+    pts = cargar_puntos_rendimiento(conn, "BUS1", T0, T0 + timedelta(hours=1), CAL)
     assert [(p.litros, p.odometro_total) for p in pts] == [
         (10.0, 100000.0),
         (11.0, 112000.0),
     ]
-
-
-def test_formatear_eventos_vacio_y_con_filas():
-    from elena.fuel_repo import EventoFila, formatear_eventos
-
-    tz = ZoneInfo("America/Hermosillo")
-    assert formatear_eventos([], tz) == ["(sin eventos)"]
-    e = EventoFila(
-        fecha_inicio=datetime(2026, 10, 8, 17, 5, tzinfo=ZoneInfo("UTC")),
-        fecha_fin=None,
-        idautobus="1",
-        tipo_evento="carga_confirmada",
-        estado="confirmado",
-        litros_antes=10.0,
-        litros_despues=13.0,
-        litros_evento=3.0,
-        latitude=29.07,
-        longitude=-110.95,
-        calidad_evento="valida",
-        motivo="aumento_valido_sostenido",
-    )
-    lineas = formatear_eventos([e], tz)
-    assert len(lineas) == 2
-    # 17:05 UTC = 10:05 en Hermosillo (UTC-7, sin horario de verano)
-    assert "2026-10-08 10:05" in lineas[1] and "carga_confirmada" in lineas[1]
-    assert "29.07000,-110.95000" in lineas[1] and "3.00" in lineas[1]
-    # sin coordenadas se indica claramente
-    from dataclasses import replace
-
-    sin = replace(e, latitude=None, longitude=None)
-    assert "sin posición" in formatear_eventos([sin], tz)[1]
 
 
 def test_rendimiento_reciente_usa_la_config_del_autobus(monkeypatch):
@@ -221,7 +145,7 @@ def test_rendimiento_reciente_sin_config_propaga_el_error(monkeypatch):
 
 
 def test_guardar_rendimiento_reciente_con_y_sin_estimacion():
-    from elena.pipeline_repo import guardar_rendimiento_reciente
+    from elena.fuel_repo import guardar_rendimiento_reciente
     from elena.rendimiento import RendimientoReciente
 
     class Conn:
@@ -263,9 +187,7 @@ def _serie_km(i0, i1):
     from elena.rendimiento import PuntoRendimiento
 
     return [
-        PuntoRendimiento(
-            T0 + timedelta(minutes=5 * i), 40.0 - i / 12, 1e5 + i * 1000.0
-        )
+        PuntoRendimiento(T0 + timedelta(minutes=5 * i), 40.0 - i / 12, 1e5 + i * 1000.0)
         for i in range(i0, i1)
     ]
 
@@ -329,7 +251,7 @@ def test_bloques_nuevos_con_historial_retoma_en_el_ultimo_fin(monkeypatch):
 def test_guardar_bloques_cuenta_solo_los_nuevos():
     from types import SimpleNamespace
 
-    from elena.pipeline_repo import guardar_bloques
+    from elena.fuel_repo import guardar_bloques
     from elena.rendimiento import calcular_bloques
 
     bloques = calcular_bloques(_serie_km(0, 130), km_bloque=50)
@@ -353,7 +275,7 @@ def test_guardar_bloques_cuenta_solo_los_nuevos():
 
 
 def test_guardar_bloques_toma_las_coordenadas_de_gps_records():
-    from elena.pipeline_repo import (
+    from elena.fuel_repo import (
         GUARDAR_RENDIMIENTO_RECIENTE_SQL,
         INSERTAR_BLOQUE_SQL,
     )

@@ -14,7 +14,6 @@ dependencies = [
 ]
 
 [project.scripts]
-elena = "elena:main"
 elena-fuel = "elena.cli:app"
 
 [build-system]

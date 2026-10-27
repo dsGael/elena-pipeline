@@ -1,19 +1,19 @@
-"""Lecturas de solo lectura de la base que comparten el pipeline y los comandos.
+"""Acceso a la base para el rendimiento (km/L): config, puntos y escritura de resultados.
 
-SQL manual (sin ORM). Nada aquí escribe en la base.
+SQL manual (sin ORM). Lee fuel_config, fuel_windows, dispositivos y gps_records; escribe solo en
+fuel_rendimiento_reciente y fuel_rendimiento_historial.
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
-from dataclasses import dataclass, replace
-from datetime import datetime, timedelta, tzinfo
+from collections.abc import Iterable
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 from typing import Any
 
 from psycopg import Connection
 
 from .calibration import CalibrationTable
-from .processor import ProcesadorConfig
 from .rendimiento import (
     BloqueRendimiento,
     PuntoRendimiento,
@@ -23,19 +23,8 @@ from .rendimiento import (
 )
 
 CONFIG_SQL = """
-SELECT calibracion, calibracion_version, umbral_carga_dudosa, umbral_carga_candidata,
-       umbral_carga_confirmada, umbral_extraccion, velocidad_max_carga,
-       ventanas_sostenidas, rendimiento_default,
-       concordancia_ventanas, concordancia_tolerancia, concordancia_max_minutos,
-       concordancia_carga, pendiente_max_minutos
+SELECT calibracion, umbral_carga_candidata, rendimiento_default
 FROM public.fuel_config
-WHERE idautobus = %(idautobus)s
-"""
-
-# Rendimiento más reciente del autobús (lo escribe el run-cycle; ver sql/12).
-RENDIMIENTO_RECIENTE_SQL = """
-SELECT rendimiento_km_l
-FROM public.fuel_rendimiento_reciente
 WHERE idautobus = %(idautobus)s
 """
 
@@ -53,72 +42,34 @@ ORDER BY w.ventana_inicio
 
 
 class ConfigError(RuntimeError):
-    """El autobús no tiene fuel_config o su calibración es inválida."""
+    """El autobús no tiene fuel_config."""
+
+
+@dataclass(frozen=True, slots=True)
+class ConfigRendimiento:
+    calibracion: CalibrationTable
+    # Salto de nivel que corta un tramo (carga/extracción).
+    umbral_carga_candidata: float
+    rendimiento_default: float | None = None  # km/L esperado para atravesar huecos
+    # Factor para pasar odometro_total a km. gps_records lo guarda en METROS (Teltonika).
+    odometro_a_km: float = 0.001
 
 
 def _f(v: Any) -> float | None:
     return None if v is None else float(v)
 
 
-def rendimiento_guardado(conn: Connection, idautobus: str) -> float | None:
-    """Rendimiento (km/L) de ``fuel_rendimiento_reciente``; None si no hay un valor usable."""
-    row = conn.execute(RENDIMIENTO_RECIENTE_SQL, {"idautobus": idautobus}).fetchone()
-    valor = _f(row[0]) if row else None
-    return valor if valor is not None and valor > 0 else None
-
-
-def cargar_config(
-    conn: Connection, idautobus: str, *, rendimiento_de_tabla: bool = False
-) -> ProcesadorConfig:
-    """Config del autobús desde fuel_config.
-
-    Con ``rendimiento_de_tabla`` el rendimiento sale de ``fuel_rendimiento_reciente`` y
-    ``fuel_config.rendimiento_default`` queda solo como respaldo (si la tabla no tiene un valor).
-    Quien estima el rendimiento NO debe pedirlo así: dependería de su propio resultado.
-    """
+def cargar_config(conn: Connection, idautobus: str) -> ConfigRendimiento:
+    """Config del autobús desde fuel_config."""
     row = conn.execute(CONFIG_SQL, {"idautobus": idautobus}).fetchone()
     if row is None:
         raise ConfigError(f"El autobús {idautobus!r} no tiene fila en fuel_config.")
-    (
-        calib,
-        version,
-        dudosa,
-        candidata,
-        confirmada,
-        extraccion,
-        vmax,
-        sost,
-        rend,
-        conc_k,
-        conc_tol,
-        conc_min,
-        conc_carga,
-        pend_min,
-    ) = row
-    cfg = ProcesadorConfig(
+    calib, candidata, rend = row
+    return ConfigRendimiento(
         calibracion=CalibrationTable.from_json(calib),
-        calibracion_version=int(version),
-        umbral_carga_dudosa=float(dudosa),
         umbral_carga_candidata=float(candidata),
-        umbral_carga_confirmada=float(confirmada),
-        umbral_extraccion=float(extraccion),
-        velocidad_max_carga=_f(vmax),
-        ventanas_sostenidas=None if sost is None else int(sost),
         rendimiento_default=_f(rend),
-        rendimiento_origen="config" if _f(rend) is not None else None,
-        concordancia_ventanas=None if conc_k is None else int(conc_k),
-        concordancia_tolerancia=_f(conc_tol),
-        concordancia_max_minutos=_f(conc_min),
-        concordancia_carga=bool(conc_carga),
-        pendiente_max_minutos=_f(pend_min),
     )
-    if rendimiento_de_tabla:
-        reciente = rendimiento_guardado(conn, idautobus)
-        if reciente is not None:
-            cfg = replace(
-                cfg, rendimiento_default=reciente, rendimiento_origen="reciente"
-            )
-    return cfg
 
 
 def puntos_desde_filas(
@@ -184,105 +135,6 @@ def rendimiento_reciente(
         salto_litros=cfg.umbral_carga_candidata,
         rendimiento_esperado=cfg.rendimiento_default,
     )
-
-
-# --------------------------------------------------------------------------------------
-# Eventos (solo lectura)
-# --------------------------------------------------------------------------------------
-
-EVENTOS_SQL = """
-SELECT e.fecha_inicio, e.fecha_fin, e.idautobus, e.tipo_evento, e.estado,
-       e.litros_antes, e.litros_despues, e.litros_evento,
-       e.latitude, e.longitude, e.calidad_evento, e.motivo
-FROM public.fuel_events e
-WHERE (%(bus)s::text IS NULL OR e.idautobus = %(bus)s::text)
-  AND (%(desde)s::timestamptz IS NULL OR e.fecha_inicio >= %(desde)s::timestamptz)
-  AND (%(hasta)s::timestamptz IS NULL OR e.fecha_inicio <  %(hasta)s::timestamptz)
-  AND (%(estado)s::text IS NULL OR e.estado = %(estado)s::text)
-  AND (%(tipo)s::text IS NULL OR e.tipo_evento = %(tipo)s::text)
-ORDER BY e.fecha_inicio DESC, e.created_at DESC
-LIMIT %(limite)s
-"""
-
-
-@dataclass(frozen=True, slots=True)
-class EventoFila:
-    fecha_inicio: datetime
-    fecha_fin: datetime | None
-    idautobus: str
-    tipo_evento: str
-    estado: str
-    litros_antes: float
-    litros_despues: float
-    litros_evento: float
-    latitude: float | None
-    longitude: float | None
-    calidad_evento: str | None
-    motivo: str | None
-
-
-def listar_eventos(
-    conn: Connection,
-    *,
-    idautobus: str | None = None,
-    desde: datetime | None = None,
-    hasta: datetime | None = None,
-    estado: str | None = None,
-    tipo: str | None = None,
-    limite: int = 50,
-) -> list[EventoFila]:
-    filas = conn.execute(
-        EVENTOS_SQL,
-        {
-            "bus": idautobus,
-            "desde": desde,
-            "hasta": hasta,
-            "estado": estado,
-            "tipo": tipo,
-            "limite": limite,
-        },
-    ).fetchall()
-    return [
-        EventoFila(
-            fecha_inicio=r[0],
-            fecha_fin=r[1],
-            idautobus=r[2],
-            tipo_evento=r[3],
-            estado=r[4],
-            litros_antes=float(r[5]),
-            litros_despues=float(r[6]),
-            litros_evento=float(r[7]),
-            latitude=_f(r[8]),
-            longitude=_f(r[9]),
-            calidad_evento=r[10],
-            motivo=r[11],
-        )
-        for r in filas
-    ]
-
-
-def formatear_eventos(filas: Sequence[EventoFila], tz: tzinfo) -> list[str]:
-    """Tabla de texto (una línea por evento) con las horas en la zona ``tz``."""
-    if not filas:
-        return ["(sin eventos)"]
-    cab = (
-        f"{'inicio (local)':<16} {'bus':<6} {'tipo':<34} {'estado':<11} "
-        f"{'antes':>6} {'despues':>7} {'litros':>7}  ubicación / motivo"
-    )
-    out = [cab]
-    for e in filas:
-        ini = e.fecha_inicio.astimezone(tz).strftime("%Y-%m-%d %H:%M")
-        ubic = (
-            f"{e.latitude:.5f},{e.longitude:.5f}"
-            if e.latitude is not None and e.longitude is not None
-            else "sin posición"
-        )
-        out.append(
-            f"{ini:<16} {e.idautobus:<6} {e.tipo_evento:<34} {e.estado:<11} "
-            f"{e.litros_antes:>6.2f} {e.litros_despues:>7.2f} {e.litros_evento:>7.2f}  "
-            f"{ubic}  {e.motivo or ''}"
-        )
-    return out
 
 
 # --------------------------------------------------------------------------------------
@@ -358,3 +210,152 @@ def bloques_rendimiento_nuevos(
         salto_litros=cfg.umbral_carga_candidata,
         rendimiento_esperado=cfg.rendimiento_default,
     )
+
+
+# fuel_windows no guarda posición: se toma de gps_records dentro de la ventana de 5 min que
+# empieza en el instante dado (la primera muestra para el inicio, la última para el fin).
+# Se guarda como texto 'lat,lon' (5 decimales). Si no hay muestra con coordenadas, queda NULL.
+_POS_INICIO = """
+LEFT JOIN LATERAL (
+    SELECT concat(round(g.latitude::numeric, 5), ',', round(g.longitude::numeric, 5)) AS coord
+    FROM public.gps_records g
+    JOIN public.dispositivos d ON d.imei = g.imei
+    WHERE d.idautobus = %(bus)s
+      AND g.recorded_at >= {t} AND g.recorded_at < {t} + interval '5 minutes'
+      AND g.latitude IS NOT NULL AND g.longitude IS NOT NULL
+    ORDER BY g.recorded_at ASC LIMIT 1
+) p_ini ON true"""
+_POS_FIN = """
+LEFT JOIN LATERAL (
+    SELECT concat(round(g.latitude::numeric, 5), ',', round(g.longitude::numeric, 5)) AS coord
+    FROM public.gps_records g
+    JOIN public.dispositivos d ON d.imei = g.imei
+    WHERE d.idautobus = %(bus)s
+      AND g.recorded_at >= {t} AND g.recorded_at < {t} + interval '5 minutes'
+      AND g.latitude IS NOT NULL AND g.longitude IS NOT NULL
+    ORDER BY g.recorded_at DESC LIMIT 1
+) p_fin ON true"""
+
+
+GUARDAR_RENDIMIENTO_RECIENTE_SQL = (
+    """
+INSERT INTO public.fuel_rendimiento_reciente (
+    idautobus, calculado_en, km_ventana, rendimiento_km_l, error_pct, km, litros,
+    puntos, segmentos, desde, hasta, motivo,
+    coordenadas_inicio, coordenadas_fin)
+SELECT %(bus)s::varchar, now(), %(km_ventana)s::numeric, %(rend)s::numeric,
+       %(error)s::numeric, %(km)s::numeric, %(litros)s::numeric,
+       %(puntos)s::integer, %(segmentos)s::integer, %(desde)s::timestamptz,
+       %(hasta)s::timestamptz, %(motivo)s::text,
+       p_ini.coord, p_fin.coord
+FROM (SELECT 1) x"""
+    + _POS_INICIO.format(t="%(desde)s::timestamptz")
+    + _POS_FIN.format(t="%(hasta)s::timestamptz")
+    + """
+ON CONFLICT (idautobus) DO UPDATE SET
+    calculado_en = now(),
+    km_ventana = EXCLUDED.km_ventana,
+    rendimiento_km_l = EXCLUDED.rendimiento_km_l,
+    error_pct = EXCLUDED.error_pct,
+    km = EXCLUDED.km,
+    litros = EXCLUDED.litros,
+    puntos = EXCLUDED.puntos,
+    segmentos = EXCLUDED.segmentos,
+    desde = EXCLUDED.desde,
+    hasta = EXCLUDED.hasta,
+    motivo = EXCLUDED.motivo,
+    coordenadas_inicio = EXCLUDED.coordenadas_inicio,
+    coordenadas_fin = EXCLUDED.coordenadas_fin
+"""
+)
+
+# Sin estimación: se conserva el último valor bueno y solo se avisa el motivo.
+SIN_ESTIMACION_RENDIMIENTO_RECIENTE_SQL = """
+INSERT INTO public.fuel_rendimiento_reciente (idautobus, calculado_en, km_ventana, km, puntos, segmentos, motivo)
+VALUES (%(bus)s, now(), %(km_ventana)s, 0, 0, 0, %(motivo)s)
+ON CONFLICT (idautobus) DO UPDATE SET calculado_en = now(), motivo = EXCLUDED.motivo
+"""
+
+
+def guardar_rendimiento_reciente(
+    conn: Connection, idautobus: str, est: RendimientoReciente, km_ventana: float
+) -> None:
+    """Una fila por autobús con su rendimiento más reciente (la lee el dashboard)."""
+    if est.rendimiento_km_l is None:
+        conn.execute(
+            SIN_ESTIMACION_RENDIMIENTO_RECIENTE_SQL,
+            {"bus": idautobus, "km_ventana": km_ventana, "motivo": est.motivo},
+        )
+        return
+    conn.execute(
+        GUARDAR_RENDIMIENTO_RECIENTE_SQL,
+        {
+            "bus": idautobus,
+            "km_ventana": km_ventana,
+            "rend": est.rendimiento_km_l,
+            "error": est.error_pct,
+            "km": est.km,
+            "litros": est.litros,
+            "puntos": est.puntos,
+            "segmentos": est.segmentos,
+            "desde": est.desde,
+            "hasta": est.hasta,
+            "motivo": None,
+        },
+    )
+
+
+INSERTAR_BLOQUE_SQL = (
+    """
+INSERT INTO public.fuel_rendimiento_historial (
+    idautobus, fecha_inicio, fecha_fin, odometro_inicio_km, odometro_fin_km, km_recorridos,
+    litros_inicio, litros_fin, litros_consumidos, rendimiento_km_l, error_pct, puntos,
+    cierre, completo, estado, km_bloque,
+    coordenadas_inicio, coordenadas_fin)
+SELECT %(bus)s::varchar, %(inicio)s::timestamptz, %(fin)s::timestamptz,
+       %(odo_ini)s::numeric, %(odo_fin)s::numeric, %(km)s::numeric,
+       %(l_ini)s::numeric, %(l_fin)s::numeric, %(litros)s::numeric, %(rend)s::numeric,
+       %(error)s::numeric, %(puntos)s::integer,
+       %(cierre)s::text, %(completo)s::boolean, %(estado)s::text, %(km_bloque)s::numeric,
+       p_ini.coord, p_fin.coord
+FROM (SELECT 1) x"""
+    + _POS_INICIO.format(t="%(inicio)s::timestamptz")
+    + _POS_FIN.format(t="%(fin)s::timestamptz")
+    + """
+ON CONFLICT (idautobus, fecha_inicio) DO NOTHING
+"""
+)
+
+
+def guardar_bloques(
+    conn: Connection,
+    idautobus: str,
+    bloques: list[BloqueRendimiento],
+    km_bloque: float,
+) -> int:
+    """Agrega bloques al historial (idempotente). Devuelve cuántos eran nuevos."""
+    nuevos = 0
+    for b in bloques:
+        cur = conn.execute(
+            INSERTAR_BLOQUE_SQL,
+            {
+                "bus": idautobus,
+                "inicio": b.inicio,
+                "fin": b.fin,
+                "odo_ini": b.odometro_inicio_km,
+                "odo_fin": b.odometro_fin_km,
+                "km": b.km,
+                "l_ini": b.litros_inicio,
+                "l_fin": b.litros_fin,
+                "litros": b.litros_consumidos,
+                "rend": b.rendimiento_km_l,
+                "error": b.error_pct,
+                "puntos": b.puntos,
+                "cierre": b.cierre,
+                "completo": b.completo,
+                "estado": b.estado,
+                "km_bloque": km_bloque,
+            },
+        )
+        nuevos += cur.rowcount
+    return nuevos

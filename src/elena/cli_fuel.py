@@ -11,10 +11,7 @@ Comandos:
     elena-fuel estimar-rendimiento --idautobus X [--desde ...] [--hasta ...]
     elena-fuel rendimiento-reciente [--idautobus X] [--km 100] [--dias 30] [--guardar]
     elena-fuel historial-rendimiento [--idautobus X] [--km-bloque 50] [--desde ...] [--guardar]
-    elena-fuel process [--idautobus X] [--max-ventanas N]
     elena-fuel run-cycle [--log-dir logs]      (lo que ejecuta el Task Scheduler)
-    elena-fuel reprocess --idautobus X [--desde ...] [--aplicar]
-    elena-fuel events [--idautobus X] [--desde ...] [--estado ...] [--tipo ...]
 """
 
 from __future__ import annotations
@@ -41,15 +38,12 @@ from .fuel_repo import (
     bloques_rendimiento_nuevos,
     cargar_config,
     cargar_puntos_rendimiento,
-    formatear_eventos,
-    listar_eventos,
+    guardar_bloques,
+    guardar_rendimiento_reciente,
     rendimiento_reciente,
 )
-from .pipeline import ejecutar_pipeline
-from .pipeline_repo import guardar_bloques, guardar_rendimiento_reciente
 from .quality import QualityRules
 from .rendimiento import BloqueRendimiento, RendimientoReciente, estimar_rendimiento
-from .reprocess import AutobusOcupado, planificar, reiniciar
 from .scheduled_worker import configurar_logging, ejecutar_ciclo
 from .settings import settings
 
@@ -117,7 +111,7 @@ def _print_summary(s: ConsolidationSummary, show: int) -> None:
     if s.muestra and show > 0:
         typer.echo("")
         typer.echo(
-            f"{'inicio (local)':<17} {'imei':<16} {'n/val':>7} {'sensor':>8} {'ang.corr':>9} {'%ang':>6} {'ign':>4}  calidad"
+            f"{'inicio (local)':<17} {'imei':<16} {'n/val':>7} {'sensor':>8} {'litros':>7} {'ang.corr':>9} {'%ang':>6}  calidad"
         )
         for w in s.muestra[:show]:
             ang = "-" if w.angulo_corregido is None else f"{w.angulo_corregido:.2f}"
@@ -127,12 +121,17 @@ def _print_summary(s: ConsolidationSummary, show: int) -> None:
                 else f"{w.porcentaje_angulo_valido:.0f}"
             )
             sensor = "-" if w.sensor_mediana is None else f"{w.sensor_mediana:.0f}"
-            ign = {True: "si", False: "no", None: "-"}[w.ignicion_dominante]
+            litros = "-" if w.litros is None else f"{w.litros:.2f}"
             motivo = f" ({w.motivo_calidad})" if w.motivo_calidad else ""
+            calib = (
+                f" [calibración: {w.estado_calibracion or 'inválida'}]"
+                if w.estado_calibracion != "ok"
+                else ""
+            )
             typer.echo(
                 f"{_fmt(w.ventana_inicio):<17} {w.imei:<16} "
-                f"{w.muestras_totales:>3}/{w.muestras_validas:<3} {sensor:>8} {ang:>9} {pct:>6} {ign:>4}  "
-                f"{w.calidad_ventana}{motivo}"
+                f"{w.muestras_totales:>3}/{w.muestras_validas:<3} {sensor:>8} {litros:>7} {ang:>9} {pct:>6}  "
+                f"{w.calidad_ventana}{motivo}{calib}"
             )
 
 
@@ -172,30 +171,14 @@ def consolidate_cmd(
         float | None,
         typer.Option(help="Regla opcional: % mínimo de muestras con ángulo válido."),
     ] = None,
-    ignicion_apagada_invalida: Annotated[
-        bool,
-        typer.Option(
-            "--ignicion-apagada-invalida",
-            help="Marca dudosas las ventanas con ignición apagada.",
-        ),
-    ] = False,
-    descartar_sin_ignicion: Annotated[
-        bool | None,
-        typer.Option(
-            "--descartar-sin-ignicion/--conservar-sin-ignicion",
-            help="Fuerza descartar (o conservar) las lecturas con el motor apagado en todos "
-            "los autobuses. Sin la opción, cada autobús usa fuel_config.descartar_sin_ignicion.",
-        ),
-    ] = None,
     verbose: Annotated[bool, typer.Option("--verbose", "-v")] = False,
 ) -> None:
-    """Agrupa gps_records en ventanas de 5 min y las guarda (o simula) en fuel_windows."""
+    """Agrupa gps_records en ventanas de 5 min con sus litros y las guarda (o simula) en fuel_windows."""
     _setup_logging(verbose)
     reglas = QualityRules(
         fcc_inclinacion=0.0,  # el FCC real viene de fuel_config por vehículo
         max_rango_sensor=max_rango_sensor,
         porcentaje_angulo_min=porcentaje_angulo_min,
-        ignicion_apagada_invalida=ignicion_apagada_invalida,
     )
     now = datetime.now(UTC)
     with get_connection() as conn:
@@ -224,7 +207,6 @@ def consolidate_cmd(
             base_rules=reglas,
             dry_run=dry_run,
             keep_sample=show,
-            descartar_sin_ignicion=descartar_sin_ignicion,
         )
         # el bloque 'with' confirma la transacción al salir sin errores; con --dry-run no hay nada que confirmar
     _print_summary(summary, show)
@@ -432,148 +414,17 @@ def historial_rendimiento_cmd(
     raise typer.Exit(code=1 if hubo_error else 0)
 
 
-@app.command("process")
-def process_cmd(
-    idautobus: Annotated[
-        str | None, typer.Option(help="Procesa solo este autobús (por defecto, todos).")
-    ] = None,
-    max_ventanas: Annotated[
-        int | None,
-        typer.Option(help="Máximo de ventanas por autobús en esta corrida."),
-    ] = None,
-    verbose: Annotated[bool, typer.Option("--verbose", "-v")] = False,
-) -> None:
-    """Procesa las ventanas nuevas: resultados, eventos y último valor confiable."""
-    _setup_logging(verbose)
-    with get_connection() as conn:
-        resumen = ejecutar_pipeline(
-            conn, idautobus=idautobus, max_ventanas=max_ventanas
-        )
-    if not resumen.autobuses:
-        typer.echo("No hay autobuses activos en fuel_config.")
-        return
-    for a in resumen.autobuses:
-        estados = "  ".join(f"{k}={v}" for k, v in sorted(a.por_estado.items()))
-        linea = f"{a.idautobus:<12} {a.resultado:<8} ventanas={a.procesadas}"
-        if a.eventos:
-            linea += f" eventos={a.eventos}"
-        if a.omitidas_tardias:
-            linea += f" tardías_omitidas={a.omitidas_tardias}"
-        typer.echo(linea + (f"  [{estados}]" if estados else ""))
-        if a.error:
-            typer.echo(f"  ERROR: {a.error}", err=True)
-    raise typer.Exit(code=0 if resumen.ok else 1)
-
-
 @app.command("run-cycle")
 def run_cycle_cmd(
     log_dir: Annotated[
         str, typer.Option(help="Carpeta del log rotativo (vacío = solo consola).")
     ] = "logs",
-    max_ventanas: Annotated[
-        int | None,
-        typer.Option(help="Máximo de ventanas por autobús en este ciclo."),
-    ] = None,
     verbose: Annotated[bool, typer.Option("--verbose", "-v")] = False,
 ) -> None:
-    """Un ciclo completo (consolidar + procesar). Pensado para el Task Scheduler."""
+    """Un ciclo completo (consolidar + rendimiento). Pensado para el Task Scheduler."""
     from pathlib import Path
 
     configurar_logging(Path(log_dir) if log_dir else None, verbose)
     with get_connection() as conn:
-        resultado = ejecutar_ciclo(conn, max_ventanas=max_ventanas)
+        resultado = ejecutar_ciclo(conn)
     raise typer.Exit(code=resultado.codigo)
-
-
-@app.command("reprocess")
-def reprocess_cmd(
-    idautobus: Annotated[str, typer.Option(help="Autobús a reprocesar.")],
-    desde: Annotated[
-        str | None,
-        typer.Option(
-            help="Inicio local 'AAAA-MM-DD HH:MM'. Sin él, se recalcula todo el autobús."
-        ),
-    ] = None,
-    aplicar: Annotated[
-        bool,
-        typer.Option(
-            "--aplicar",
-            help="Sin esta opción solo muestra lo que se borraría (no cambia nada).",
-        ),
-    ] = False,
-    verbose: Annotated[bool, typer.Option("--verbose", "-v")] = False,
-) -> None:
-    """Borra los resultados/eventos derivados de un autobús y los recalcula."""
-    _setup_logging(verbose)
-    d = _parse_local(desde, "--desde")
-    with get_connection() as conn:
-        plan = planificar(conn, idautobus, d)
-        conn.commit()
-        alcance = "todo el autobús" if d is None else f"desde {_fmt(d)}"
-        typer.echo(f"Autobús:      {idautobus} ({alcance})")
-        typer.echo(
-            f"Se borrarían: {plan.resultados} resultados, {plan.eventos} eventos"
-        )
-        if d is not None:
-            if plan.base is None:
-                typer.echo(
-                    "Estado base:  ninguno antes de esa fecha (se empieza de cero)"
-                )
-            else:
-                typer.echo(
-                    f"Estado base:  {plan.base.ultimo_litro_confiable:.2f} L "
-                    f"({_fmt(plan.base.fecha_ultimo_confiable)})"
-                )
-        if not aplicar:
-            typer.echo("\n(simulación: agrega --aplicar para ejecutar)")
-            return
-        try:
-            reiniciar(conn, idautobus, d)
-        except AutobusOcupado as exc:
-            typer.echo(f"ERROR: {exc}", err=True)
-            raise typer.Exit(code=2) from exc
-        resumen = ejecutar_pipeline(conn, idautobus=idautobus)
-    for a in resumen.autobuses:
-        estados = "  ".join(f"{k}={v}" for k, v in sorted(a.por_estado.items()))
-        typer.echo(
-            f"{a.idautobus:<12} {a.resultado:<8} ventanas={a.procesadas} eventos={a.eventos}"
-            + (f"  [{estados}]" if estados else "")
-        )
-        if a.error:
-            typer.echo(f"  ERROR: {a.error}", err=True)
-    raise typer.Exit(code=0 if resumen.ok else 1)
-
-
-@app.command("events")
-def events_cmd(
-    idautobus: Annotated[str | None, typer.Option(help="Solo este autobús.")] = None,
-    desde: Annotated[
-        str | None,
-        typer.Option(
-            help="Inicio local 'AAAA-MM-DD HH:MM'. Por defecto, 7 días atrás."
-        ),
-    ] = None,
-    hasta: Annotated[str | None, typer.Option(help="Fin local exclusivo.")] = None,
-    estado: Annotated[
-        str | None, typer.Option(help="abierto | confirmado | descartado")
-    ] = None,
-    tipo: Annotated[
-        str | None,
-        typer.Option(help="Por ejemplo carga_confirmada, posible_extraccion."),
-    ] = None,
-    limite: Annotated[int, typer.Option(help="Máximo de eventos a mostrar.")] = 50,
-) -> None:
-    """Lista los eventos detectados (cargas, extracciones, pendientes). Solo lectura."""
-    d = _parse_local(desde, "--desde") or datetime.now(UTC) - timedelta(days=7)
-    with get_connection() as conn:
-        filas = listar_eventos(
-            conn,
-            idautobus=idautobus,
-            desde=d,
-            hasta=_parse_local(hasta, "--hasta"),
-            estado=estado,
-            tipo=tipo,
-            limite=limite,
-        )
-    for linea in formatear_eventos(filas, _tz()):
-        typer.echo(linea)

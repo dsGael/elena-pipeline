@@ -6,14 +6,11 @@ Reglas (documento ELENA, sección 8):
 
         [{"litros": 4, "sensor": 5735}, {"litros": 5, "sensor": 5604}, ...]
 
-    litros estrictamente ascendentes y sensor estrictamente monótono. Hay dos sentidos:
-      * descendente: a más combustible, menor lectura (Yaris, s_analogo);
-      * ascendente: a más combustible, mayor lectura (CORBER, fuel).
-    El sentido se deduce de los dos primeros puntos y debe mantenerse en toda la tabla.
+    litros y sensor estrictamente ascendentes (sensor ``fuel``: a más combustible, mayor lectura).
 
-Casos de borde, sin extrapolar (el "lado bajo" es el del primer punto, sea cual sea el sentido):
-  * lectura más allá del primer punto  -> ZONA_BAJA: el nivel es "<= litros del primer punto".
-  * lectura más allá del último punto  -> ARRIBA_DE_CALIBRACION: el nivel es ">= litros del último punto".
+Casos de borde, sin extrapolar:
+  * lectura <= primer punto  -> ZONA_BAJA: el nivel es "<= litros del primer punto".
+  * lectura > último punto   -> ARRIBA_DE_CALIBRACION: el nivel es ">= litros del último punto".
 
 Este módulo es puro: no toca base de datos ni configuración.
 """
@@ -80,13 +77,10 @@ class CalibrationTable:
                     f"Sensor repetido ({cur.sensor}) en {prev.litros} y {cur.litros} L: "
                     f"deja un solo punto (el de menos litros) para esa lectura."
                 )
-        # Sentido de la tabla: +1 si el sensor sube con los litros, -1 si baja.
-        self._sentido = 1 if pts[1].sensor > pts[0].sensor else -1
-        for prev, cur in pairwise(pts):
-            if (cur.sensor - prev.sensor) * self._sentido < 0:
+            if cur.sensor < prev.sensor:
                 raise CalibrationError(
-                    f"El sensor debe ser monótono: siempre sube o siempre baja al subir los "
-                    f"litros ({prev.litros} L={prev.sensor} -> {cur.litros} L={cur.sensor})."
+                    f"El sensor debe subir al subir los litros "
+                    f"({prev.litros} L={prev.sensor} -> {cur.litros} L={cur.sensor})."
                 )
         self._points: tuple[CalibrationPoint, ...] = tuple(pts)
 
@@ -145,15 +139,13 @@ class CalibrationTable:
             return LitersResult(None, CalibStatus.SIN_LECTURA)
 
         pts = self._points
-        # Se normaliza a "sube con los litros" multiplicando por el sentido.
-        u = x * self._sentido
-        if u <= pts[0].sensor * self._sentido:
+        if x <= pts[0].sensor:
             return LitersResult(pts[0].litros, CalibStatus.ZONA_BAJA)
-        if u > pts[-1].sensor * self._sentido:
+        if x > pts[-1].sensor:
             return LitersResult(pts[-1].litros, CalibStatus.ARRIBA_DE_CALIBRACION)
 
         for a, b in pairwise(pts):
-            if a.sensor * self._sentido <= u <= b.sensor * self._sentido:
+            if a.sensor <= x <= b.sensor:
                 fraccion = (x - a.sensor) / (b.sensor - a.sensor)
                 return LitersResult(
                     a.litros + fraccion * (b.litros - a.litros), CalibStatus.OK

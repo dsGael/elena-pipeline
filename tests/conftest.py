@@ -19,14 +19,15 @@ import pytest
 
 SCHEMA_SQL = Path(__file__).resolve().parents[1] / "sql" / "11_schema_elena_v2.sql"
 
-YARIS_CALIBRACION = (
-    '[{"litros":4,"sensor":5735},{"litros":5,"sensor":5604},{"litros":6,"sensor":5510},'
-    '{"litros":7,"sensor":5344},{"litros":8,"sensor":5233},{"litros":9,"sensor":5143},'
-    '{"litros":10,"sensor":5036},{"litros":11,"sensor":4953},{"litros":12,"sensor":4866},'
-    '{"litros":13,"sensor":4779},{"litros":14,"sensor":4692},{"litros":15,"sensor":4618}]'
+CALIBRACION = (
+    '[{"litros":0,"sensor":2},{"litros":1,"sensor":151},{"litros":2,"sensor":289},'
+    '{"litros":3,"sensor":425},{"litros":4,"sensor":560},{"litros":5,"sensor":700},'
+    '{"litros":6,"sensor":832},{"litros":7,"sensor":967},{"litros":8,"sensor":1103},'
+    '{"litros":9,"sensor":1232},{"litros":10,"sensor":1374},{"litros":11,"sensor":1511},'
+    '{"litros":12,"sensor":1651},{"litros":13,"sensor":1777},{"litros":14,"sensor":1918}]'
 )
 
-IMEI_YARIS = "350000000000001"
+IMEI_BUS = "350000000000001"
 IMEI_SIN_CONFIG = "350000000000002"  # dispositivo de un autobús sin fuel_config
 IMEI_SIN_ASIGNAR = "350000000000003"  # dispositivo sin autobús
 
@@ -62,17 +63,17 @@ def _schema(_test_dsn: str) -> str:
         )
         conn.execute(
             "INSERT INTO autobuses (idautobus, numero_economico, idcliente) "
-            "VALUES ('YARIS1','Y-01','C1'), ('BUS2','B-02','C1')"
+            "VALUES ('BUS1','B-01','C1'), ('BUS2','B-02','C1')"
         )
         conn.execute(
             "INSERT INTO dispositivos (iddispositivo, imei, idautobus) VALUES "
-            "('D1', %s, 'YARIS1'), ('D2', %s, 'BUS2'), ('D3', %s, NULL)",
-            (IMEI_YARIS, IMEI_SIN_CONFIG, IMEI_SIN_ASIGNAR),
+            "('D1', %s, 'BUS1'), ('D2', %s, 'BUS2'), ('D3', %s, NULL)",
+            (IMEI_BUS, IMEI_SIN_CONFIG, IMEI_SIN_ASIGNAR),
         )
         conn.execute(
             "INSERT INTO fuel_config (idautobus, fcc_inclinacion, angulo_max, calibracion) "
-            "VALUES ('YARIS1', 2.6, 5, %s::jsonb)",
-            (YARIS_CALIBRACION,),
+            "VALUES ('BUS1', 2.6, 5, %s::jsonb)",
+            (CALIBRACION,),
         )
     return _test_dsn
 

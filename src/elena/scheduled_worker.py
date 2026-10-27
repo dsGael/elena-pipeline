@@ -1,18 +1,17 @@
-"""Ciclo programado (Windows Task Scheduler): consolidar ventanas y procesarlas.
+"""Ciclo programado (Windows Task Scheduler): consolidar ventanas (con litros) y rendimiento.
 
 Un ciclo hace, en este orden:
   1. Toma un lock advisory de SESIÓN (``elena_fuel`` / ``ciclo``). Si otro ciclo ya corre, sale
      sin hacer nada (código 0): el Task Scheduler puede lanzar una segunda instancia.
-  2. Consolida gps_records -> fuel_windows desde la última ventana guardada (con traslape para
-     datos tardíos) hasta la última ventana cerrada, y confirma.
-  3. Procesa las ventanas nuevas de cada autobús (pipeline.ejecutar_pipeline).
-  4. Actualiza el rendimiento reciente (fuel_rendimiento_reciente) y agrega al historial los
+  2. Consolida gps_records -> fuel_windows (calidad y litros) desde la última ventana guardada
+     (con traslape para datos tardíos) hasta la última ventana cerrada, y confirma.
+  3. Actualiza el rendimiento reciente (fuel_rendimiento_reciente) y agrega al historial los
      bloques de km ya definitivos (fuel_rendimiento_historial). Un fallo aquí se registra pero
-     no cambia el código de salida: no es parte del procesamiento.
-  5. Libera el lock, también si algo falla.
+     no cambia el código de salida: no es parte de la consolidación.
+  4. Libera el lock, también si algo falla.
 
-Códigos de salida: 0 = bien u omitido por ciclo en curso; 1 = error en algún autobús o fallo del
-ciclo; 2 = no hay punto de partida (fuel_windows vacía: corre antes ``consolidate --desde``).
+Códigos de salida: 0 = bien u omitido por ciclo en curso; 1 = fallo del ciclo; 2 = no hay punto
+de partida (fuel_windows vacía: corre antes ``consolidate --desde``).
 """
 
 from __future__ import annotations
@@ -35,10 +34,10 @@ from .consolidation import (
 from .fuel_repo import (
     autobuses_activos,
     bloques_rendimiento_nuevos,
+    guardar_bloques,
+    guardar_rendimiento_reciente,
     rendimiento_reciente,
 )
-from .pipeline import ResumenPipeline, ejecutar_pipeline
-from .pipeline_repo import guardar_bloques, guardar_rendimiento_reciente
 from .quality import QualityRules
 
 log = logging.getLogger("elena.worker")
@@ -60,7 +59,6 @@ class ResultadoCiclo:
     codigo: int = EXIT_OK
     omitido: bool = False  # otro ciclo estaba corriendo
     consolidacion: ConsolidationSummary | None = None
-    pipeline: ResumenPipeline | None = None
     mensajes: list[str] = field(default_factory=list)
 
 
@@ -173,7 +171,11 @@ def actualizar_historial_rendimiento(
         try:
             with conn.transaction():
                 bloques = bloques_rendimiento_nuevos(
-                    conn, bus, ahora=ahora, km_bloque=km_bloque, dias_inicial=dias_inicial
+                    conn,
+                    bus,
+                    ahora=ahora,
+                    km_bloque=km_bloque,
+                    dias_inicial=dias_inicial,
                 )
                 n = guardar_bloques(conn, bus, bloques, km_bloque)
             nuevos += n
@@ -190,7 +192,6 @@ def ejecutar_ciclo(
     now: datetime | None = None,
     lag_minutes: int = 2,
     overlap_minutes: int = 60,
-    max_ventanas: int | None = None,
 ) -> ResultadoCiclo:
     res = ResultadoCiclo()
     if not _try_lock_ciclo(conn):
@@ -224,7 +225,6 @@ def ejecutar_ciclo(
                 hasta,
                 minutes=WINDOW_MINUTES,
                 base_rules=QualityRules(fcc_inclinacion=0.0),
-                descartar_sin_ignicion=None,  # lo decide fuel_config.descartar_sin_ignicion por autobús
             )
             conn.commit()
             c = res.consolidacion
@@ -241,21 +241,6 @@ def ejecutar_ciclo(
         else:
             log.info("Nada que consolidar (%s >= %s)", desde, hasta)
 
-        res.pipeline = ejecutar_pipeline(conn, max_ventanas=max_ventanas)
-        for a in res.pipeline.autobuses:
-            log.info(
-                "%s %s: ventanas=%d eventos=%d tardías=%d %s",
-                a.idautobus,
-                a.resultado,
-                a.procesadas,
-                a.eventos,
-                a.omitidas_tardias,
-                dict(a.por_estado),
-            )
-            if a.error:
-                log.error("%s: %s", a.idautobus, a.error)
-        if not res.pipeline.ok:
-            res.codigo = EXIT_ERROR
         actualizar_rendimiento_reciente(conn, ahora=ahora)
         actualizar_historial_rendimiento(conn, ahora=ahora)
         return res

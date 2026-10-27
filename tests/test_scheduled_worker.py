@@ -8,7 +8,6 @@ import pytest
 
 from elena import scheduled_worker as sw
 from elena.consolidation import ConsolidationSummary, NoStartError
-from elena.pipeline import ResumenAutobus, ResumenPipeline
 
 T0 = datetime(2026, 10, 8, 10, 0, tzinfo=ZoneInfo("America/Hermosillo"))
 T1 = datetime(2026, 10, 8, 11, 0, tzinfo=ZoneInfo("America/Hermosillo"))
@@ -50,8 +49,8 @@ class ConexionFalsa:
 
 @pytest.fixture
 def pasos(monkeypatch):
-    """Reemplaza plan_range, consolidate y ejecutar_pipeline; registra el orden."""
-    estado = {"orden": [], "pipeline": ResumenPipeline([ResumenAutobus("YARIS1")])}
+    """Reemplaza plan_range y consolidate; registra el orden."""
+    estado = {"orden": []}
 
     def plan(conn, **kw):
         estado["orden"].append("plan")
@@ -61,24 +60,19 @@ def pasos(monkeypatch):
         estado["orden"].append("consolidar")
         return ConsolidationSummary(desde=desde, hasta=hasta, ventanas=12, insertadas=1)
 
-    def pipeline(conn, **kw):
-        estado["orden"].append("pipeline")
-        return estado["pipeline"]
-
     monkeypatch.setattr(sw, "plan_range", plan)
     monkeypatch.setattr(sw, "consolidate", consolidar)
-    monkeypatch.setattr(sw, "ejecutar_pipeline", pipeline)
     # el rendimiento reciente se prueba aparte; aquí no toca la conexión falsa
     monkeypatch.setattr(sw, "actualizar_rendimiento_reciente", lambda conn, **kw: 0)
     monkeypatch.setattr(sw, "actualizar_historial_rendimiento", lambda conn, **kw: 0)
     return estado
 
 
-def test_ciclo_ok_orden_y_commit_entre_consolidar_y_procesar(pasos):
+def test_ciclo_ok_orden_y_commit_tras_consolidar(pasos):
     conn = ConexionFalsa()
     r = sw.ejecutar_ciclo(conn)
     assert r.codigo == sw.EXIT_OK and not r.omitido
-    assert pasos["orden"] == ["plan", "consolidar", "pipeline"]
+    assert pasos["orden"] == ["plan", "consolidar"]
     # lock -> commit(lock) -> commit tras consolidar -> unlock
     assert conn.pasos[0] == "lock" and conn.pasos[-1] == "unlock"
     assert conn.eventos.count("commit") >= 3
@@ -103,14 +97,6 @@ def test_sin_punto_de_partida_da_codigo_2_y_libera_el_lock(monkeypatch, pasos):
     assert pasos["orden"] == [] and conn.pasos[-1] == "unlock"
 
 
-def test_error_en_un_autobus_da_codigo_1(pasos):
-    pasos["pipeline"] = ResumenPipeline(
-        [ResumenAutobus("A"), ResumenAutobus("B", resultado="error", error="Boom")]
-    )
-    r = sw.ejecutar_ciclo(ConexionFalsa())
-    assert r.codigo == sw.EXIT_ERROR
-
-
 def test_excepcion_inesperada_da_codigo_1_y_siempre_libera_el_lock(monkeypatch, pasos):
     def consolidar(conn, desde, hasta, **kw):
         raise RuntimeError("se cayó la red")
@@ -119,14 +105,13 @@ def test_excepcion_inesperada_da_codigo_1_y_siempre_libera_el_lock(monkeypatch, 
     conn = ConexionFalsa()
     r = sw.ejecutar_ciclo(conn)
     assert r.codigo == sw.EXIT_ERROR
-    assert "pipeline" not in pasos["orden"]
     assert conn.pasos[-1] == "unlock" and "rollback" in conn.eventos
 
 
-def test_rango_vacio_no_consolida_pero_si_procesa(monkeypatch, pasos):
+def test_rango_vacio_no_consolida(monkeypatch, pasos):
     monkeypatch.setattr(sw, "plan_range", lambda conn, **kw: (T1, T1))
     r = sw.ejecutar_ciclo(ConexionFalsa())
-    assert pasos["orden"] == ["pipeline"] and r.consolidacion is None
+    assert pasos["orden"] == [] and r.consolidacion is None and r.codigo == sw.EXIT_OK
 
 
 def test_configurar_logging_crea_archivo_rotativo(tmp_path):
@@ -143,25 +128,7 @@ def test_configurar_logging_crea_archivo_rotativo(tmp_path):
     sw.configurar_logging(None)  # deja el estado limpio para otras pruebas
 
 
-def test_el_ciclo_deja_que_cada_autobus_decida_el_descarte_por_ignicion(
-    monkeypatch, pasos
-):
-    recibido = {}
-
-    def consolidar(conn, desde, hasta, **kw):
-        recibido.update(kw)
-        return ConsolidationSummary(desde=desde, hasta=hasta)
-
-    monkeypatch.setattr(sw, "consolidate", consolidar)
-    sw.ejecutar_ciclo(ConexionFalsa())
-    assert (
-        recibido["descartar_sin_ignicion"] is None
-    )  # lo decide fuel_config por autobús
-
-
-def test_el_ciclo_actualiza_el_rendimiento_reciente_despues_del_pipeline(
-    monkeypatch, pasos
-):
+def test_el_ciclo_actualiza_el_rendimiento_despues_de_consolidar(monkeypatch, pasos):
     def rendimiento(conn, **kw):
         pasos["orden"].append("rendimiento")
         pasos["ahora"] = kw["ahora"]
@@ -178,23 +145,10 @@ def test_el_ciclo_actualiza_el_rendimiento_reciente_despues_del_pipeline(
     assert pasos["orden"] == [
         "plan",
         "consolidar",
-        "pipeline",
         "rendimiento",
         "historial",
     ]
     assert pasos["ahora"] == T1
-
-
-def test_un_error_de_pipeline_no_impide_actualizar_el_rendimiento(monkeypatch, pasos):
-    llamado = []
-    monkeypatch.setattr(
-        sw, "actualizar_rendimiento_reciente", lambda conn, **kw: llamado.append(1)
-    )
-    pasos["pipeline"] = ResumenPipeline(
-        [ResumenAutobus("B", resultado="error", error="Boom")]
-    )
-    assert sw.ejecutar_ciclo(ConexionFalsa()).codigo == sw.EXIT_ERROR
-    assert llamado == [1]
 
 
 class ConexionRendimiento:
