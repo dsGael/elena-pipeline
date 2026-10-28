@@ -9,8 +9,9 @@ Qué hace
   5. La calidad de cada ventana (valida / dudosa / descartada) la decide ``quality.py``.
   6. Convierte la mediana del sensor a litros con la calibración del autobús
      (``fuel_config.calibracion``). Son litros crudos, con el ruido del sensor.
-  7. Calcula ``litros_grafica``: igual a ``litros``, salvo cuando el ángulo está fuera de rango;
-     ahí estima con la última ventana válida menos (km recorridos / rendimiento del autobús).
+  7. Calcula ``litros_grafica``: igual a ``litros``, salvo estacionado (se arrastra el nivel
+     anterior y solo pasan cargas/extracciones) o con el ángulo fuera de rango (última ventana
+     válida menos km / rendimiento).
   8. Hace upsert idempotente en ``fuel_windows`` por (imei, ventana_inicio).
 
 Qué NO hace: no modifica gps_records ni toca los litros crudos.
@@ -26,7 +27,8 @@ import logging
 from collections import Counter
 from dataclasses import dataclass, field, replace
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from itertools import pairwise
+from typing import Any, NamedTuple
 
 from psycopg import Connection
 
@@ -38,6 +40,14 @@ log = logging.getLogger(__name__)
 WINDOW_MINUTES = 5
 GRID_ORIGIN = datetime(2000, 1, 1, tzinfo=UTC)
 ODOMETRO_A_KM = 0.001  # gps_records guarda el odómetro en METROS (Teltonika)
+# < 300 m en 5 min es ir a < 3.6 km/h: maniobra o deriva del GPS estacionado (se ven ventanas
+# de hasta ~150 m sin moverse). Lo que se consume en ese tramo (~0.04 L) no se ve en el sensor.
+ODOMETRO_PARADO_M = 300.0
+# Al detenerse el sensor tarda hasta 2 ventanas en asentarse en el valor (falso) de la rampa:
+# la de la parada mezcla muestras en marcha y en reposo.
+VENTANAS_TRANSICION = 2
+# Ya estacionado, la deriva es ~0.1 L por ventana; una carga/extracción mueve 2-12 L por ventana.
+SALTO_ESTACIONADO_L = 1.0
 
 W_MIN_MUESTRAS_PENDIENTE = "min_muestras_ventana sin definir en fuel_config: no se valida suficiencia de muestras."
 
@@ -161,6 +171,22 @@ WHERE ventana_inicio < %(desde)s
   AND odometro_total IS NOT NULL
   AND (%(imei)s::text IS NULL OR imei = %(imei)s::text)
 ORDER BY imei, ventana_inicio DESC
+"""
+
+# Últimas ventanas (con odómetro) de cada IMEI antes del rango: dicen si la primera del rango
+# está estacionada y cuántas ventanas lleva así.
+PREVIAS_SQL = """
+SELECT imei, odometro_total, litros_grafica, litros
+FROM (
+    SELECT imei, ventana_inicio, odometro_total, litros_grafica, litros,
+           row_number() OVER (PARTITION BY imei ORDER BY ventana_inicio DESC) AS k
+    FROM public.fuel_windows
+    WHERE ventana_inicio < %(desde)s
+      AND odometro_total IS NOT NULL
+      AND (%(imei)s::text IS NULL OR imei = %(imei)s::text)
+) x
+WHERE k <= %(n)s
+ORDER BY imei, k
 """
 
 
@@ -339,6 +365,15 @@ class ConsolidatedWindow:
         }
 
 
+class Previa(NamedTuple):
+    """Lo que ``litros_para_grafica`` necesita de la ventana anterior de un IMEI."""
+
+    odometro: float
+    litros_grafica: float | None
+    litros: float | None  # última lectura cruda disponible
+    parados: int  # estacionadas seguidas hasta esta (tope VENTANAS_TRANSICION + 1)
+
+
 @dataclass(slots=True)
 class ConsolidationSummary:
     desde: datetime
@@ -420,24 +455,55 @@ def litros_para_grafica(
     windows: list[ConsolidatedWindow],
     rendimientos: dict[str, float | None],
     anclas: dict[str, tuple[float, float]],
+    previas: dict[str, Previa],
 ) -> list[ConsolidatedWindow]:
-    """Llena ``litros_grafica``. ``anclas`` (imei -> (litros, odómetro) de la última ventana
-    válida) se actualiza en el lugar, para que el ancla pase de un bloque al siguiente.
+    """Llena ``litros_grafica``. ``windows`` debe venir en orden de tiempo.
 
-    Con el ángulo fuera de rango el sensor no es confiable: se estima
-    ancla.litros - km recorridos desde el ancla / rendimiento. NULL si falta ancla, rendimiento
-    u odómetro, o si el odómetro retrocede. ``windows`` debe venir en orden de tiempo.
+    ``anclas`` (imei -> (litros, odómetro) de la última ventana válida en movimiento) y
+    ``previas`` (imei -> estado de la ventana anterior) se actualizan en el lugar, para que
+    pasen de un bloque al siguiente.
+
+    1. Estacionado (el odómetro avanzó menos de ``ODOMETRO_PARADO_M`` desde la ventana
+       anterior): se arrastra el nivel de la ventana anterior. Al detenerse el sensor brinca
+       a un valor falso (rampas, ±2-5 L) aunque el ángulo esté en rango, y luego solo deriva
+       despacio. Por eso se ignoran las primeras ``VENTANAS_TRANSICION`` ventanas y, después,
+       un cambio de al menos ``SALTO_ESTACIONADO_L`` entre ventanas seguidas (carga o
+       extracción con el motor apagado) hace que la gráfica tome la lectura y mueve el ancla.
+    2. Ángulo fuera de rango: ancla.litros - km recorridos desde el ancla / rendimiento. NULL si
+       falta ancla, rendimiento u odómetro, o si el odómetro retrocede.
+    3. Lo demás: los litros medidos.
     """
     out: list[ConsolidatedWindow] = []
     for w in windows:
         litros = w.litros
-        if w.motivo_calidad and M_ANGULO in w.motivo_calidad.split("; "):
+        previa = previas.get(w.imei)
+        estacionado = (
+            previa is not None
+            and previa.litros_grafica is not None
+            and w.odometro_total is not None
+            and 0 <= w.odometro_total - previa.odometro < ODOMETRO_PARADO_M
+        )
+        parados = min(previa.parados + 1, VENTANAS_TRANSICION + 1) if estacionado else 0
+        if estacionado:
+            litros = previa.litros_grafica
+            if (
+                parados > VENTANAS_TRANSICION
+                and w.litros is not None
+                and previa.litros is not None
+                and abs(w.litros - previa.litros) >= SALTO_ESTACIONADO_L
+            ):
+                # Se toma la lectura y no la suma de cambios: así no se pierden los cambios
+                # chicos ni se rebasan los topes del sensor (0 L y máximo calibrado).
+                litros = w.litros
+                anclas[w.imei] = (litros, w.odometro_total)
+        elif w.motivo_calidad and M_ANGULO in w.motivo_calidad.split("; "):
             ancla = anclas.get(w.imei)
             rend = rendimientos.get(w.idautobus)
             litros = None
             if ancla and rend and w.odometro_total is not None:
                 km = (w.odometro_total - ancla[1]) * ODOMETRO_A_KM
-                if km >= 0:
+                # negativo = ancla vieja con muchos km encima: no hay estimado creíble
+                if km >= 0 and ancla[0] - km / rend >= 0:
                     litros = _r(ancla[0] - km / rend)
         elif (
             w.calidad_ventana == "valida"
@@ -445,6 +511,9 @@ def litros_para_grafica(
             and w.odometro_total is not None
         ):
             anclas[w.imei] = (w.litros, w.odometro_total)
+        if w.odometro_total is not None:
+            crudo = w.litros if w.litros is not None else previa and previa.litros
+            previas[w.imei] = Previa(w.odometro_total, litros, crudo, parados)
         out.append(replace(w, litros_grafica=litros))
     return out
 
@@ -459,6 +528,25 @@ def fetch_anclas(
 ) -> dict[str, tuple[float, float]]:
     rows = conn.execute(ANCLAS_SQL, {"desde": desde, "imei": imei}).fetchall()
     return {i: (float(lt), float(odo)) for i, lt, odo in rows}
+
+
+def fetch_previas(
+    conn: Connection, desde: datetime, imei: str | None = None
+) -> dict[str, Previa]:
+    """Estado de la última ventana antes de ``desde``; ``parados`` sale de las anteriores."""
+    params = {"desde": desde, "imei": imei, "n": VENTANAS_TRANSICION + 2}
+    filas: dict[str, list[tuple[Any, ...]]] = {}
+    for i, odo, lg, lt in conn.execute(PREVIAS_SQL, params).fetchall():
+        filas.setdefault(i, []).append((float(odo), _f(lg), _f(lt)))
+    out: dict[str, Previa] = {}
+    for i, f in filas.items():  # f: de la más reciente a la más vieja
+        parados = 0
+        for nueva, vieja in pairwise(f):
+            if not 0 <= nueva[0] - vieja[0] < ODOMETRO_PARADO_M:
+                break
+            parados += 1
+        out[i] = Previa(f[0][0], f[0][1], f[0][2], parados)
+    return out
 
 
 def fetch_calibraciones(
@@ -549,6 +637,7 @@ def consolidate(
     calibraciones = fetch_calibraciones(conn, summary)
     rendimientos = fetch_rendimientos(conn)
     anclas = fetch_anclas(conn, desde, imei)
+    previas = fetch_previas(conn, desde, imei)
 
     cursor = desde
     while cursor < hasta:
@@ -561,6 +650,7 @@ def consolidate(
             ],
             rendimientos,
             anclas,
+            previas,
         )
 
         for a, w in zip(aggs, windows, strict=True):
@@ -598,6 +688,7 @@ __all__ = [
     "ConsolidatedWindow",
     "ConsolidationSummary",
     "NoStartError",
+    "Previa",
     "WindowAggregate",
     "align_down",
     "build_window",
@@ -606,6 +697,7 @@ __all__ = [
     "fetch_aggregates",
     "fetch_anclas",
     "fetch_calibraciones",
+    "fetch_previas",
     "fetch_rendimientos",
     "litros_para_grafica",
     "plan_range",
