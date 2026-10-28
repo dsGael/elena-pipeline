@@ -9,9 +9,11 @@ Qué hace
   5. La calidad de cada ventana (valida / dudosa / descartada) la decide ``quality.py``.
   6. Convierte la mediana del sensor a litros con la calibración del autobús
      (``fuel_config.calibracion``). Son litros crudos, con el ruido del sensor.
-  7. Hace upsert idempotente en ``fuel_windows`` por (imei, ventana_inicio).
+  7. Calcula ``litros_grafica``: igual a ``litros``, salvo cuando el ángulo está fuera de rango;
+     ahí estima con la última ventana válida menos (km recorridos / rendimiento del autobús).
+  8. Hace upsert idempotente en ``fuel_windows`` por (imei, ventana_inicio).
 
-Qué NO hace: no modifica gps_records ni limpia el ruido de los litros.
+Qué NO hace: no modifica gps_records ni toca los litros crudos.
 
 Las ventanas viven en una rejilla global anclada a 2000-01-01 00:00 UTC. Como Hermosillo
 no tiene horario de verano y 5 min divide una hora exacta, la rejilla coincide con las
@@ -29,12 +31,13 @@ from typing import Any
 from psycopg import Connection
 
 from .calibration import CalibrationError, CalibrationTable
-from .quality import QualityRules, WindowStats, evaluate_window
+from .quality import M_ANGULO, QualityRules, WindowStats, evaluate_window
 
 log = logging.getLogger(__name__)
 
 WINDOW_MINUTES = 5
 GRID_ORIGIN = datetime(2000, 1, 1, tzinfo=UTC)
+ODOMETRO_A_KM = 0.001  # gps_records guarda el odómetro en METROS (Teltonika)
 
 W_MIN_MUESTRAS_PENDIENTE = "min_muestras_ventana sin definir en fuel_config: no se valida suficiencia de muestras."
 
@@ -63,6 +66,7 @@ src AS (
            CASE WHEN g.fuel >= 0 THEN g.fuel END                       AS sensor_uso,
            g.inclinacion_vertical,
            g.speed,
+           g.ignicion,
            g.odometro_total
     FROM public.gps_records g
     JOIN cfg ON cfg.imei = g.imei
@@ -90,6 +94,10 @@ SELECT s.imei,
              AND abs(s.inclinacion_vertical - cfg.fcc_inclinacion) <= cfg.angulo_max
        )                                                                   AS muestras_angulo_valido,
        avg(s.speed)                                                        AS velocidad_promedio,
+       -- Informativo (gráfica): encendida si al menos la mitad de las muestras con dato lo están.
+       CASE WHEN count(s.ignicion) > 0
+            THEN count(*) FILTER (WHERE s.ignicion) * 2 >= count(s.ignicion)
+       END                                                                 AS ignicion_dominante,
        max(s.odometro_total)                                               AS odometro_total
 FROM src s
 JOIN cfg ON cfg.imei = s.imei
@@ -103,14 +111,14 @@ INSERT INTO public.fuel_windows (
     imei, ventana_inicio, ventana_fin, muestras_totales, muestras_validas,
     sensor_mediana, sensor_promedio, sensor_min, sensor_max,
     inclinacion_mediana, angulo_corregido, porcentaje_angulo_valido,
-    velocidad_promedio, odometro_total,
-    calidad_ventana, motivo_calidad, litros, estado_calibracion
+    velocidad_promedio, ignicion_dominante, odometro_total,
+    calidad_ventana, motivo_calidad, litros, estado_calibracion, litros_grafica
 ) VALUES (
     %(imei)s, %(ventana_inicio)s, %(ventana_fin)s, %(muestras_totales)s, %(muestras_validas)s,
     %(sensor_mediana)s, %(sensor_promedio)s, %(sensor_min)s, %(sensor_max)s,
     %(inclinacion_mediana)s, %(angulo_corregido)s, %(porcentaje_angulo_valido)s,
-    %(velocidad_promedio)s, %(odometro_total)s,
-    %(calidad_ventana)s, %(motivo_calidad)s, %(litros)s, %(estado_calibracion)s
+    %(velocidad_promedio)s, %(ignicion_dominante)s, %(odometro_total)s,
+    %(calidad_ventana)s, %(motivo_calidad)s, %(litros)s, %(estado_calibracion)s, %(litros_grafica)s
 )
 ON CONFLICT (imei, ventana_inicio) DO UPDATE SET
     ventana_fin              = EXCLUDED.ventana_fin,
@@ -124,15 +132,36 @@ ON CONFLICT (imei, ventana_inicio) DO UPDATE SET
     angulo_corregido         = EXCLUDED.angulo_corregido,
     porcentaje_angulo_valido = EXCLUDED.porcentaje_angulo_valido,
     velocidad_promedio       = EXCLUDED.velocidad_promedio,
+    ignicion_dominante       = EXCLUDED.ignicion_dominante,
     odometro_total           = EXCLUDED.odometro_total,
     calidad_ventana          = EXCLUDED.calidad_ventana,
     motivo_calidad           = EXCLUDED.motivo_calidad,
     litros                   = EXCLUDED.litros,
-    estado_calibracion       = EXCLUDED.estado_calibracion
+    estado_calibracion       = EXCLUDED.estado_calibracion,
+    litros_grafica           = EXCLUDED.litros_grafica
 RETURNING (xmax = 0) AS insertada
 """
 
 CALIBRACIONES_SQL = "SELECT idautobus, calibracion FROM public.fuel_config WHERE activo"
+
+RENDIMIENTOS_SQL = """
+SELECT c.idautobus, coalesce(r.rendimiento_km_l, c.rendimiento_default)
+FROM public.fuel_config c
+LEFT JOIN public.fuel_rendimiento_reciente r ON r.idautobus = c.idautobus
+WHERE c.activo
+"""
+
+# Última ventana válida (con litros y odómetro) de cada IMEI antes del rango a consolidar.
+ANCLAS_SQL = """
+SELECT DISTINCT ON (imei) imei, litros, odometro_total
+FROM public.fuel_windows
+WHERE ventana_inicio < %(desde)s
+  AND calidad_ventana = 'valida'
+  AND litros IS NOT NULL
+  AND odometro_total IS NOT NULL
+  AND (%(imei)s::text IS NULL OR imei = %(imei)s::text)
+ORDER BY imei, ventana_inicio DESC
+"""
 
 
 # --------------------------------------------------------------------------------------
@@ -232,6 +261,7 @@ class WindowAggregate:
     muestras_con_angulo: int
     muestras_angulo_valido: int
     velocidad_promedio: float | None
+    ignicion_dominante: bool | None
     odometro_total: float | None
 
     @classmethod
@@ -253,6 +283,7 @@ class WindowAggregate:
             muestras_con_angulo=int(row["muestras_con_angulo"]),
             muestras_angulo_valido=int(row["muestras_angulo_valido"]),
             velocidad_promedio=_f(row["velocidad_promedio"]),
+            ignicion_dominante=row["ignicion_dominante"],
             odometro_total=_f(row["odometro_total"]),
         )
 
@@ -275,11 +306,13 @@ class ConsolidatedWindow:
     angulo_corregido: float | None
     porcentaje_angulo_valido: float | None
     velocidad_promedio: float | None
+    ignicion_dominante: bool | None
     odometro_total: float | None
     calidad_ventana: str
     motivo_calidad: str | None
     litros: float | None  # crudos: en zona_baja / arriba_de_calibracion son cotas
     estado_calibracion: str | None  # None = el autobús no tiene calibración válida
+    litros_grafica: float | None = None  # lo llena litros_para_grafica
 
     def as_params(self) -> dict[str, Any]:
         return {
@@ -296,11 +329,13 @@ class ConsolidatedWindow:
             "angulo_corregido": self.angulo_corregido,
             "porcentaje_angulo_valido": self.porcentaje_angulo_valido,
             "velocidad_promedio": self.velocidad_promedio,
+            "ignicion_dominante": self.ignicion_dominante,
             "odometro_total": self.odometro_total,
             "calidad_ventana": self.calidad_ventana,
             "motivo_calidad": self.motivo_calidad,
             "litros": self.litros,
             "estado_calibracion": self.estado_calibracion,
+            "litros_grafica": self.litros_grafica,
         }
 
 
@@ -372,12 +407,58 @@ def build_window(
         angulo_corregido=q.angulo_corregido,
         porcentaje_angulo_valido=q.porcentaje_angulo_valido,
         velocidad_promedio=_r(agg.velocidad_promedio),
+        ignicion_dominante=agg.ignicion_dominante,
         odometro_total=_r(agg.odometro_total),
         calidad_ventana=q.calidad.value,
         motivo_calidad=q.motivo,
         litros=_r(conv.litros) if conv else None,
         estado_calibracion=conv.estado.value if conv else None,
     )
+
+
+def litros_para_grafica(
+    windows: list[ConsolidatedWindow],
+    rendimientos: dict[str, float | None],
+    anclas: dict[str, tuple[float, float]],
+) -> list[ConsolidatedWindow]:
+    """Llena ``litros_grafica``. ``anclas`` (imei -> (litros, odómetro) de la última ventana
+    válida) se actualiza en el lugar, para que el ancla pase de un bloque al siguiente.
+
+    Con el ángulo fuera de rango el sensor no es confiable: se estima
+    ancla.litros - km recorridos desde el ancla / rendimiento. NULL si falta ancla, rendimiento
+    u odómetro, o si el odómetro retrocede. ``windows`` debe venir en orden de tiempo.
+    """
+    out: list[ConsolidatedWindow] = []
+    for w in windows:
+        litros = w.litros
+        if w.motivo_calidad and M_ANGULO in w.motivo_calidad.split("; "):
+            ancla = anclas.get(w.imei)
+            rend = rendimientos.get(w.idautobus)
+            litros = None
+            if ancla and rend and w.odometro_total is not None:
+                km = (w.odometro_total - ancla[1]) * ODOMETRO_A_KM
+                if km >= 0:
+                    litros = _r(ancla[0] - km / rend)
+        elif (
+            w.calidad_ventana == "valida"
+            and w.litros is not None
+            and w.odometro_total is not None
+        ):
+            anclas[w.imei] = (w.litros, w.odometro_total)
+        out.append(replace(w, litros_grafica=litros))
+    return out
+
+
+def fetch_rendimientos(conn: Connection) -> dict[str, float | None]:
+    """km/L de cada autobús activo: el reciente y, si no hay, ``rendimiento_default``."""
+    return {bus: _f(rend) for bus, rend in conn.execute(RENDIMIENTOS_SQL).fetchall()}
+
+
+def fetch_anclas(
+    conn: Connection, desde: datetime, imei: str | None = None
+) -> dict[str, tuple[float, float]]:
+    rows = conn.execute(ANCLAS_SQL, {"desde": desde, "imei": imei}).fetchall()
+    return {i: (float(lt), float(odo)) for i, lt, odo in rows}
 
 
 def fetch_calibraciones(
@@ -466,15 +547,21 @@ def consolidate(
     hasta = align_down(hasta, minutes)
     summary = ConsolidationSummary(desde=desde, hasta=hasta, dry_run=dry_run)
     calibraciones = fetch_calibraciones(conn, summary)
+    rendimientos = fetch_rendimientos(conn)
+    anclas = fetch_anclas(conn, desde, imei)
 
     cursor = desde
     while cursor < hasta:
         end = min(cursor + timedelta(hours=chunk_hours), hasta)
         aggs = fetch_aggregates(conn, cursor, end, imei=imei, minutes=minutes)
-        windows = [
-            build_window(a, minutes, base_rules, calibraciones.get(a.idautobus))
-            for a in aggs
-        ]
+        windows = litros_para_grafica(
+            [
+                build_window(a, minutes, base_rules, calibraciones.get(a.idautobus))
+                for a in aggs
+            ],
+            rendimientos,
+            anclas,
+        )
 
         for a, w in zip(aggs, windows, strict=True):
             summary.ventanas += 1
@@ -517,7 +604,10 @@ __all__ = [
     "closed_window_limit",
     "consolidate",
     "fetch_aggregates",
+    "fetch_anclas",
     "fetch_calibraciones",
+    "fetch_rendimientos",
+    "litros_para_grafica",
     "plan_range",
     "upsert_windows",
 ]

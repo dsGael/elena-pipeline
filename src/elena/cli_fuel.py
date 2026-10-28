@@ -111,7 +111,7 @@ def _print_summary(s: ConsolidationSummary, show: int) -> None:
     if s.muestra and show > 0:
         typer.echo("")
         typer.echo(
-            f"{'inicio (local)':<17} {'imei':<16} {'n/val':>7} {'sensor':>8} {'litros':>7} {'ang.corr':>9} {'%ang':>6}  calidad"
+            f"{'inicio (local)':<17} {'imei':<16} {'n/val':>7} {'sensor':>8} {'litros':>7} {'graf.':>7} {'ang.corr':>9} {'%ang':>6}  calidad"
         )
         for w in s.muestra[:show]:
             ang = "-" if w.angulo_corregido is None else f"{w.angulo_corregido:.2f}"
@@ -122,6 +122,7 @@ def _print_summary(s: ConsolidationSummary, show: int) -> None:
             )
             sensor = "-" if w.sensor_mediana is None else f"{w.sensor_mediana:.0f}"
             litros = "-" if w.litros is None else f"{w.litros:.2f}"
+            graf = "-" if w.litros_grafica is None else f"{w.litros_grafica:.2f}"
             motivo = f" ({w.motivo_calidad})" if w.motivo_calidad else ""
             calib = (
                 f" [calibración: {w.estado_calibracion or 'inválida'}]"
@@ -130,7 +131,7 @@ def _print_summary(s: ConsolidationSummary, show: int) -> None:
             )
             typer.echo(
                 f"{_fmt(w.ventana_inicio):<17} {w.imei:<16} "
-                f"{w.muestras_totales:>3}/{w.muestras_validas:<3} {sensor:>8} {litros:>7} {ang:>9} {pct:>6}  "
+                f"{w.muestras_totales:>3}/{w.muestras_validas:<3} {sensor:>8} {litros:>7} {graf:>7} {ang:>9} {pct:>6}  "
                 f"{w.calidad_ventana}{motivo}{calib}"
             )
 

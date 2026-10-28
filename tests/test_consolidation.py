@@ -16,6 +16,7 @@ from elena.consolidation import (
     closed_window_limit,
     consolidate,
     fetch_calibraciones,
+    litros_para_grafica,
     plan_range,
 )
 from elena.quality import QualityRules
@@ -84,6 +85,7 @@ def _agg(**kw) -> WindowAggregate:
         muestras_con_angulo=15,
         muestras_angulo_valido=15,
         velocidad_promedio=0.0,
+        ignicion_dominante=True,
         odometro_total=1000.0,
     )
     base.update(kw)
@@ -140,14 +142,73 @@ def test_build_window_litros_en_cotas_y_sin_lectura():
     assert dudosa.calidad_ventana == "dudosa" and dudosa.litros == 10.0
 
 
+def test_build_window_pasa_la_ignicion_sin_afectar_la_calidad():
+    for ign in (True, False, None):
+        w = build_window(_agg(ignicion_dominante=ign), calibracion=CAL)
+        assert w.ignicion_dominante is ign and w.calidad_ventana == "valida"
+
+
 def test_build_window_sin_calibracion_no_da_litros():
     w = build_window(_agg())
     assert w.litros is None and w.estado_calibracion is None
 
 
+def _serie(*specs):
+    """Ventanas consecutivas de 5 min: (inclinacion_mediana, odometro_m, sensor)."""
+    return [
+        build_window(
+            _agg(
+                ventana_inicio=T0 + timedelta(minutes=5 * k),
+                inclinacion_mediana=incl,
+                odometro_total=odo,
+                sensor_mediana=sensor,
+            ),
+            calibracion=CAL,
+        )
+        for k, (incl, odo, sensor) in enumerate(specs)
+    ]
+
+
+def test_litros_para_grafica_estima_con_odometro_si_el_angulo_falla():
+    # 10 L válidos; luego 2 inclinadas (9.0 - 2.6 > 5) con lectura falsa; luego válida 9 L
+    ws = _serie(
+        (2.9, 100_000.0, 1374.0),
+        (9.0, 103_000.0, 1918.0),
+        (9.0, 106_000.0, 1918.0),
+        (2.9, 110_000.0, 1232.0),
+    )
+    anclas: dict = {}
+    out = litros_para_grafica(ws, {"BUS1": 3.0}, anclas)
+    # 3 km / 3 km/L = 1 L; 6 km -> 2 L, siempre desde la última válida
+    assert [w.litros_grafica for w in out] == [10.0, 9.0, 8.0, 9.0]
+    assert [w.litros for w in out] == [10.0, 14.0, 14.0, 9.0]  # crudos intactos
+    assert anclas[IMEI_BUS] == (9.0, 110_000.0)
+
+
+def test_litros_para_grafica_ancla_previa_y_casos_sin_estimado():
+    inclinada = _serie((9.0, 103_000.0, 1918.0))
+
+    def graf(rend, ancla):
+        anclas = {IMEI_BUS: ancla} if ancla else {}
+        return litros_para_grafica(inclinada, {"BUS1": rend}, anclas)[0].litros_grafica
+
+    assert graf(3.0, (10.0, 100_000.0)) == 9.0  # ancla que viene de la BD
+    assert graf(3.0, None) is None  # sin ventana válida previa
+    assert graf(None, (10.0, 100_000.0)) is None  # sin rendimiento
+    assert graf(3.0, (10.0, 200_000.0)) is None  # odómetro que retrocede
+
+
+def test_litros_para_grafica_otra_dudosa_conserva_crudo_y_no_es_ancla():
+    sin_angulo = build_window(_agg(inclinacion_mediana=None), calibracion=CAL)
+    anclas: dict = {}
+    out = litros_para_grafica([sin_angulo], {"BUS1": 3.0}, anclas)
+    assert out[0].calidad_ventana == "dudosa" and out[0].litros_grafica == 10.0
+    assert anclas == {}
+
+
 def test_el_sql_lee_la_columna_fuel_e_ignora_negativos():
     assert "WHEN g.fuel >= 0 THEN g.fuel" in AGGREGATE_SQL
-    assert "s_analogo" not in AGGREGATE_SQL and "ignicion" not in AGGREGATE_SQL
+    assert "s_analogo" not in AGGREGATE_SQL
 
 
 class _ConnCalibraciones:
@@ -217,8 +278,9 @@ def _windows(conn):
     cur = conn.execute(
         "SELECT imei, ventana_inicio, ventana_fin, muestras_totales, muestras_validas, "
         "sensor_mediana, sensor_promedio, sensor_min, sensor_max, inclinacion_mediana, "
-        "angulo_corregido, porcentaje_angulo_valido, velocidad_promedio, "
-        "odometro_total, calidad_ventana, motivo_calidad, litros, estado_calibracion, id "
+        "angulo_corregido, porcentaje_angulo_valido, velocidad_promedio, ignicion_dominante, "
+        "odometro_total, calidad_ventana, motivo_calidad, litros, estado_calibracion, "
+        "litros_grafica, id "
         "FROM fuel_windows ORDER BY ventana_inicio, imei"
     )
     names = [c.name for c in cur.description]
@@ -250,7 +312,9 @@ def test_tres_ventanas_valida_dudosa_descartada(conn):
     assert float(v["angulo_corregido"]) == pytest.approx(0.3)
     assert float(v["porcentaje_angulo_valido"]) == 100.0
     assert v["motivo_calidad"] is None
+    assert v["ignicion_dominante"] is True
     assert float(v["litros"]) == 10.0 and v["estado_calibracion"] == "ok"
+    assert float(v["litros_grafica"]) == 10.0
     assert v["ventana_fin"] == v["ventana_inicio"] + timedelta(minutes=5)
 
     d = w[1]
@@ -262,6 +326,7 @@ def test_tres_ventanas_valida_dudosa_descartada(conn):
     assert (
         float(d["sensor_mediana"]) == 1374.0
     )  # el sensor NO se descarta por el ángulo
+    assert d["litros_grafica"] is None  # BUS1 no tiene rendimiento para estimar
 
     x = w[2]
     assert x["muestras_validas"] == 0 and x["muestras_totales"] == 15
