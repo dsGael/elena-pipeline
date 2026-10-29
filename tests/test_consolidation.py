@@ -9,6 +9,7 @@ from elena.calibration import CalibrationTable
 from elena.consolidation import (
     AGGREGATE_SQL,
     CALIBRACIONES_SQL,
+    PREVIAS_SQL,
     NoStartError,
     Previa,
     WindowAggregate,
@@ -17,6 +18,7 @@ from elena.consolidation import (
     closed_window_limit,
     consolidate,
     fetch_calibraciones,
+    fetch_previas,
     litros_para_grafica,
     plan_range,
 )
@@ -178,35 +180,30 @@ def test_litros_para_grafica_estima_con_odometro_si_el_angulo_falla():
         (9.0, 106_000.0, 1918.0),
         (2.9, 110_000.0, 1232.0),
     )
-    anclas: dict = {}
-    out = litros_para_grafica(ws, {"BUS1": 3.0}, anclas, {})
-    # 3 km / 3 km/L = 1 L; 6 km -> 2 L, siempre desde la última válida
+    out = litros_para_grafica(ws, {"BUS1": 3.0}, {})
+    # cada estimada baja km / rendimiento desde la anterior: 3 km / 3 km/L = 1 L
     assert [w.litros_grafica for w in out] == [10.0, 9.0, 8.0, 9.0]
     assert [w.litros for w in out] == [10.0, 14.0, 14.0, 9.0]  # crudos intactos
-    assert anclas[IMEI_BUS] == (9.0, 110_000.0)
 
 
-def test_litros_para_grafica_ancla_previa_y_casos_sin_estimado():
+def test_litros_para_grafica_estimado_desde_la_previa_y_casos_sin_estimado():
     inclinada = _serie((9.0, 103_000.0, 1918.0))
 
-    def graf(rend, ancla):
-        anclas = {IMEI_BUS: ancla} if ancla else {}
-        out = litros_para_grafica(inclinada, {"BUS1": rend}, anclas, {})
-        return out[0].litros_grafica
+    def graf(rend, nivel, odo=100_000.0):
+        previas = {IMEI_BUS: Previa(odo, nivel, nivel, 0, 4)} if nivel else {}
+        return litros_para_grafica(inclinada, {"BUS1": rend}, previas)[0].litros_grafica
 
-    assert graf(3.0, (10.0, 100_000.0)) == 9.0  # ancla que viene de la BD
-    assert graf(3.0, None) is None  # sin ventana válida previa
-    assert graf(None, (10.0, 100_000.0)) is None  # sin rendimiento
-    assert graf(3.0, (10.0, 200_000.0)) is None  # odómetro que retrocede
-    assert graf(3.0, (0.5, 100_000.0)) is None  # daría -0.5 L
+    assert graf(3.0, 10.0) == 9.0  # nivel que viene de la BD
+    assert graf(3.0, None) is None  # sin nivel anterior
+    assert graf(None, 10.0) is None  # sin rendimiento
+    assert graf(3.0, 10.0, odo=200_000.0) is None  # odómetro que retrocede
+    assert graf(3.0, 0.5) is None  # daría -0.5 L
 
 
-def test_litros_para_grafica_otra_dudosa_conserva_crudo_y_no_es_ancla():
+def test_litros_para_grafica_otra_dudosa_conserva_crudo():
     sin_angulo = build_window(_agg(inclinacion_mediana=None), calibracion=CAL)
-    anclas: dict = {}
-    out = litros_para_grafica([sin_angulo], {"BUS1": 3.0}, anclas, {})
+    out = litros_para_grafica([sin_angulo], {"BUS1": 3.0}, {})
     assert out[0].calidad_ventana == "dudosa" and out[0].litros_grafica == 10.0
-    assert anclas == {}
 
 
 def test_litros_para_grafica_congela_el_nivel_estacionado():
@@ -218,27 +215,25 @@ def test_litros_para_grafica_congela_el_nivel_estacionado():
         (2.9, 100_150.0, 1918.0),
         (2.9, 103_000.0, 1232.0),
     )
-    anclas: dict = {}
     previas: dict = {}
-    out = litros_para_grafica(ws, {"BUS1": 3.0}, anclas, previas)
+    out = litros_para_grafica(ws, {"BUS1": 3.0}, previas)
+    # la parada fue corta (2 ventanas): al arrancar no hay bloqueo y se usa la lectura
     assert [w.litros_grafica for w in out] == [10.0, 10.0, 10.0, 9.0]
-    assert previas[IMEI_BUS] == Previa(103_000.0, 9.0, 9.0, 0)
-    # las ventanas estacionadas no son ancla aunque sean válidas
-    assert anclas[IMEI_BUS] == (9.0, 103_000.0)
+    assert previas[IMEI_BUS] == Previa(103_000.0, 9.0, 9.0, 0, 4)
 
 
 def test_litros_para_grafica_congela_desde_la_ventana_previa_de_la_bd():
     parada = _serie((2.9, 100_010.0, 1918.0))
-    previa = {IMEI_BUS: Previa(100_000.0, 10.0, 10.0, 0)}
-    assert litros_para_grafica(parada, {}, {}, previa)[0].litros_grafica == 10.0
+    previa = {IMEI_BUS: Previa(100_000.0, 10.0, 10.0, 0, 0)}
+    assert litros_para_grafica(parada, {}, previa)[0].litros_grafica == 10.0
     # sin nivel previo (p. ej. historial sin re-consolidar) se usa la lectura
-    sin_nivel = {IMEI_BUS: Previa(100_000.0, None, None, 0)}
-    assert litros_para_grafica(parada, {}, {}, sin_nivel)[0].litros_grafica == 14.0
+    sin_nivel = {IMEI_BUS: Previa(100_000.0, None, None, 0, 0)}
+    assert litros_para_grafica(parada, {}, sin_nivel)[0].litros_grafica == 14.0
 
 
 def test_litros_para_grafica_muestra_carga_y_extraccion_estacionado():
     # 10 L en marcha; al parar la rampa marca 12 L y en la 2a ventana 13 L (transición, se
-    # ignora); deriva 13.1 (se ignora); extracción a 9 L; carga a 14 L; arranca midiendo 10 L
+    # ignora); deriva 13.1 (se ignora); extracción a 9 L; carga a 14 L; arranca y recorre 3 km
     sensor = {9: 1232.0, 10: 1374.0, 12: 1651.0, 13: 1777.0, 14: 1918.0}
     ws = _serie(
         (2.9, 100_000.0, sensor[10]),
@@ -249,23 +244,150 @@ def test_litros_para_grafica_muestra_carga_y_extraccion_estacionado():
         (2.9, 100_000.0, sensor[14]),
         (2.9, 103_000.0, sensor[10]),
     )
-    anclas: dict = {}
-    out = litros_para_grafica(ws, {"BUS1": 3.0}, anclas, {})
-    # en la extracción y la carga la gráfica toma la lectura
+    out = litros_para_grafica(ws, {"BUS1": 3.0}, {})
+    # en la extracción y la carga la gráfica toma la lectura; al arrancar estima desde la carga
     graf = [w.litros_grafica for w in out]
-    assert graf == [10.0, 10.0, 10.0, 10.0, 9.0, 14.0, 10.0]
-    # la carga estacionado mueve el ancla del estimado por ángulo
-    assert anclas[IMEI_BUS] == (10.0, 103_000.0)
+    assert graf == [10.0, 10.0, 10.0, 10.0, 9.0, 14.0, 13.0]
+
+
+def test_litros_para_grafica_arranque_estima_las_primeras_ventanas():
+    # estacionado en 10 L; arranca y el sensor arrastra 12 L de la rampa 3 ventanas; luego 6 L
+    ws = _serie(
+        (2.9, 103_000.0, 1651.0),
+        (2.9, 106_000.0, 1651.0),
+        (2.9, 109_000.0, 1651.0),
+        (2.9, 112_000.0, 832.0),
+    )
+
+    def graf(previas, n=4):
+        return [
+            w.litros_grafica
+            for w in litros_para_grafica(ws[:n], {"BUS1": 3.0}, previas)
+        ]
+
+    # tras una parada larga (3 ventanas): se estiman las 3 primeras
+    assert graf({IMEI_BUS: Previa(100_000.0, 10.0, 12.0, 3, 0)}) == [9.0, 8.0, 7.0, 6.0]
+    # tras una parada corta (2 ventanas, semáforo) no hay bloqueo
+    assert graf({IMEI_BUS: Previa(100_000.0, 10.0, 12.0, 2, 0)}, 1) == [12.0]
+    # sin historia (primera ventana de la serie) tampoco: no se sabe si arrancó
+    assert graf({}, 1) == [12.0]
+
+
+def test_litros_para_grafica_estacionado_ignora_ventanas_con_angulo_incompleto():
+    previa = {IMEI_BUS: Previa(100_000.0, 10.0, 10.0, 2, 0)}
+    ws = [
+        build_window(
+            _agg(
+                ventana_inicio=T0 + timedelta(minutes=5 * k),
+                odometro_total=100_000.0,
+                sensor_mediana=sensor,
+                muestras_angulo_valido=validas,
+            ),
+            calibracion=CAL,
+        )
+        # 14 L con 4 de 15 muestras fuera de ángulo (73% < 80): no es carga; luego 10.5 L con
+        # 13 de 15 (87%): no es extracción (-3.5 vs 14), se compara contra la última confiable
+        for k, (sensor, validas) in enumerate([(1918.0, 11), (1442.5, 13)])
+    ]
+    out = litros_para_grafica(ws, {}, previa)
+    assert [w.litros_grafica for w in out] == [10.0, 10.0]
+    assert previa[IMEI_BUS].litros == 10.5
+
+
+def test_litros_para_grafica_en_marcha_estima_si_pocas_muestras_en_angulo():
+    def ventana(k, validas, sensor):
+        agg = _agg(
+            ventana_inicio=T0 + timedelta(minutes=5 * k),
+            odometro_total=100_000.0 + 3_000 * k,
+            sensor_mediana=sensor,
+            muestras_angulo_valido=validas,
+        )
+        return build_window(agg, calibracion=CAL)
+
+    # 10 L; 7/15 (47%) con lectura falsa de 14 L: se estima; 8/15 (53%): se usa la lectura
+    ws = [ventana(0, 15, 1374.0), ventana(1, 7, 1918.0), ventana(2, 8, 1232.0)]
+    out = litros_para_grafica(ws, {"BUS1": 3.0}, {})
+    assert [w.litros_grafica for w in out] == [10.0, 9.0, 9.0]
+    assert out[1].calidad_ventana == "valida"  # la calidad no cambia, solo la gráfica
 
 
 def test_litros_para_grafica_transicion_cruza_bloques():
     # la ventana previa (de la BD) ya era la 2a estacionada: un salto aquí sí cuenta
     parada = _serie((2.9, 100_000.0, 1232.0))
-    previa = {IMEI_BUS: Previa(100_000.0, 10.0, 14.0, 2)}
-    assert litros_para_grafica(parada, {}, {}, previa)[0].litros_grafica == 9.0
+    previa = {IMEI_BUS: Previa(100_000.0, 10.0, 14.0, 2, 0)}
+    assert litros_para_grafica(parada, {}, previa)[0].litros_grafica == 9.0
     # si era la 1a, todavía es transición
-    previa = {IMEI_BUS: Previa(100_000.0, 10.0, 14.0, 1)}
-    assert litros_para_grafica(parada, {}, {}, previa)[0].litros_grafica == 10.0
+    previa = {IMEI_BUS: Previa(100_000.0, 10.0, 14.0, 1, 0)}
+    assert litros_para_grafica(parada, {}, previa)[0].litros_grafica == 10.0
+
+
+class _ConnPrevias:
+    """Devuelve como PREVIAS_SQL las ventanas ya calculadas (la más reciente primero)."""
+
+    def __init__(self, ventanas):
+        self.ventanas = ventanas
+
+    def execute(self, sql, params):
+        assert sql == PREVIAS_SQL
+        self.filas = [
+            (
+                w.imei,
+                w.odometro_total,
+                w.litros_grafica,
+                w.litros,
+                w.porcentaje_angulo_valido,
+            )
+            for w in reversed(self.ventanas)
+        ][: params["n"]]
+        return self
+
+    def fetchall(self):
+        return self.filas
+
+
+def test_retomar_desde_la_bd_da_lo_mismo_que_calcular_de_corrido():
+    # (odómetro, sensor, muestras con ángulo válido de 15)
+    specs = [
+        (100_000, 1374, 15),  # 10 L
+        (103_000, 1232, 15),  # en marcha 9 L
+        (103_000, 1651, 15),  # se estaciona en rampa: 12 L
+        (103_000, 1651, 15),
+        (103_000, 1651, 15),
+        (103_000, 1651, 15),
+        (103_000, 1918, 15),  # carga estacionado: 14 L
+        (103_000, 1918, 15),
+        (106_000, 1918, 15),  # arranque: 3 estimadas
+        (109_000, 1918, 15),
+        (112_000, 1918, 15),
+        (115_000, 1374, 15),  # lectura: 10 L
+        (115_100, 1374, 15),  # semáforo
+        (118_000, 1232, 15),  # sin bloqueo: 9 L
+        (121_000, 1918, 7),  # 47% de ángulo válido: estimada
+        (124_000, 1103, 15),  # 8 L
+    ]
+    ws = [
+        build_window(
+            _agg(
+                ventana_inicio=T0 + timedelta(minutes=5 * k),
+                odometro_total=float(odo),
+                sensor_mediana=float(sensor),
+                muestras_angulo_valido=validas,
+            ),
+            calibracion=CAL,
+        )
+        for k, (odo, sensor, validas) in enumerate(specs)
+    ]
+    rend = {"BUS1": 3.0}
+    corrido = litros_para_grafica(ws, rend, {})
+    assert [w.litros_grafica for w in corrido] == [
+        10.0, 9.0, 9.0, 9.0, 9.0, 9.0, 14.0, 14.0, 13.0, 12.0, 11.0, 10.0, 10.0, 9.0, 8.0, 8.0,
+    ]  # fmt: skip
+    for corte in range(1, len(ws)):
+        previas = fetch_previas(_ConnPrevias(corrido[:corte]), T0, IMEI_BUS)
+        retomado = litros_para_grafica(ws[corte:], rend, previas)
+        assert [w.litros_grafica for w in retomado] == [
+            w.litros_grafica for w in corrido[corte:]
+        ], f"corte en la ventana {corte}"
 
 
 def test_el_sql_lee_la_columna_fuel_e_ignora_negativos():

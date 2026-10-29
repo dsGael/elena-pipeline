@@ -2,7 +2,8 @@
 -- Litros para la gráfica. Igual a `litros`, salvo:
 --   * estacionado (el odómetro avanzó < 300 m desde la ventana anterior): se congela el nivel
 --     anterior; en reposo el sensor se queda en valores falsos (rampas) aunque el ángulo esté bien.
---   * ángulo fuera de rango (|mediana(inclinación) - FCC| > angulo_max): se estima con la última
+--   * ángulo fuera de rango (|mediana(inclinación) - FCC| > angulo_max), o en marcha con menos
+--     del 50% de muestras con ángulo válido: se estima con la última
 --     ventana válida menos los km recorridos desde ella / rendimiento del autobús
 --     (fuel_rendimiento_reciente, si no hay fuel_config.rendimiento_default).
 -- También agrega ignicion_dominante (informativo para la gráfica).
