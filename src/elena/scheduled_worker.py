@@ -5,10 +5,12 @@ Un ciclo hace, en este orden:
      sin hacer nada (código 0): el Task Scheduler puede lanzar una segunda instancia.
   2. Consolida gps_records -> fuel_windows (calidad y litros) desde la última ventana guardada
      (con traslape para datos tardíos) hasta la última ventana cerrada, y confirma.
-  3. Actualiza el rendimiento reciente (fuel_rendimiento_reciente) y agrega al historial los
+  3. Detecta los eventos del mismo rango (fuel_events). Un fallo aquí se registra pero no cambia
+     el código de salida.
+  4. Actualiza el rendimiento reciente (fuel_rendimiento_reciente) y agrega al historial los
      bloques de km ya definitivos (fuel_rendimiento_historial). Un fallo aquí se registra pero
      no cambia el código de salida: no es parte de la consolidación.
-  4. Libera el lock, también si algo falla.
+  5. Libera el lock, también si algo falla.
 
 Códigos de salida: 0 = bien u omitido por ciclo en curso; 1 = fallo del ciclo; 2 = no hay punto
 de partida (fuel_windows vacía: corre antes ``consolidate --desde``).
@@ -31,6 +33,7 @@ from .consolidation import (
     consolidate,
     plan_range,
 )
+from .eventos import detectar_eventos
 from .fuel_repo import (
     autobuses_activos,
     bloques_rendimiento_nuevos,
@@ -147,6 +150,16 @@ def actualizar_rendimiento_reciente(
     return guardados
 
 
+def actualizar_eventos(conn: Connection, desde: datetime, hasta: datetime) -> None:
+    """Detecta y guarda los eventos de [desde, hasta) en su propia transacción. Nunca lanza."""
+    try:
+        with conn.transaction():
+            n = detectar_eventos(conn, desde, hasta)
+        log.info("Eventos: %s", dict(n) or "ninguno")
+    except Exception:
+        log.exception("Falló la detección de eventos")
+
+
 def actualizar_historial_rendimiento(
     conn: Connection,
     *,
@@ -238,6 +251,7 @@ def ejecutar_ciclo(
             )
             for a in c.advertencias:
                 log.warning("Consolidación: %s", a)
+            actualizar_eventos(conn, desde, hasta)
         else:
             log.info("Nada que consolidar (%s >= %s)", desde, hasta)
 

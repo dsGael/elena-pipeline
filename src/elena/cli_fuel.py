@@ -32,6 +32,7 @@ from .consolidation import (
     plan_range,
 )
 from .db import get_connection
+from .eventos import detectar_eventos
 from .fuel_repo import (
     ConfigError,
     autobuses_activos,
@@ -174,7 +175,7 @@ def consolidate_cmd(
     ] = None,
     verbose: Annotated[bool, typer.Option("--verbose", "-v")] = False,
 ) -> None:
-    """Agrupa gps_records en ventanas de 5 min con sus litros y las guarda (o simula) en fuel_windows."""
+    """Agrupa gps_records en ventanas de 5 min con sus litros y las guarda (o simula) en fuel_windows, y detecta sus eventos."""
     _setup_logging(verbose)
     reglas = QualityRules(
         fcc_inclinacion=0.0,  # el FCC real viene de fuel_config por vehículo
@@ -210,9 +211,14 @@ def consolidate_cmd(
             keep_sample=show,
         )
         # el bloque 'with' confirma la transacción al salir sin errores; con --dry-run no hay nada que confirmar
+        if not dry_run:
+            conn.commit()  # un fallo en los eventos no revierte las ventanas
+            eventos = detectar_eventos(conn, d, h, imei=imei)
     _print_summary(summary, show)
     if dry_run:
         typer.echo("\n(dry-run: no se escribió nada)")
+    else:
+        typer.echo(f"Eventos: {dict(eventos) or 'ninguno'}")
 
 
 @app.command("estimar-rendimiento")
@@ -422,7 +428,7 @@ def run_cycle_cmd(
     ] = "logs",
     verbose: Annotated[bool, typer.Option("--verbose", "-v")] = False,
 ) -> None:
-    """Un ciclo completo (consolidar + rendimiento). Pensado para el Task Scheduler."""
+    """Un ciclo completo (consolidar + eventos + rendimiento). Pensado para el Task Scheduler."""
     from pathlib import Path
 
     configurar_logging(Path(log_dir) if log_dir else None, verbose)

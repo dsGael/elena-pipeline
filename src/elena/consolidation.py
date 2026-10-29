@@ -84,6 +84,7 @@ src AS (
            g.inclinacion_vertical,
            g.speed,
            g.ignicion,
+           g.maniobra,
            g.odometro_total
     FROM public.gps_records g
     JOIN cfg ON cfg.imei = g.imei
@@ -115,7 +116,9 @@ SELECT s.imei,
        CASE WHEN count(s.ignicion) > 0
             THEN count(*) FILTER (WHERE s.ignicion) * 2 >= count(s.ignicion)
        END                                                                 AS ignicion_dominante,
-       max(s.odometro_total)                                               AS odometro_total
+       max(s.odometro_total)                                               AS odometro_total,
+       array_agg(DISTINCT s.maniobra ORDER BY s.maniobra)
+           FILTER (WHERE s.maniobra IN (1, 2, 3))                          AS maniobra
 FROM src s
 JOIN cfg ON cfg.imei = s.imei
 GROUP BY s.imei, cfg.idautobus, cfg.fcc_inclinacion, cfg.angulo_max,
@@ -129,13 +132,14 @@ INSERT INTO public.fuel_windows (
     sensor_mediana, sensor_promedio, sensor_min, sensor_max,
     inclinacion_mediana, angulo_corregido, porcentaje_angulo_valido,
     velocidad_promedio, ignicion_dominante, odometro_total,
-    calidad_ventana, motivo_calidad, litros, estado_calibracion, litros_grafica
+    calidad_ventana, motivo_calidad, litros, estado_calibracion, litros_grafica, maniobra
 ) VALUES (
     %(imei)s, %(ventana_inicio)s, %(ventana_fin)s, %(muestras_totales)s, %(muestras_validas)s,
     %(sensor_mediana)s, %(sensor_promedio)s, %(sensor_min)s, %(sensor_max)s,
     %(inclinacion_mediana)s, %(angulo_corregido)s, %(porcentaje_angulo_valido)s,
     %(velocidad_promedio)s, %(ignicion_dominante)s, %(odometro_total)s,
-    %(calidad_ventana)s, %(motivo_calidad)s, %(litros)s, %(estado_calibracion)s, %(litros_grafica)s
+    %(calidad_ventana)s, %(motivo_calidad)s, %(litros)s, %(estado_calibracion)s, %(litros_grafica)s,
+    %(maniobra)s
 )
 ON CONFLICT (imei, ventana_inicio) DO UPDATE SET
     ventana_fin              = EXCLUDED.ventana_fin,
@@ -155,7 +159,8 @@ ON CONFLICT (imei, ventana_inicio) DO UPDATE SET
     motivo_calidad           = EXCLUDED.motivo_calidad,
     litros                   = EXCLUDED.litros,
     estado_calibracion       = EXCLUDED.estado_calibracion,
-    litros_grafica           = EXCLUDED.litros_grafica
+    litros_grafica           = EXCLUDED.litros_grafica,
+    maniobra                 = EXCLUDED.maniobra
 RETURNING (xmax = 0) AS insertada
 """
 
@@ -284,6 +289,7 @@ class WindowAggregate:
     velocidad_promedio: float | None
     ignicion_dominante: bool | None
     odometro_total: float | None
+    maniobra: list[int] | None = None  # maniobras distintas (1-3) de la ventana
 
     @classmethod
     def from_row(cls, row: dict[str, Any]) -> WindowAggregate:
@@ -306,6 +312,7 @@ class WindowAggregate:
             velocidad_promedio=_f(row["velocidad_promedio"]),
             ignicion_dominante=row["ignicion_dominante"],
             odometro_total=_f(row["odometro_total"]),
+            maniobra=row["maniobra"],
         )
 
 
@@ -334,6 +341,7 @@ class ConsolidatedWindow:
     litros: float | None  # crudos: en zona_baja / arriba_de_calibracion son cotas
     estado_calibracion: str | None  # None = el autobús no tiene calibración válida
     litros_grafica: float | None = None  # lo llena litros_para_grafica
+    maniobra: list[int] | None = None
 
     def as_params(self) -> dict[str, Any]:
         return {
@@ -357,6 +365,7 @@ class ConsolidatedWindow:
             "litros": self.litros,
             "estado_calibracion": self.estado_calibracion,
             "litros_grafica": self.litros_grafica,
+            "maniobra": self.maniobra,
         }
 
 
@@ -444,6 +453,7 @@ def build_window(
         motivo_calidad=q.motivo,
         litros=_r(conv.litros) if conv else None,
         estado_calibracion=conv.estado.value if conv else None,
+        maniobra=agg.maniobra,
     )
 
 

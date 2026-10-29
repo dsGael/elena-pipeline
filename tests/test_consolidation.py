@@ -151,6 +151,11 @@ def test_build_window_pasa_la_ignicion_sin_afectar_la_calidad():
         assert w.ignicion_dominante is ign and w.calidad_ventana == "valida"
 
 
+def test_build_window_pasa_la_maniobra():
+    assert build_window(_agg(maniobra=[1, 3])).maniobra == [1, 3]
+    assert build_window(_agg()).maniobra is None
+
+
 def test_build_window_sin_calibracion_no_da_litros():
     w = build_window(_agg())
     assert w.litros is None and w.estado_calibracion is None

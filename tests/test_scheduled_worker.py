@@ -62,6 +62,9 @@ def pasos(monkeypatch):
 
     monkeypatch.setattr(sw, "plan_range", plan)
     monkeypatch.setattr(sw, "consolidate", consolidar)
+    monkeypatch.setattr(
+        sw, "actualizar_eventos", lambda conn, d, h: estado["orden"].append("eventos")
+    )
     # el rendimiento reciente se prueba aparte; aquí no toca la conexión falsa
     monkeypatch.setattr(sw, "actualizar_rendimiento_reciente", lambda conn, **kw: 0)
     monkeypatch.setattr(sw, "actualizar_historial_rendimiento", lambda conn, **kw: 0)
@@ -72,7 +75,7 @@ def test_ciclo_ok_orden_y_commit_tras_consolidar(pasos):
     conn = ConexionFalsa()
     r = sw.ejecutar_ciclo(conn)
     assert r.codigo == sw.EXIT_OK and not r.omitido
-    assert pasos["orden"] == ["plan", "consolidar"]
+    assert pasos["orden"] == ["plan", "consolidar", "eventos"]
     # lock -> commit(lock) -> commit tras consolidar -> unlock
     assert conn.pasos[0] == "lock" and conn.pasos[-1] == "unlock"
     assert conn.eventos.count("commit") >= 3
@@ -145,6 +148,7 @@ def test_el_ciclo_actualiza_el_rendimiento_despues_de_consolidar(monkeypatch, pa
     assert pasos["orden"] == [
         "plan",
         "consolidar",
+        "eventos",
         "rendimiento",
         "historial",
     ]
@@ -224,3 +228,11 @@ def test_historial_nunca_lanza_aunque_falle_el_listado(monkeypatch):
 
     monkeypatch.setattr(sw, "autobuses_activos", falla)
     assert sw.actualizar_historial_rendimiento(ConexionRendimiento(), ahora=T1) == 0
+
+
+def test_eventos_nunca_lanza(monkeypatch):
+    def falla(conn, desde, hasta):
+        raise RuntimeError("fallo en eventos")
+
+    monkeypatch.setattr(sw, "detectar_eventos", falla)
+    sw.actualizar_eventos(ConexionRendimiento(), T0, T1)

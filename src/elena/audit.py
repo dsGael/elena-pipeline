@@ -17,7 +17,7 @@ from psycopg import Connection
 
 from .calibration import CalibrationError, CalibrationTable
 
-# Columnas que usa el código (sql/11_schema_elena_v2.sql + sql/12, 13, 17 y 18). Otras tablas o
+# Columnas que usa el código (sql/11_schema_elena_v2.sql + sql/12, 13, 17, 18 y 19). Otras tablas o
 # columnas fuel_* (de etapas ya descartadas) solo se reportan como aviso.
 EXPECTED_COLUMNS: dict[str, dict[str, str]] = {
     "fuel_config": {
@@ -29,6 +29,7 @@ EXPECTED_COLUMNS: dict[str, dict[str, str]] = {
         "umbral_carga_candidata": "numeric",
         "rendimiento_default": "numeric",
         "calibracion": "jsonb",
+        "minutos_ralenti": "int4",
     },
     "fuel_windows": {
         "id": "uuid",
@@ -52,7 +53,17 @@ EXPECTED_COLUMNS: dict[str, dict[str, str]] = {
         "litros": "numeric",
         "estado_calibracion": "varchar",
         "litros_grafica": "numeric",
+        "maniobra": "ARRAY",
         "created_at": "timestamptz",
+    },
+    "fuel_events": {
+        "id": "int8",
+        "idautobus": "varchar",
+        "fecha": "timestamptz",
+        "evento": "varchar",
+        "cantidad": "numeric",
+        "ubicacion": "text",
+        "creado_en": "timestamptz",
     },
     "fuel_rendimiento_reciente": {
         "idautobus": "varchar",
