@@ -95,3 +95,19 @@ def test_bajo_el_umbral_o_en_marcha_no_hay_evento():
     assert cargas_extracciones(chico) == []
     marcha = [_v(k, 50.0 - 3 * k, odo=1000.0 * k) for k in range(6)]
     assert cargas_extracciones(marcha) == []
+
+
+def test_subida_de_golpe_en_marcha_es_carga():
+    # el 10-30 del autobús 2: el nivel nuevo aparece ya a 418 m de la ventana anterior
+    serie = [
+        _v(0, 17.13, odo=0.0),
+        _v(1, 16.85, odo=1649.0),
+        _v(2, 38.56, odo=2067.0),
+        _v(3, 38.05, odo=2412.0),
+    ]
+    assert cargas_extracciones(serie) == [
+        Evento("BUS1", T0 + timedelta(minutes=10), "carga", 21.71)
+    ]
+    # una subida chica en marcha es ruido
+    serie[2:] = [_v(2, 19.0, odo=2067.0), _v(3, 18.8, odo=2412.0)]
+    assert cargas_extracciones(serie) == []

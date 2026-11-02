@@ -4,7 +4,8 @@ Qué detecta en [desde, hasta) (con ``CONTEXTO`` hacia atrás para ver el inicio
   * carga / extracción: rachas de ventanas estacionadas en las que ``litros_grafica`` cambia.
     Estacionado, ``litros_grafica`` solo se mueve con un salto real (ver
     ``consolidation.litros_para_grafica``), así que el cambio neto de la racha es lo cargado o
-    extraído. Cuenta si llega a ``fuel_config.umbral_carga_candidata``.
+    extraído. Cuenta si llega a ``fuel_config.umbral_carga_candidata``. En marcha solo cuenta una
+    subida de golpe de al menos ese umbral (carga que el sensor vio ya arrancando).
   * aceleración / frenado / giro brusco: cada registro con ``gps_records.maniobra`` 1-3 (AVL 253).
   * ralentí: muestras seguidas con la ignición encendida y quieto (``movimiento = 0`` o
     velocidad < ``VELOCIDAD_RALENTI_KMH``) durante al menos ``fuel_config.minutos_ralenti``.
@@ -184,15 +185,18 @@ def ralentis(muestras: Iterable[Muestra]) -> list[Evento]:
     return out
 
 
-def _cambio_estacionado(a: Ventana, b: Ventana) -> float:
-    """Cambio de ``litros_grafica`` de ``a`` a ``b`` si está estacionado; si no, 0."""
-    if (
-        a.litros_grafica is None
-        or b.litros_grafica is None
-        or not 0 <= b.odometro_total - a.odometro_total < ODOMETRO_PARADO_M
-    ):
+def _cambio(a: Ventana, b: Ventana) -> float:
+    """Cambio de ``litros_grafica`` de ``a`` a ``b`` que cuenta para un evento; si no, 0.
+
+    Estacionado cuenta cualquier cambio. En marcha solo una subida de golpe de al menos el
+    umbral: el sensor a veces ve la carga ya arrancando (el 10-30 20:55, +21.7 L a 418 m).
+    Una bajada en marcha es consumo o ruido, nunca extracción."""
+    if a.litros_grafica is None or b.litros_grafica is None:
         return 0.0
-    return b.litros_grafica - a.litros_grafica
+    cambio = b.litros_grafica - a.litros_grafica
+    if 0 <= b.odometro_total - a.odometro_total < ODOMETRO_PARADO_M:
+        return cambio
+    return cambio if b.umbral is not None and cambio >= b.umbral else 0.0
 
 
 def cargas_extracciones(ventanas: Iterable[Ventana]) -> list[Evento]:
@@ -204,7 +208,7 @@ def cargas_extracciones(ventanas: Iterable[Ventana]) -> list[Evento]:
         rachas: list[list[tuple[Ventana, float]]] = []
         seguida = False
         for a, b in pairwise(serie):
-            cambio = _cambio_estacionado(a, b)
+            cambio = _cambio(a, b)
             if cambio and not seguida:
                 rachas.append([])
             if cambio:
