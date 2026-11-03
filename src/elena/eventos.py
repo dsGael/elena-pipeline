@@ -7,6 +7,7 @@ Qué detecta en [desde, hasta) (con ``CONTEXTO`` hacia atrás para ver el inicio
     extraído. Cuenta si llega a ``fuel_config.umbral_carga_candidata``. En marcha solo cuenta una
     subida de golpe de al menos ese umbral (carga que el sensor vio ya arrancando).
   * aceleración / frenado / giro brusco: cada registro con ``gps_records.maniobra`` 1-3 (AVL 253).
+    Al instante los guarda el trigger de sql/20; aquí se repasan por si el trigger falló.
   * ralentí: muestras seguidas con la ignición encendida y quieto (``movimiento = 0`` o
     velocidad < ``VELOCIDAD_RALENTI_KMH``) durante al menos ``fuel_config.minutos_ralenti``.
     Es "o" y no "y": el Teltonika puede marcar movimiento con el motor encendido (fuente de
@@ -238,14 +239,24 @@ def cargas_extracciones(ventanas: Iterable[Ventana]) -> list[Evento]:
 
 
 def detectar_eventos(
-    conn: Connection, desde: datetime, hasta: datetime, *, imei: str | None = None
+    conn: Connection,
+    desde: datetime,
+    hasta: datetime,
+    *,
+    imei: str | None = None,
+    hasta_gps: datetime | None = None,
 ) -> Counter[str]:
-    """Detecta y guarda (upsert) los eventos. Devuelve cuántos de cada tipo empiezan en
-    [desde, hasta). No hace commit: lo decide quien llama."""
+    """Detecta y guarda (upsert) los eventos. Devuelve cuántos de cada tipo empiezan desde
+    ``desde``. No hace commit: lo decide quien llama.
+
+    Las cargas solo llegan hasta ``hasta`` (ventanas consolidadas); maniobras y ralentí, que
+    salen directo de gps_records, hasta ``hasta_gps`` si se da (el ciclo pasa la hora actual)."""
     params = {"desde": desde - CONTEXTO, "hasta": hasta, "imei": imei}
     muestras = [
         Muestra(i, bus, t, ign, _f(vel), mov, man, mr)
-        for i, bus, t, ign, vel, mov, man, mr in conn.execute(MUESTRAS_SQL, params)
+        for i, bus, t, ign, vel, mov, man, mr in conn.execute(
+            MUESTRAS_SQL, {**params, "hasta": hasta_gps or hasta}
+        )
     ]
     ventanas = [
         Ventana(i, bus, t, float(odo), _f(lg), _f(umbral))

@@ -5,8 +5,9 @@ Un ciclo hace, en este orden:
      sin hacer nada (código 0): el Task Scheduler puede lanzar una segunda instancia.
   2. Consolida gps_records -> fuel_windows (calidad y litros) desde la última ventana guardada
      (con traslape para datos tardíos) hasta la última ventana cerrada, y confirma.
-  3. Detecta los eventos del mismo rango (fuel_events). Un fallo aquí se registra pero no cambia
-     el código de salida.
+  3. Detecta los eventos (fuel_events): cargas hasta la última ventana consolidada; ralentí y
+     maniobras hasta ahora (las maniobras ya las guarda al instante el trigger de sql/20). Corre
+     aunque no haya ventanas nuevas. Un fallo aquí se registra pero no cambia el código de salida.
   4. Actualiza el rendimiento reciente (fuel_rendimiento_reciente) y agrega al historial los
      bloques de km ya definitivos (fuel_rendimiento_historial). Un fallo aquí se registra pero
      no cambia el código de salida: no es parte de la consolidación.
@@ -150,11 +151,15 @@ def actualizar_rendimiento_reciente(
     return guardados
 
 
-def actualizar_eventos(conn: Connection, desde: datetime, hasta: datetime) -> None:
-    """Detecta y guarda los eventos de [desde, hasta) en su propia transacción. Nunca lanza."""
+def actualizar_eventos(
+    conn: Connection, desde: datetime, hasta: datetime, ahora: datetime
+) -> None:
+    """Detecta y guarda los eventos en su propia transacción. Nunca lanza.
+
+    Cargas hasta ``hasta`` (ventanas consolidadas); maniobras y ralentí hasta ``ahora``."""
     try:
         with conn.transaction():
-            n = detectar_eventos(conn, desde, hasta)
+            n = detectar_eventos(conn, desde, hasta, hasta_gps=ahora)
         log.info("Eventos: %s", dict(n) or "ninguno")
     except Exception:
         log.exception("Falló la detección de eventos")
@@ -251,9 +256,11 @@ def ejecutar_ciclo(
             )
             for a in c.advertencias:
                 log.warning("Consolidación: %s", a)
-            actualizar_eventos(conn, desde, hasta)
         else:
             log.info("Nada que consolidar (%s >= %s)", desde, hasta)
+
+        # aunque no haya ventanas nuevas: un ralentí puede cumplir sus minutos en cualquier ciclo
+        actualizar_eventos(conn, desde, hasta, ahora)
 
         actualizar_rendimiento_reciente(conn, ahora=ahora)
         actualizar_historial_rendimiento(conn, ahora=ahora)

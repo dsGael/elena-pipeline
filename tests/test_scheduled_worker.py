@@ -62,9 +62,12 @@ def pasos(monkeypatch):
 
     monkeypatch.setattr(sw, "plan_range", plan)
     monkeypatch.setattr(sw, "consolidate", consolidar)
-    monkeypatch.setattr(
-        sw, "actualizar_eventos", lambda conn, d, h: estado["orden"].append("eventos")
-    )
+
+    def eventos(conn, desde, hasta, ahora):
+        estado["orden"].append("eventos")
+        estado["eventos_ahora"] = ahora
+
+    monkeypatch.setattr(sw, "actualizar_eventos", eventos)
     # el rendimiento reciente se prueba aparte; aquí no toca la conexión falsa
     monkeypatch.setattr(sw, "actualizar_rendimiento_reciente", lambda conn, **kw: 0)
     monkeypatch.setattr(sw, "actualizar_historial_rendimiento", lambda conn, **kw: 0)
@@ -113,8 +116,10 @@ def test_excepcion_inesperada_da_codigo_1_y_siempre_libera_el_lock(monkeypatch, 
 
 def test_rango_vacio_no_consolida(monkeypatch, pasos):
     monkeypatch.setattr(sw, "plan_range", lambda conn, **kw: (T1, T1))
-    r = sw.ejecutar_ciclo(ConexionFalsa())
-    assert pasos["orden"] == [] and r.consolidacion is None and r.codigo == sw.EXIT_OK
+    r = sw.ejecutar_ciclo(ConexionFalsa(), now=T1)
+    # sin ventanas nuevas igual se buscan maniobras y ralentí hasta ahora
+    assert pasos["orden"] == ["eventos"] and pasos["eventos_ahora"] == T1
+    assert r.consolidacion is None and r.codigo == sw.EXIT_OK
 
 
 def test_configurar_logging_crea_archivo_rotativo(tmp_path):
@@ -231,8 +236,8 @@ def test_historial_nunca_lanza_aunque_falle_el_listado(monkeypatch):
 
 
 def test_eventos_nunca_lanza(monkeypatch):
-    def falla(conn, desde, hasta):
+    def falla(conn, desde, hasta, **kw):
         raise RuntimeError("fallo en eventos")
 
     monkeypatch.setattr(sw, "detectar_eventos", falla)
-    sw.actualizar_eventos(ConexionRendimiento(), T0, T1)
+    sw.actualizar_eventos(ConexionRendimiento(), T0, T1, T1)
