@@ -50,6 +50,11 @@ VENTANAS_TRANSICION = 2
 VENTANAS_ARRANQUE = 3
 # Ya estacionado, la deriva es ~0.1 L por ventana; una carga/extracción mueve 2-12 L por ventana.
 SALTO_ESTACIONADO_L = 1.0
+# Una subida de golpe de al menos esto entre lecturas crudas es carga aunque la ventana no sea
+# confiable (transición al parar, % de ángulo bajo, arranque): del 10-22 al 11-04 la rampa y
+# el ruido subieron <= 5 L y las cargas, 13-58 L. Sin esto la carga del 11-03 12:15 (+58 L,
+# parada de una ventana) se vio hasta las 12:40, ya en carretera.
+SALTO_CARGA_L = 8.0
 # Estacionado, % mínimo de muestras con ángulo válido para tomar la lectura (en prueba).
 PORCENTAJE_ANGULO_ESTACIONADO = 80.0
 # En marcha los baches sacan muchas muestras de rango; con < 50% suben las lecturas con más de
@@ -176,9 +181,10 @@ WHERE c.activo
 # Últimas ventanas (con odómetro) de cada IMEI antes del rango: el nivel del que se parte y
 # si la primera del rango está estacionada o recién arrancada.
 PREVIAS_SQL = """
-SELECT imei, odometro_total, litros_grafica, litros, porcentaje_angulo_valido
+SELECT imei, odometro_total, litros_grafica, litros, porcentaje_angulo_valido, motivo_calidad
 FROM (
     SELECT imei, ventana_inicio, odometro_total, litros_grafica, litros, porcentaje_angulo_valido,
+           motivo_calidad,
            row_number() OVER (PARTITION BY imei ORDER BY ventana_inicio DESC) AS k
     FROM public.fuel_windows
     WHERE ventana_inicio < %(desde)s
@@ -482,6 +488,9 @@ def litros_para_grafica(
        anterior / rendimiento. NULL si falta nivel anterior, rendimiento u odómetro, si el
        odómetro retrocede o si daría negativo.
     3. Lo demás: los litros medidos.
+
+    Antes de 1 y 2: una subida de al menos ``SALTO_CARGA_L`` contra la lectura cruda anterior
+    se toma tal cual (carga), sin esperar la transición, el ángulo ni el arranque.
     """
     out: list[ConsolidatedWindow] = []
     for w in windows:
@@ -492,9 +501,10 @@ def litros_para_grafica(
             parado and previa is not None and previa.litros_grafica is not None
         )
         confiable = _angulo_confiable_estacionado(w.porcentaje_angulo_valido)
+        salto_carga = _salto_carga(previa, w.litros, w.motivo_calidad)
         if estacionado:
             litros = previa.litros_grafica
-            if (
+            if salto_carga or (
                 parados > VENTANAS_TRANSICION
                 and confiable
                 and w.litros is not None
@@ -504,7 +514,7 @@ def litros_para_grafica(
                 # Se toma la lectura y no la suma de cambios: así no se pierden los cambios
                 # chicos ni se rebasan los topes del sensor (0 L y máximo calibrado).
                 litros = w.litros
-        elif (
+        elif not salto_carga and (
             (w.motivo_calidad and M_ANGULO in w.motivo_calidad.split("; "))
             or (
                 w.porcentaje_angulo_valido is not None
@@ -525,7 +535,9 @@ def litros_para_grafica(
                 if km >= 0 and previa.litros_grafica - km / rend >= 0:
                     litros = _r(previa.litros_grafica - km / rend)
         if w.odometro_total is not None:
-            usar = w.litros is not None and _referencia(confiable, estacionado, parados)
+            usar = w.litros is not None and (
+                salto_carga or _referencia(confiable, estacionado, parados)
+            )
             crudo = w.litros if usar else previa and previa.litros
             previas[w.imei] = Previa(w.odometro_total, litros, crudo, parados, marcha)
         out.append(replace(w, litros_grafica=litros))
@@ -563,6 +575,21 @@ def _referencia(confiable: bool, estacionado: bool, parados: int) -> bool:
     return confiable or not estacionado or parados <= VENTANAS_TRANSICION
 
 
+def _salto_carga(
+    previa: Previa | None, litros: float | None, motivo_calidad: str | None
+) -> bool:
+    """¿Subida de golpe que se toma como carga aunque la ventana no sea confiable?
+
+    Con el ángulo fuera de rango no: el tanque inclinado da lecturas falsas de cualquier tamaño."""
+    return (
+        not (motivo_calidad and M_ANGULO in motivo_calidad.split("; "))
+        and litros is not None
+        and previa is not None
+        and previa.litros is not None
+        and litros - previa.litros >= SALTO_CARGA_L
+    )
+
+
 def fetch_rendimientos(conn: Connection) -> dict[str, float | None]:
     """km/L de cada autobús activo: el reciente y, si no hay, ``rendimiento_default``."""
     return {bus: _f(rend) for bus, rend in conn.execute(RENDIMIENTOS_SQL).fetchall()}
@@ -580,18 +607,19 @@ def fetch_previas(
         "n": VENTANAS_TRANSICION + VENTANAS_ARRANQUE + 3,
     }
     filas: dict[str, list[tuple[Any, ...]]] = {}
-    for i, odo, lg, lt, pct in conn.execute(PREVIAS_SQL, params).fetchall():
-        filas.setdefault(i, []).append((float(odo), _f(lg), _f(lt), _f(pct)))
+    for i, odo, lg, lt, pct, motivo in conn.execute(PREVIAS_SQL, params).fetchall():
+        filas.setdefault(i, []).append((float(odo), _f(lg), _f(lt), _f(pct), motivo))
     out: dict[str, Previa] = {}
     for i, f in filas.items():
         # De la más vieja a la más reciente, con las mismas reglas que en memoria. La más vieja
         # no tiene anterior: se toma como en marcha sin arranque pendiente.
         p: Previa | None = None
-        for odo, lg, lt, pct in reversed(f):
+        for odo, lg, lt, pct, motivo in reversed(f):
             parado, parados, marcha = _movimiento(p, odo)
             estacionado = parado and p is not None and p.litros_grafica is not None
-            usar = lt is not None and _referencia(
-                _angulo_confiable_estacionado(pct), estacionado, parados
+            usar = lt is not None and (
+                _salto_carga(p, lt, motivo)
+                or _referencia(_angulo_confiable_estacionado(pct), estacionado, parados)
             )
             crudo = lt if usar else p and p.litros
             p = Previa(odo, lg, crudo, parados, marcha)

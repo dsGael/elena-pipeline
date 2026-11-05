@@ -255,6 +255,19 @@ def test_litros_para_grafica_muestra_carga_y_extraccion_estacionado():
     assert graf == [10.0, 10.0, 10.0, 10.0, 9.0, 14.0, 13.0]
 
 
+def test_litros_para_grafica_carga_de_golpe_no_espera_transicion_ni_arranque():
+    # 4 L en marcha; para una sola ventana y el sensor ya marca 14 L (+10, como la HILUX el
+    # 11-03 12:15); arranca con poco ángulo válido (estimaría) y sigue marcando 14 L
+    previas = {IMEI_BUS: Previa(100_000.0, 4.0, 4.0, 0, 4)}
+    ws = _serie((2.9, 100_050.0, 1918.0), (9.0, 103_050.0, 1918.0))
+    out = litros_para_grafica(ws, {"BUS1": 3.0}, previas)
+    # la parada toma la carga al instante; en marcha ya no hay salto y estima desde ahí
+    assert [w.litros_grafica for w in out] == [14.0, 13.0]
+    # una subida menor en la transición sigue ignorándose
+    poca = {IMEI_BUS: Previa(100_000.0, 7.0, 7.0, 0, 4)}
+    assert litros_para_grafica(ws[:1], {}, poca)[0].litros_grafica == 7.0
+
+
 def test_litros_para_grafica_arranque_estima_las_primeras_ventanas():
     # estacionado en 10 L; arranca y el sensor arrastra 12 L de la rampa 3 ventanas; luego 6 L
     ws = _serie(
@@ -361,6 +374,7 @@ class _ConnPrevias:
                 w.litros_grafica,
                 w.litros,
                 w.porcentaje_angulo_valido,
+                w.motivo_calidad,
             )
             for w in reversed(self.ventanas)
         ][: params["n"]]
