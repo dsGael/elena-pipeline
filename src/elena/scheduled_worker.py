@@ -5,8 +5,8 @@ Un ciclo hace, en este orden:
      sin hacer nada (código 0): el Task Scheduler puede lanzar una segunda instancia.
   2. Consolida gps_records -> fuel_windows (calidad y litros) desde la última ventana guardada
      (con traslape para datos tardíos) hasta la última ventana cerrada, y confirma.
-  3. Detecta los eventos (fuel_events): cargas hasta la última ventana consolidada; ralentí y
-     maniobras hasta ahora (las maniobras ya las guarda al instante el trigger de sql/20). Corre
+  3. Detecta los eventos (fuel_events): cargas hasta la última ventana consolidada; ralentí
+     (terminado y en curso), encendido/apagado y maniobras hasta ahora (las maniobras ya las guarda al instante el trigger de sql/20). Corre
      aunque no haya ventanas nuevas. Un fallo aquí se registra pero no cambia el código de salida.
   4. Actualiza el rendimiento reciente (fuel_rendimiento_reciente) y agrega al historial los
      bloques de km ya definitivos (fuel_rendimiento_historial). Un fallo aquí se registra pero
@@ -156,7 +156,7 @@ def actualizar_eventos(
 ) -> None:
     """Detecta y guarda los eventos en su propia transacción. Nunca lanza.
 
-    Cargas hasta ``hasta`` (ventanas consolidadas); maniobras y ralentí hasta ``ahora``."""
+    Cargas hasta ``hasta`` (ventanas consolidadas); el resto hasta ``ahora``."""
     try:
         with conn.transaction():
             n = detectar_eventos(conn, desde, hasta, hasta_gps=ahora)

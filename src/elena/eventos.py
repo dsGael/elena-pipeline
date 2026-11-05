@@ -12,8 +12,13 @@ Qué detecta en [desde, hasta) (con ``CONTEXTO`` hacia atrás para ver el inicio
     velocidad < ``VELOCIDAD_RALENTI_KMH``) durante al menos ``fuel_config.minutos_ralenti``.
     Es "o" y no "y": el Teltonika puede marcar movimiento con el motor encendido (fuente de
     movimiento = ignición, o la vibración del diésel en el acelerómetro).
+    Si al final de lo leído sigue quieto (y la última muestra no tiene más de
+    ``HUECO_MAX_RALENTI``), se guarda como ``ralenti_en_curso`` para avisar antes de que termine;
+    ``ralenti`` se guarda cuando ya terminó. Las dos filas quedan.
+  * encendido / apagado: cada cambio de ``gps_records.ignicion`` entre muestras seguidas con
+    ignición conocida.
 
-El upsert es idempotente por (idautobus, fecha, evento): un ralentí o una carga que sigue en curso
+El upsert es idempotente por (idautobus, fecha, evento): un ralentí en curso o una carga que sigue
 al cerrar el ciclo se guarda con lo que lleva y el siguiente ciclo actualiza la cantidad.
 """
 
@@ -127,7 +132,7 @@ class Evento(NamedTuple):
     idautobus: str
     fecha: datetime  # inicio
     evento: str
-    # litros (carga/extracción), minutos (ralentí), None (maniobras)
+    # litros (carga/extracción), minutos (ralentí), None (maniobras, encendido/apagado)
     cantidad: float | None
 
 
@@ -148,14 +153,28 @@ def maniobras(muestras: Iterable[Muestra]) -> list[Evento]:
     ]
 
 
+def encendidos(muestras: Iterable[Muestra]) -> list[Evento]:
+    """``muestras`` en orden (imei, recorded_at). Las de ignición NULL no cuentan."""
+    out: list[Evento] = []
+    for _, grupo in groupby(muestras, key=attrgetter("imei")):
+        conocidas = [m for m in grupo if m.ignicion is not None]
+        out += [
+            Evento(b.idautobus, b.recorded_at, "encendido" if b.ignicion else "apagado", None)
+            for a, b in pairwise(conocidas)
+            if a.ignicion != b.ignicion
+        ]
+    return out
+
+
 def _quieta(m: Muestra) -> bool:
     return m.ignicion is True and (
         m.movimiento == 0 or (m.speed is not None and m.speed < VELOCIDAD_RALENTI_KMH)
     )
 
 
-def ralentis(muestras: Iterable[Muestra]) -> list[Evento]:
-    """``muestras`` en orden (imei, recorded_at)."""
+def ralentis(muestras: Iterable[Muestra], hasta: datetime | None = None) -> list[Evento]:
+    """``muestras`` en orden (imei, recorded_at), leídas hasta ``hasta``. Sin ``hasta`` no se
+    sabe si el último sigue, y todos cuentan como terminados."""
     out: list[Evento] = []
     for _, grupo in groupby(muestras, key=attrgetter("imei")):
         serie = list(grupo)
@@ -174,15 +193,21 @@ def ralentis(muestras: Iterable[Muestra]) -> list[Evento]:
             if isla[0] is serie[0]:
                 continue  # pudo empezar antes de lo leído
             minutos = (isla[-1].recorded_at - isla[0].recorded_at).total_seconds() / 60
-            if minutos >= isla[0].minutos_ralenti:
-                out.append(
-                    Evento(
-                        isla[0].idautobus,
-                        isla[0].recorded_at,
-                        "ralenti",
-                        round(minutos, 1),
-                    )
+            if minutos < isla[0].minutos_ralenti:
+                continue
+            en_curso = (
+                hasta is not None
+                and isla[-1] is serie[-1]
+                and hasta - isla[-1].recorded_at <= HUECO_MAX_RALENTI
+            )
+            out.append(
+                Evento(
+                    isla[0].idautobus,
+                    isla[0].recorded_at,
+                    "ralenti_en_curso" if en_curso else "ralenti",
+                    round(minutos, 1),
                 )
+            )
     return out
 
 
@@ -249,20 +274,27 @@ def detectar_eventos(
     """Detecta y guarda (upsert) los eventos. Devuelve cuántos de cada tipo empiezan desde
     ``desde``. No hace commit: lo decide quien llama.
 
-    Las cargas solo llegan hasta ``hasta`` (ventanas consolidadas); maniobras y ralentí, que
-    salen directo de gps_records, hasta ``hasta_gps`` si se da (el ciclo pasa la hora actual)."""
+    Las cargas solo llegan hasta ``hasta`` (ventanas consolidadas); maniobras, ralentí y
+    encendido/apagado, que salen directo de gps_records, hasta ``hasta_gps`` si se da (el ciclo
+    pasa la hora actual)."""
     params = {"desde": desde - CONTEXTO, "hasta": hasta, "imei": imei}
+    hasta_gps = hasta_gps or hasta
     muestras = [
         Muestra(i, bus, t, ign, _f(vel), mov, man, mr)
         for i, bus, t, ign, vel, mov, man, mr in conn.execute(
-            MUESTRAS_SQL, {**params, "hasta": hasta_gps or hasta}
+            MUESTRAS_SQL, {**params, "hasta": hasta_gps}
         )
     ]
     ventanas = [
         Ventana(i, bus, t, float(odo), _f(lg), _f(umbral))
         for i, bus, t, odo, lg, umbral in conn.execute(VENTANAS_SQL, params)
     ]
-    eventos = maniobras(muestras) + ralentis(muestras) + cargas_extracciones(ventanas)
+    eventos = (
+        maniobras(muestras)
+        + ralentis(muestras, hasta_gps)
+        + encendidos(muestras)
+        + cargas_extracciones(ventanas)
+    )
     if eventos:
         with conn.cursor() as cur:
             cur.executemany(
@@ -287,6 +319,7 @@ __all__ = [
     "Ventana",
     "cargas_extracciones",
     "detectar_eventos",
+    "encendidos",
     "maniobras",
     "ralentis",
 ]

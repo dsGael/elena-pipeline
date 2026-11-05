@@ -8,6 +8,7 @@ from elena.eventos import (
     Muestra,
     Ventana,
     cargas_extracciones,
+    encendidos,
     maniobras,
     ralentis,
 )
@@ -58,6 +59,29 @@ def test_un_hueco_largo_corta_el_ralenti():
 
 def test_ralenti_que_empieza_en_la_primera_muestra_leida_se_descarta():
     assert ralentis([_m(k) for k in range(10)]) == []
+
+
+def test_ralenti_que_sigue_al_final_es_en_curso():
+    serie = _serie_ralenti(6)
+    fin = serie[-1].recorded_at
+    assert ralentis(serie, fin + timedelta(minutes=2)) == [
+        Evento("BUS1", T0 + timedelta(minutes=1), "ralenti_en_curso", 6.0)
+    ]
+    # sin datos hace más de HUECO_MAX_RALENTI: ya terminó
+    assert [e.evento for e in ralentis(serie, fin + HUECO_MAX_RALENTI * 2)] == ["ralenti"]
+    # cerrado por una muestra en marcha: terminado aunque sea reciente
+    serie.append(_m(9, speed=40.0))
+    assert [e.evento for e in ralentis(serie, fin + timedelta(minutes=2))] == ["ralenti"]
+
+
+def test_encendido_y_apagado_en_cada_cambio_de_ignicion():
+    serie = [_m(0, ign=False), _m(1, ign=True), _m(2, ign=None), _m(3, ign=True), _m(4, ign=False)]
+    assert encendidos(serie) == [
+        Evento("BUS1", T0 + timedelta(minutes=1), "encendido", None),
+        Evento("BUS1", T0 + timedelta(minutes=4), "apagado", None),
+    ]
+    # la primera muestra leída no es un cambio
+    assert encendidos([_m(0, ign=True), _m(1, ign=True)]) == []
 
 
 def test_maniobras_1_a_3_y_otros_valores_se_ignoran():
