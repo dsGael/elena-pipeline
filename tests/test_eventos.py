@@ -84,6 +84,25 @@ def test_encendido_y_apagado_en_cada_cambio_de_ignicion():
     assert encendidos([_m(0, ign=True), _m(1, ign=True)]) == []
 
 
+def _s(segundos, ign):
+    return _m(segundos / 60, ign=ign)
+
+
+def test_rebote_de_ignicion_al_apagar_da_un_solo_apagado():
+    # unidad 2 el 11-05: encendido, 11:54:02 off, :04 on, :06 off y sigue apagado
+    serie = [_s(-120, True), _s(29, True), _s(58, False), _s(60, True), _s(62, False), _s(182, False)]
+    assert encendidos(serie) == [Evento("BUS1", T0 + timedelta(seconds=58), "apagado", None)]
+    # apagado y encendido en segundos sin seguir apagado: nada
+    serie = [_s(-120, True), _s(58, False), _s(60, True), _s(300, True)]
+    assert encendidos(serie) == []
+
+
+def test_cambio_reciente_espera_a_durar_el_rebote():
+    serie = [_s(0, True), _s(100, False)]
+    assert encendidos(serie, T0 + timedelta(seconds=130)) == []
+    assert [e.evento for e in encendidos(serie, T0 + timedelta(seconds=200))] == ["apagado"]
+
+
 def test_maniobras_1_a_3_y_otros_valores_se_ignoran():
     serie = [_m(0, man=1), _m(1, man=2), _m(2, man=3), _m(3, man=0), _m(4, man=None)]
     assert [e.evento for e in maniobras(serie)] == [

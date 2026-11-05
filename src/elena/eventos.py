@@ -15,8 +15,9 @@ Qué detecta en [desde, hasta) (con ``CONTEXTO`` hacia atrás para ver el inicio
     Si al final de lo leído sigue quieto (y la última muestra no tiene más de
     ``HUECO_MAX_RALENTI``), se guarda como ``ralenti_en_curso`` para avisar antes de que termine;
     ``ralenti`` se guarda cuando ya terminó. Las dos filas quedan.
-  * encendido / apagado: cada cambio de ``gps_records.ignicion`` entre muestras seguidas con
-    ignición conocida.
+  * encendido / apagado: cada cambio de ``gps_records.ignicion`` que dura al menos
+    ``REBOTE_IGNICION``. El Teltonika saca la ignición del voltaje y al apagar rebota unos
+    segundos (13.14 V apagado, 13.24 V encendido, 13.13 V apagado el 11-05 11:54).
 
 El upsert es idempotente por (idautobus, fecha, evento): un ralentí en curso o una carga que sigue
 al cerrar el ciclo se guarda con lo que lleva y el siguiente ciclo actualiza la cantidad.
@@ -45,6 +46,9 @@ HUECO_MAX_RALENTI = timedelta(minutes=30)
 # ampliar si aparecen ralentís más largos.
 CONTEXTO = timedelta(hours=12)
 MANIOBRAS = {1: "aceleracion", 2: "frenado", 3: "giro_brusco"}
+# Un estado de ignición más corto es rebote del voltaje y no cuenta. Un apagado y encendido real
+# más rápido que esto se pierde.
+REBOTE_IGNICION = timedelta(seconds=40)
 
 # --------------------------------------------------------------------------------------
 # SQL
@@ -153,16 +157,34 @@ def maniobras(muestras: Iterable[Muestra]) -> list[Evento]:
     ]
 
 
-def encendidos(muestras: Iterable[Muestra]) -> list[Evento]:
-    """``muestras`` en orden (imei, recorded_at). Las de ignición NULL no cuentan."""
+def encendidos(muestras: Iterable[Muestra], hasta: datetime | None = None) -> list[Evento]:
+    """``muestras`` en orden (imei, recorded_at), leídas hasta ``hasta``. Las de ignición NULL no
+    cuentan.
+
+    Una racha de muestras con la misma ignición es real si dura (hasta la siguiente racha) al
+    menos ``REBOTE_IGNICION``; las cortas se ignoran. El evento va entre dos rachas reales
+    distintas, con la fecha de la primera muestra después de la anterior: ahí se apagó o
+    encendió, aunque luego rebotara. La última racha dura hasta ``hasta``: si aún es corta, el
+    siguiente ciclo decide (sin ``hasta`` cuenta como real)."""
     out: list[Evento] = []
     for _, grupo in groupby(muestras, key=attrgetter("imei")):
-        conocidas = [m for m in grupo if m.ignicion is not None]
-        out += [
-            Evento(b.idautobus, b.recorded_at, "encendido" if b.ignicion else "apagado", None)
-            for a, b in pairwise(conocidas)
-            if a.ignicion != b.ignicion
+        rachas = [
+            list(r)
+            for _, r in groupby(
+                (m for m in grupo if m.ignicion is not None), key=attrgetter("ignicion")
+            )
         ]
+        fines = [r[0].recorded_at for r in rachas[1:]] + [hasta]
+        reales = [
+            i
+            for i, (r, fin) in enumerate(zip(rachas, fines))
+            if fin is None or fin - r[0].recorded_at >= REBOTE_IGNICION
+        ]
+        for i, j in pairwise(reales):
+            if rachas[i][0].ignicion != rachas[j][0].ignicion:
+                m = rachas[i + 1][0]
+                evento = "encendido" if rachas[j][0].ignicion else "apagado"
+                out.append(Evento(m.idautobus, m.recorded_at, evento, None))
     return out
 
 
@@ -292,7 +314,7 @@ def detectar_eventos(
     eventos = (
         maniobras(muestras)
         + ralentis(muestras, hasta_gps)
-        + encendidos(muestras)
+        + encendidos(muestras, hasta_gps)
         + cargas_extracciones(ventanas)
     )
     if eventos:
