@@ -525,7 +525,7 @@ def litros_para_grafica(
                 if km >= 0 and previa.litros_grafica - km / rend >= 0:
                     litros = _r(previa.litros_grafica - km / rend)
         if w.odometro_total is not None:
-            usar = w.litros is not None and (confiable or not estacionado)
+            usar = w.litros is not None and _referencia(confiable, estacionado, parados)
             crudo = w.litros if usar else previa and previa.litros
             previas[w.imei] = Previa(w.odometro_total, litros, crudo, parados, marcha)
         out.append(replace(w, litros_grafica=litros))
@@ -551,6 +551,16 @@ def _movimiento(previa: Previa | None, odometro: float | None) -> tuple[bool, in
 def _angulo_confiable_estacionado(porcentaje: float | None) -> bool:
     """Estacionado, una ventana con muchas muestras fuera de ángulo no cuenta como lectura."""
     return porcentaje is None or porcentaje >= PORCENTAJE_ANGULO_ESTACIONADO
+
+
+def _referencia(confiable: bool, estacionado: bool, parados: int) -> bool:
+    """¿La lectura de esta ventana pasa a ser la referencia para detectar cargas/extracciones?
+
+    En la transición siempre: el sensor se asienta en su valor de reposo (p. ej. inclinado) y
+    el salto se mide desde ahí, no desde la lectura en marcha (HILUX 11-04 19:40: 12.0 -> 14.9
+    sin carga, con las 2 ventanas de transición por debajo del 80% de ángulo válido).
+    """
+    return confiable or not estacionado or parados <= VENTANAS_TRANSICION
 
 
 def fetch_rendimientos(conn: Connection) -> dict[str, float | None]:
@@ -580,8 +590,8 @@ def fetch_previas(
         for odo, lg, lt, pct in reversed(f):
             parado, parados, marcha = _movimiento(p, odo)
             estacionado = parado and p is not None and p.litros_grafica is not None
-            usar = lt is not None and (
-                _angulo_confiable_estacionado(pct) or not estacionado
+            usar = lt is not None and _referencia(
+                _angulo_confiable_estacionado(pct), estacionado, parados
             )
             crudo = lt if usar else p and p.litros
             p = Previa(odo, lg, crudo, parados, marcha)

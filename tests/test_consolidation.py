@@ -299,6 +299,26 @@ def test_litros_para_grafica_estacionado_ignora_ventanas_con_angulo_incompleto()
     assert previa[IMEI_BUS].litros == 10.5
 
 
+def test_litros_para_grafica_transicion_con_angulo_incompleto_fija_la_referencia():
+    # HILUX 11-04 19:30: 10 L en marcha; se estaciona inclinado y la transición (73%) ya marca
+    # 14 L; la 3a ventana (100%) sigue en 14 L: no es carga, se mide desde la transición
+    previa = {IMEI_BUS: Previa(100_000.0, 10.0, 10.0, 0, 4)}
+    ws = [
+        build_window(
+            _agg(
+                ventana_inicio=T0 + timedelta(minutes=5 * k),
+                odometro_total=100_000.0,
+                sensor_mediana=1918.0,
+                muestras_angulo_valido=validas,
+            ),
+            calibracion=CAL,
+        )
+        for k, validas in enumerate([11, 11, 15])
+    ]
+    out = litros_para_grafica(ws, {}, previa)
+    assert [w.litros_grafica for w in out] == [10.0, 10.0, 10.0]
+
+
 def test_litros_para_grafica_en_marcha_estima_si_pocas_muestras_en_angulo():
     def ventana(k, validas, sensor):
         agg = _agg(
